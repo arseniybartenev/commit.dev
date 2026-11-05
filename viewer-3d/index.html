@@ -1,0 +1,1364 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Коммит: 3D-просмотр</title>
+<style>
+:root{--bg:#fff;--fg:#111413;--mut:#6b726d;--card:rgba(255,255,255,.92);--line:rgba(17,20,19,.12);--acc:#1f9d55}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:14px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+#wrap{position:relative;width:100%;height:100%;min-height:360px;overflow:hidden;background:var(--bg)}
+canvas{display:block;width:100%;height:100%;touch-action:none;outline:none;cursor:grab}
+#wrap.shelf canvas{touch-action:pan-y !important}   /* на полке жесты прокрутки отдаём странице-родителю */
+canvas:active{cursor:grabbing}
+#load{position:absolute;inset:0;display:grid;place-items:center;font:500 13px ui-monospace,Menlo,monospace;color:var(--mut);pointer-events:none;transition:opacity .4s}
+#load.off{opacity:0}
+#ui{position:absolute;left:0;right:0;bottom:0;padding:0 10px calc(10px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
+#ui>*{pointer-events:auto}
+.row{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+.bar{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:0 1px 6px rgba(17,20,19,.06)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;border-radius:10px;padding:6px 12px;min-height:38px}
+button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+button:disabled{opacity:.35;cursor:default}
+.nav{display:flex;align-items:center;gap:2px}
+.nav{position:relative}
+.nav .lbl{white-space:nowrap;min-width:176px;text-align:center;font:500 12px ui-monospace,Menlo,monospace;color:var(--mut);padding:6px 10px}
+.nav .lbl::after{content:'';display:inline-block;margin-left:7px;width:0;height:0;border:4px solid transparent;border-bottom-color:currentColor;border-top:0;vertical-align:2px}
+.nav .lbl[aria-expanded=true]{background:rgba(17,20,19,.06);color:var(--fg)}
+#secmenu{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%);min-width:236px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:0 6px 24px rgba(17,20,19,.14);display:none;z-index:6}
+#secmenu.on{display:block}
+#secmenu button{display:flex;justify-content:space-between;gap:16px;width:100%;text-align:left;font-size:13px;padding:7px 10px;min-height:34px}
+#secmenu button span{color:var(--mut);font:500 11px ui-monospace,Menlo,monospace;align-self:center}
+#secmenu button[aria-selected=true]{background:var(--fg);color:var(--bg)}
+#secmenu button[aria-selected=true] span{color:inherit;opacity:.7}
+.nav button{font-size:18px;line-height:1;width:44px;padding:0}
+.sets{display:flex;gap:2px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.sets::-webkit-scrollbar{display:none}
+.sets button{white-space:nowrap;font-size:13px}
+.sets button[aria-pressed=true]{background:var(--fg);color:var(--bg)}
+.kits{display:flex;gap:2px;align-items:center;padding:6px 8px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.kits::-webkit-scrollbar{display:none}
+.kits button{height:28px;min-height:28px;padding:0 10px 0 6px;border-radius:9px;border:0;background:transparent;display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap;flex:none}
+.kits button i{display:block;width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.22)}
+.kits button[aria-pressed=true]{background:var(--fg);color:var(--bg)}
+.kits .seg{display:flex;gap:2px;margin-left:8px;padding-left:8px;border-left:1px solid var(--line);flex:none}
+.kits .seg button{padding:0 10px}
+@media (max-width:760px){.kits button span{display:none}.kits button{padding:0 6px}.kits .seg button span{display:inline}}
+.tool{font-size:13px}
+@media (max-width:520px){.nav .lbl{min-width:140px;padding:6px 6px}.nav button{width:40px}.sets button{padding:6px 10px}.tool .long{display:none}}
+@media (min-width:521px){.tool .short{display:none}}
+.row{flex-wrap:nowrap}
+#tools{display:flex}
+@media (max-width:520px){.row{flex-wrap:wrap}.tool{padding:6px 8px}}
+#zoom{position:absolute;right:10px;top:12px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px}
+#zoom button{width:34px;height:34px;min-height:34px;padding:0;font-size:18px;line-height:1}
+#zoom .zs{position:relative;width:34px;height:132px}
+#zoom input{position:absolute;left:50%;top:50%;width:120px;margin:0;transform:translate(-50%,-50%) rotate(-90deg);accent-color:#111413;cursor:pointer}
+#marks{position:absolute;right:10px;top:270px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;z-index:4}
+.mk{display:flex;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 6px rgba(17,20,19,.08);animation:mkin .35s ease-out}
+.mk .go{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 8px;min-height:34px;font:600 12px ui-monospace,Menlo,monospace}
+.mk i{display:block;width:10px;height:18px;border-radius:2px 2px 0 0;clip-path:polygon(0 0,100% 0,100% 100%,50% 82%,0 100%);box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+.mk .x{width:28px;min-height:34px;padding:0;color:var(--mut);font-size:16px}
+@keyframes mkin{from{opacity:0;transform:translateX(26px)}}
+@media (max-width:520px){#marks{right:6px}.mk .go{font-size:11px;padding:4px 4px 4px 6px;min-height:30px}.mk .x{min-height:30px;width:24px}}
+#toast{position:absolute;left:50%;top:14px;transform:translate(-50%,-8px);max-width:min(86%,420px);background:#111413;color:#fff;padding:8px 14px;border-radius:12px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;text-align:center;z-index:5}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:520px){#zoom{right:6px;top:8px}#zoom .zs{height:100px}#zoom input{width:90px}}
+#toShelf{position:absolute;left:12px;top:12px;z-index:4;display:none;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 6px rgba(17,20,19,.08)}
+#wrap.book #toShelf{display:block}
+#shelfHint{position:absolute;left:0;right:0;top:16px;text-align:center;font:500 14px system-ui,sans-serif;color:var(--mut);pointer-events:none;display:none;z-index:2}
+#wrap.shelfidle #shelfHint{display:block}
+#shelfBtns{position:absolute;inset:0;z-index:3;pointer-events:none;display:none}
+#wrap.shelfidle #shelfBtns{display:block}
+#shelfBtns button{position:absolute;pointer-events:auto;background:transparent;border:0;padding:0;min-height:0;border-radius:2px;cursor:pointer}
+#shelfBtns button:focus-visible{outline:2px solid #1F9D55;outline-offset:2px}
+#ui{transition:opacity .6s,visibility .6s}
+#wrap.shelf #ui{opacity:0;visibility:hidden;pointer-events:none}
+#wrap.shelf #zoom,#wrap.shelf #marks{display:none}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c" tabindex="0" aria-label="Ежедневник «Коммит» в 3D. Стрелки влево и вправо листают страницы."></canvas>
+  <div id="load">загрузка…</div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <button id="toShelf" type="button">‹ Все виды</button>
+  <div id="shelfHint">Выберите ежедневник</div>
+  <div id="shelfBtns" role="group" aria-label="Виды ежедневника"></div>
+  <div id="marks" aria-label="Закладки"></div>
+  <div class="bar" id="zoom" role="group" aria-label="Масштаб">
+    <button id="zin" aria-label="Приблизить">+</button>
+    <div class="zs"><input id="zr" type="range" min="0" max="100" step="1" aria-label="Масштаб"></div>
+    <button id="zout" aria-label="Отдалить">−</button>
+    <button id="zfit" aria-label="Вписать в экран" title="Вписать в экран">⤢</button>
+  </div>
+  <div id="ui">
+    <div class="row">
+      <div class="bar nav">
+        <button id="prev" aria-label="Назад">‹</button>
+        <button class="lbl" id="lbl" aria-haspopup="listbox" aria-expanded="false" aria-label="Разделы ежедневника"></button><div id="secmenu" role="listbox" aria-label="Разделы"></div>
+        <button id="next" aria-label="Вперёд">›</button>
+      </div>
+      <div class="bar" id="tools"><button class="tool" id="back" aria-pressed="false"><span class="long">Обратная сторона</span><span class="short">Сзади</span></button><button class="tool" id="bandB"><span class="long">Снять резинку</span><span class="short">Резинка</span></button><button class="tool" id="penB"><span class="long">Вынуть ручку</span><span class="short">Ручка</span></button></div>
+    </div>
+    <div class="row">
+      <div class="bar kits" id="kits" role="group" aria-label="Цвет комплекта"></div>
+    </div>
+    <div class="bar sets" id="sets" role="group" aria-label="Набор"></div>
+  </div>
+</div>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from './vendor/OrbitControls.js';
+
+/* ---------- данные ---------- */
+const SETS=[
+ {n:'Веб и бэкенд',kit:'a',tag:'web · backend'},{n:'Данные и ML',kit:'h',tag:'data · ml'},{n:'Инфраструктура',kit:'d',tag:'infra · sre'},
+ {n:'Мобильная и игры',kit:'e',tag:'mobile · games'},{n:'Качество и безопасность',kit:'f',tag:'qa · security'},{n:'Руководители',kit:'b',tag:'lead · mgmt'}];
+// ключ a,b,d,e,f,h — «Основной», с суффиксом i — «Конверсия» (обложка и корешок меняются местами)
+// bg: цвет обложки, sp: цвет корешка (= полоска, резинка, петля), acc: набор акцента на страницах
+const KITS={
+ a:{n:'Графит',bg:'#101412',sp:'#4FD283',tx:'#0C120F',ac:'#0C120F',acc:'green'},
+ b:{n:'Сланец',bg:'#2B2F36',sp:'#E2B04A',tx:'#2B2F36',ac:'#2B2F36',acc:'ochre'},
+ d:{n:'Кобальт',bg:'#2F5BEA',sp:'#E6EDFF',tx:'#1D3A9E',ac:'#2F5BEA',acc:'blue'},
+ e:{n:'Петроль',bg:'#0B2D33',sp:'#FF9A4D',tx:'#0B2D33',ac:'#0B2D33',acc:'amber'},
+ f:{n:'Чернильная',bg:'#0F1E3D',sp:'#7FB0FF',tx:'#0F1E3D',ac:'#0F1E3D',acc:'sky'},
+ h:{n:'Фиолетовая',bg:'#1F1147',sp:'#A57CFF',tx:'#1F1147',ac:'#1F1147',acc:'violet'},
+ ai:{n:'Графит',bg:'#4FD283',sp:'#101412',tx:'#4FD283',ac:'#4FD283',acc:'green'},
+ bi:{n:'Сланец',bg:'#E2B04A',sp:'#2B2F36',tx:'#F1EEE6',ac:'#F1EEE6',acc:'ochre'},
+ di:{n:'Кобальт',bg:'#E6EDFF',sp:'#2F5BEA',tx:'#FFFFFF',ac:'#FFFFFF',acc:'blue'},
+ ei:{n:'Петроль',bg:'#FF9A4D',sp:'#0B2D33',tx:'#EAF6F7',ac:'#EAF6F7',acc:'amber'},
+ fi:{n:'Чернильная',bg:'#7FB0FF',sp:'#0F1E3D',tx:'#EAF0FF',ac:'#EAF0FF',acc:'sky'},
+ hi:{n:'Фиолетовая',bg:'#A57CFF',sp:'#1F1147',tx:'#F3EEFF',ac:'#F3EEFF',acc:'violet'}};
+const NSP=33;            // разворотов в просмотре
+const NL=NSP-1;          // листов
+const q=new URLSearchParams(location.search);
+const TEX=q.get('tex')||'./tex';
+const SITE=q.get('look')==='site';   // ?look=site: холодный серый декор полки для сайта
+const BGQ=(q.get('bg')||'').replace('#','');
+if(/^[0-9a-fA-F]{6}$/.test(BGQ))document.documentElement.style.setProperty('--bg','#'+BGQ);
+const TV='?v=37';   // версия текстур: при замене картинок поднять, чтобы браузер не отдавал старые из кэша
+
+/* ---------- размеры, см ---------- */
+const W=14.8,H=21.0,CB=0.22,TB=1.0,T=TB+2*CB,PWD=14.5,PHT=20.5,R_CORNER=0.45;
+const Y0=-T/2+CB;
+
+/* ---------- состояние ---------- */
+let set=Math.min(5,Math.max(0,+(q.get('set')||0)));
+let kit=KITS[q.get('kit')]?q.get('kit'):SETS[set].kit;
+let f=0,target=0,backFlip=0,backTarget=0;
+let dirty=true;
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ---------- сцена ---------- */
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'low-power'});
+renderer.setClearColor(0,0);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(28,1,8,420);
+const controls=new OrbitControls(camera,canvas);
+controls.enableZoom=false;controls.enablePan=false;controls.enableDamping=true;controls.dampingFactor=.09;
+controls.minPolarAngle=.15;controls.maxPolarAngle=1.32;controls.rotateSpeed=.7;
+controls.addEventListener('change',()=>dirty=true);
+scene.add(new THREE.AmbientLight(0xffffff,1.55));
+const sun=new THREE.DirectionalLight(0xffffff,1.65);sun.position.set(-10,26,16);scene.add(sun);
+const fill=new THREE.DirectionalLight(0xffffff,.35);fill.position.set(14,6,-10);scene.add(fill);
+
+const lift=new THREE.Group();scene.add(lift);
+const pivot=new THREE.Group();lift.add(pivot);
+const book=new THREE.Group();pivot.add(book);
+
+/* контактная тень */
+{
+ const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');
+ const g=x.createRadialGradient(64,64,6,64,64,64);g.addColorStop(0,'rgba(20,24,22,.62)');g.addColorStop(.5,'rgba(20,24,22,.26)');g.addColorStop(1,'rgba(0,0,0,0)');
+ x.fillStyle=g;x.fillRect(0,0,128,128);
+ var shadow=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false}));
+ shadow.rotation.x=-Math.PI/2;shadow.position.y=-T/2-.03;shadow.renderOrder=-1;pivot.add(shadow);
+}
+
+/* ---------- текстуры ---------- */
+// Загрузка без рывков: декодирование картинки вне основного потока, на видеокарту грузим по одной текстуре за кадр,
+// старые текстуры остаются на книге, пока новые не готовы.
+const maxAniso=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+const cache=new Map();            // url -> {url,tex,state}
+let loadQ=[],upQ=[],loading=0;
+const MAXLOAD=2;
+const accKey=()=>KITS[kit].acc;
+const spreadUrl=i=>`${TEX}/g${set}/${accKey()}/s${String(i).padStart(2,'0')}.webp${TV}`;
+const frontUrl=()=>`${TEX}/g${set}/covers/front_${kit}.webp${TV}`;
+const backUrl=()=>`${TEX}/back/back_${kit}.webp${TV}`;
+function pump(){
+ while(loading<MAXLOAD&&loadQ.length){
+  const e=loadQ.shift();loading++;e.state='loading';
+  const im=new Image();im.decoding='async';im.src=e.url;
+  (im.decode?im.decode():new Promise((ok,no)=>{im.onload=ok;im.onerror=no}))
+   .then(()=>{const t=new THREE.Texture(im);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=maxAniso;e.tex=t;e.state='decoded';upQ.push(e)})
+   .catch(()=>{e.state='error';cache.delete(e.url)})
+   .finally(()=>{loading--;pump()});
+ }
+}
+function req(url){
+ let e=cache.get(url);
+ if(!e){e={url,tex:null,state:'queued'};cache.set(url,e);loadQ.push(e);}
+ return e;
+}
+function currentSpreadIndex(){return Math.max(0,Math.min(NSP-1,Math.round(f)-1))}
+let wantedUrls=new Set(),wantedOrder=[];
+function manageTex(){
+ const c=currentSpreadIndex(),order=[frontUrl(),backUrl()];
+ const idxs=[c,c+1,c-1,c+2,c-2,c+3,0];
+ if(f>NSP-4)idxs.push(NSP-1);
+ for(const i of idxs)if(i>=0&&i<NSP)order.push(spreadUrl(i));
+ wantedOrder=order;wantedUrls=new Set(order);
+ // убираем из очереди то, что уже не нужно
+ loadQ=loadQ.filter(e=>{if(wantedUrls.has(e.url))return true;cache.delete(e.url);return false});
+ order.forEach(u=>req(u));
+ const rank=new Map(order.map((u,k)=>[u,k]));
+ // порядок: сначала обложка и текущий разворот; обложку не показываем раньше, чем нужна
+ loadQ.sort((a,b)=>rank.get(a.url)-rank.get(b.url));
+ pump();
+}
+function uploadOne(){
+ const e=upQ.shift();if(!e)return false;
+ if(!wantedUrls.has(e.url)){e.tex.dispose();cache.delete(e.url);return true}
+ e.tex.needsUpdate=true;renderer.initTexture(e.tex);e.state='ready';applyTex();return true;
+}
+function gc(){
+ const used=new Set([coverMat.map,backMat.map,innerFMat.map,innerBMat.map]);
+ for(const L of leaves){used.add(L.mF.map);used.add(L.mB.map)}
+ for(const [u,e] of cache){
+  if(e.state==='ready'&&!wantedUrls.has(u)&&!used.has(e.tex)){e.tex.dispose();cache.delete(u)}
+ }
+}
+let readyFlag=false;
+function pick(url,cur,keep){
+ const e=cache.get(url);
+ if(e&&e.state==='ready')return e.tex;
+ return keep?cur:null;
+}
+
+/* ---------- материалы ---------- */
+const paperEdge=(()=>{
+ const c=document.createElement('canvas');c.width=4;c.height=64;const x=c.getContext('2d');
+ for(let i=0;i<16;i++){x.fillStyle=i%2?'#f1f1ef':'#ffffff';x.fillRect(0,i*4,4,4)}
+ const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;return t;
+})();
+const edgeMat=new THREE.MeshLambertMaterial({color:0xffffff,map:paperEdge});
+const boardMat=new THREE.MeshLambertMaterial({color:KITS[kit].bg});
+const spineMat=new THREE.MeshLambertMaterial({color:KITS[kit].sp});
+const coverMat=new THREE.MeshLambertMaterial({color:0xffffff});
+const backMat=new THREE.MeshLambertMaterial({color:0xffffff});
+const innerFMat=new THREE.MeshLambertMaterial({color:0xffffff,alphaTest:.5});
+const innerBMat=new THREE.MeshLambertMaterial({color:0xffffff,alphaTest:.5});
+const blockMatR=new THREE.MeshLambertMaterial({color:0xffffff,map:paperEdge});
+
+/* ---------- обложки (доски) ---------- */
+function roundedShape(){
+ const s=new THREE.Shape(),r=R_CORNER;
+ s.moveTo(0,-H/2);s.lineTo(W-r,-H/2);s.quadraticCurveTo(W,-H/2,W,-H/2+r);
+ s.lineTo(W,H/2-r);s.quadraticCurveTo(W,H/2,W-r,H/2);s.lineTo(0,H/2);s.closePath();return s;
+}
+function faceGeo(upFacing,mirrorU,half){ // half: -1 лево, 1 право, 0 вся
+ const g=new THREE.ShapeGeometry(roundedShape(),6);
+ const p=g.attributes.position,uv=g.attributes.uv;
+ for(let i=0;i<p.count;i++){
+  const x=p.getX(i),y=p.getY(i);
+  let u=x/W; if(mirrorU)u=1-u;
+  if(half===-1)u=u*.5; else if(half===1)u=.5+u*.5;
+  uv.setXY(i,u,upFacing?(y+H/2)/H:(H/2-y)/H);
+ }
+ if(upFacing)g.rotateX(-Math.PI/2); else g.rotateX(Math.PI/2);
+ return g;
+}
+function boardEdgeGeo(){
+ const g=new THREE.ExtrudeGeometry(roundedShape(),{depth:CB,bevelEnabled:false,curveSegments:6});
+ g.rotateX(-Math.PI/2);g.translate(0,-CB/2,0);return g;
+}
+const eg=boardEdgeGeo();
+const FRONT_Y=T/2-CB/2,BACK_Y=-T/2+CB/2;
+
+// передняя доска
+const frontBoard=new THREE.Group();
+{
+ const e=new THREE.Mesh(eg,boardMat);frontBoard.add(e);
+ const o=new THREE.Mesh(faceGeo(true,false,0),coverMat);o.position.y=CB/2+.004;frontBoard.add(o);
+ const i=new THREE.Mesh(faceGeo(false,true,-1),innerFMat);i.position.y=-CB/2-.004;frontBoard.add(i);
+ frontBoard.userData.inner=i;
+}
+const frontPivot=new THREE.Group();frontPivot.add(frontBoard);frontBoard.position.y=FRONT_Y;book.add(frontPivot);
+// задняя доска
+const backBoard=new THREE.Group();
+{
+ const e=new THREE.Mesh(eg,boardMat);backBoard.add(e);
+ const i=new THREE.Mesh(faceGeo(true,false,1),innerBMat);i.position.y=CB/2+.004;backBoard.add(i);
+ const o=new THREE.Mesh(faceGeo(false,true,0),backMat);o.position.y=-CB/2-.004;backBoard.add(o);
+ backBoard.userData.inner=i;
+}
+backBoard.position.y=BACK_Y;book.add(backBoard);
+
+// корешок: объёмная плита (прямой, как у 7БЦ). В раскрытой книге «схлопывается» в нижнюю доску
+const SPT=.22;
+const spineMesh=new THREE.Mesh(new THREE.BoxGeometry(SPT,1,H),spineMat);book.add(spineMesh);
+// надпись на корешке: «>_», «Коммит_», тонкая черта, метка набора, «v1.0.0». Текст идёт сверху вниз, по центру ширины
+const SPW=2100,SPH=Math.round(SPW*T/H);
+const spineCanvas=document.createElement('canvas');spineCanvas.width=SPW;spineCanvas.height=SPH;
+const spineTex=new THREE.CanvasTexture(spineCanvas);spineTex.colorSpace=THREE.SRGBColorSpace;spineTex.anisotropy=8;
+const spineDecal=new THREE.Mesh(new THREE.PlaneGeometry(H,1).rotateY(-Math.PI/2),new THREE.MeshLambertMaterial({map:spineTex}));
+spineDecal.position.x=-SPT/2-.004;spineMesh.add(spineDecal);
+function drawSpineTo(c,si,kk){
+ const K=KITS[kk],x=c.getContext('2d'),SPW=c.width,SPH=c.height,mm=SPW/(H*10),cy=SPH/2;
+ x.fillStyle=K.sp;x.fillRect(0,0,SPW,SPH);
+ const mono='ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace';
+ x.textBaseline='middle';
+ // круг со знаком >_ (8,6 мм) у головы
+ const r=4.3*mm,cx=12*mm+r;
+ x.strokeStyle=K.ac;x.lineWidth=.45*mm;x.beginPath();x.arc(cx,cy,r,0,Math.PI*2);x.stroke();
+ x.fillStyle=K.ac;x.font=`700 ${3.6*mm}px ${mono}`;x.textAlign='center';x.fillText('>_',cx,cy+.2*mm);
+ // «Коммит_», черта, метка набора: одной строкой по центру
+ const gap=4*mm,title='Коммит',us='_',tag=(SETS[si]||{tag:''}).tag.toUpperCase();
+ x.font=`700 ${5.6*mm}px ${mono}`;const wT=x.measureText(title).width,wU=x.measureText(us).width;
+ x.font=`500 ${2.9*mm}px ${mono}`;if('letterSpacing' in x)x.letterSpacing=`${.55*mm}px`;const wL=x.measureText(tag).width;
+ const lineW=7*mm,total=wT+wU+gap+lineW+gap+wL;let px=SPW/2-total/2;
+ x.textAlign='left';
+ x.font=`700 ${5.6*mm}px ${mono}`;if('letterSpacing' in x)x.letterSpacing='0px';
+ x.fillStyle=K.tx;x.fillText(title,px,cy);px+=wT;
+ x.fillStyle=K.ac;x.fillText(us,px,cy);px+=wU+gap;
+ x.strokeStyle=K.tx;x.globalAlpha=.55;x.lineWidth=.3*mm;x.beginPath();x.moveTo(px,cy);x.lineTo(px+lineW,cy);x.stroke();x.globalAlpha=1;px+=lineW+gap;
+ x.fillStyle=K.ac;x.font=`500 ${2.9*mm}px ${mono}`;if('letterSpacing' in x)x.letterSpacing=`${.55*mm}px`;x.fillText(tag,px,cy);
+ // версия у хвоста
+ x.fillStyle=K.tx;x.globalAlpha=.9;x.font=`500 ${2.9*mm}px ${mono}`;if('letterSpacing' in x)x.letterSpacing='0px';x.textAlign='right';x.fillText('v1.0.0',SPW-12*mm,cy);x.globalAlpha=1;
+ if('letterSpacing' in x)x.letterSpacing='0px';
+}
+function drawSpine(){drawSpineTo(spineCanvas,set,kit);spineTex.needsUpdate=true}
+// (шарнирные канавки на обложках убраны: в макете их нет, на цветных корешках давали тёмные полосы)
+
+/* ---------- закрывающая резинка и петля для ручки ---------- */
+// резинка крепится к задней обложке: закрытая книга охвачена ею вокруг переднего обреза; снятая лежит на задней обложке
+let bandT=0,bandTarget=0,penT=0,penTarget=0,pendingOpen=null;   // 0: надета / ручка в петле, 1: снята / ручка вынута
+const elTex=(()=>{const c=document.createElement('canvas');c.width=64;c.height=64;const x=c.getContext('2d');
+ x.fillStyle='#f2f2f2';x.fillRect(0,0,64,64);
+ for(let i=0;i<64;i+=4){x.fillStyle='rgba(0,0,0,.20)';x.fillRect(i,0,1.4,64);x.fillStyle='rgba(255,255,255,.35)';x.fillRect(i+2,0,1,64)}
+ for(let j=0;j<64;j+=4){x.fillStyle='rgba(0,0,0,.07)';x.fillRect(0,j,64,1)}
+ x.fillStyle='rgba(0,0,0,.28)';x.fillRect(0,0,3,64);x.fillRect(61,0,3,64);
+ const t=new THREE.CanvasTexture(x.canvas);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t})();
+const elMat=new THREE.MeshLambertMaterial({color:KITS[kit].sp,map:elTex});
+const EW=.5,EXC=W-.6,EPN=9,ETH=.07;        // ширина 5 мм, 3,5–8,5 мм от переднего обреза (по макету), толщина
+const EN=EPN*4;
+const elGeo=new THREE.BufferGeometry();
+elGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(EN*4*3),3));
+elGeo.setAttribute('uv',new THREE.BufferAttribute(new Float32Array(EN*4*2),2));
+{const idx=[];for(let i=0;i<EN;i++){const j=(i+1)%EN,a=4*i,b=4*j;
+  idx.push(a+2,b+2,a+3,a+3,b+2,b+3);idx.push(a+0,a+1,b+0,b+0,a+1,b+1);idx.push(a+0,b+0,a+2,a+2,b+0,b+2);idx.push(a+1,a+3,b+1,b+1,a+3,b+3);
+ }elGeo.setIndex(idx)}
+const elastic=new THREE.Mesh(elGeo,elMat);elastic.frustumCulled=false;elastic.userData.act='band';book.add(elastic);
+let elKey='';
+function placeElastic(){
+ const t=bandT,dxMax=W+1.3-EXC;
+ const dx=dxMax*(t<.5?smooth(t/.5):1-smooth((t-.5)/.5));          // сползает через передний обрез, потом возвращается на заднюю обложку
+ const yt=(T/2+.012)+((Y0+.012)-(T/2+.012))*sstep(.38,.62,t);
+ const key=dx.toFixed(3)+'|'+yt.toFixed(3);if(key===elKey)return;elKey=key;
+ const yb=-T/2-.012,zh=H/2+.012,r=Math.min(.16,(yt-yb)/2-.01),X=EXC+dx;
+ const cs=[[zh-r,yt-r,Math.PI/2],[zh-r,yb+r,0],[-zh+r,yb+r,-Math.PI/2],[-zh+r,yt-r,Math.PI]],pa=elGeo.attributes.position.array,ua=elGeo.attributes.uv.array;
+ const pts=[];
+ for(const [cz,cy,a0] of cs)for(let k=0;k<EPN;k++){const a=a0-(Math.PI/2)*k/(EPN-1);pts.push([cz+Math.cos(a)*r,cy+Math.sin(a)*r,Math.cos(a),Math.sin(a)])}
+ let len=0;
+ for(let i=0;i<EN;i++){
+  if(i)len+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);
+  const [z,y,nz,ny]=pts[i],u=len/.12;
+  pa.set([X-EW/2,y,z,X+EW/2,y,z,X-EW/2,y+ny*ETH,z+nz*ETH,X+EW/2,y+ny*ETH,z+nz*ETH],i*12);
+  ua.set([0,u,1,u,0,u,1,u],i*8);
+ }
+ elGeo.attributes.position.needsUpdate=true;elGeo.attributes.uv.needsUpdate=true;elGeo.computeVertexNormals();
+}
+// петля для ручки: тканевое кольцо, закреплено внутри задней обложки у правого края по середине, выступает на 7 мм, высота 14 мм (под ручку 7–8 мм)
+const PR=.375;                                    // радиус ручки (Ø 7,5 мм)
+const penMat=new THREE.MeshLambertMaterial({color:KITS[kit].sp,map:elTex});
+const LRX=.40,LT=.06,LCX=W+.30,LCY=Y0+.2;          // внутренний радиус, толщина ткани, центр кольца
+let loopMesh;
+{
+ const sh=new THREE.Shape();sh.absellipse(0,0,LRX+LT,LRX+LT,0,Math.PI*2,false,0);
+ const hole=new THREE.Path();hole.absellipse(0,0,LRX,LRX,0,Math.PI*2,true,0);sh.holes.push(hole);
+ const g=new THREE.ExtrudeGeometry(sh,{depth:1.4,bevelEnabled:false,curveSegments:24});g.translate(0,0,-.7);
+ const pu=g.attributes.uv,pp=g.attributes.position;for(let i=0;i<pu.count;i++){const a=Math.atan2(pp.getY(i),pp.getX(i));pu.setXY(i,(pp.getZ(i)+.7)/1.4,a/Math.PI*2.2)}
+ loopMesh=new THREE.Mesh(g,penMat);loopMesh.position.set(LCX,LCY,0);loopMesh.userData.act='pen';book.add(loopMesh);
+}
+// шариковая ручка: колпачок цвета комплекта, графитовый корпус, металлический наконечник и клип (длина 135 мм)
+const penGroup=new THREE.Group();book.add(penGroup);
+const penMeshes=[];
+const penCapMat=new THREE.MeshLambertMaterial({color:KITS[kit].sp}),penBodyMat=new THREE.MeshLambertMaterial({color:0x1c2022}),penMetal=new THREE.MeshLambertMaterial({color:0xbfc4c7});
+{
+ const add=(geo,mat,z,x=0,y=0)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.userData.act='pen';penGroup.add(m);penMeshes.push(m);return m};
+ const cyl=(r1,r2,h)=>new THREE.CylinderGeometry(r1,r2,h,24).rotateX(Math.PI/2);
+ add(cyl(PR+.03,PR+.03,3.6),penCapMat,-5.0);              // колпачок
+ add(cyl(PR+.04,PR+.04,.22),penMetal,-3.2);               // кольцо
+ add(cyl(PR,PR,8.0),penBodyMat,.8);                       // корпус
+ add(cyl(.09,PR,1.9),penBodyMat,5.75);                    // конус
+ add(new THREE.SphereGeometry(.09,12,8),penMetal,6.7);    // шарик
+ add(new THREE.BoxGeometry(.07,.05,2.8),penMetal,-5.1,0,PR+.06);   // клип
+}
+const PX_T=W+4.6,PY_T=-T/2+PR,PZ_T=-2.5;
+function posePen(){
+ const u=penT,sA=sstep(0,.38,u),v=sstep(.38,1,u);
+ const x=LCX+(PX_T-LCX)*v,y=LCY+(PY_T-LCY)*v+1.6*Math.sin(Math.PI*v),z=-7.9*sA+(PZ_T+7.9)*v;
+ penGroup.position.set(x,y,z);penGroup.rotation.set(0,.6*v,0);
+}
+
+/* ---------- блок страниц ---------- */
+// блок страниц: единичная призма со скруглёнными внешними (у переднего обреза) углами, радиус как у листов (15 px из 640 = 3,4 мм)
+const PR_ROUND=.34;
+function blockGeoFor(side){
+ const sx=PWD-.05,sz=PHT-.05,rx=PR_ROUND/sx,rz=PR_ROUND/sz,N=8,pts=[[-.5,-.5],[.5-rx,-.5]];
+ for(let i=1;i<=N;i++){const a=-Math.PI/2+(Math.PI/2)*i/N;pts.push([.5-rx+Math.cos(a)*rx,-.5+rz+Math.sin(a)*rz])}
+ pts.push([.5,.5-rz]);
+ for(let i=1;i<=N;i++){const a=(Math.PI/2)*i/N;pts.push([.5-rx+Math.cos(a)*rx,.5-rz+Math.sin(a)*rz])}
+ pts.push([-.5,.5]);
+ let P=pts.map(([x,z])=>[x*side,z]);if(side<0)P=P.reverse();
+ const n=P.length,pos=[],uv=[],idx=[],nrm=[];
+ // боковая стенка
+ let len=0;const cum=[0];for(let i=1;i<=n;i++){const a=P[i-1],b=P[i%n];len+=Math.hypot((b[0]-a[0])*sx,(b[1]-a[1])*sz);cum.push(len)}
+ for(let i=0;i<n;i++){
+  const a=P[i],b=P[(i+1)%n],dx=(b[0]-a[0])*sx,dz=(b[1]-a[1])*sz,l=Math.hypot(dx,dz)||1,nx=dz/l,nz=-dx/l;
+  const k=pos.length/3;
+  pos.push(a[0],-.5,a[1],b[0],-.5,b[1],b[0],.5,b[1],a[0],.5,a[1]);
+  for(let j=0;j<4;j++)nrm.push(nx,0,nz);
+  uv.push(cum[i]/len,0,cum[i+1]/len,0,cum[i+1]/len,1,cum[i]/len,1);
+  idx.push(k,k+1,k+2,k,k+2,k+3);
+ }
+ // крышки
+ for(const [y,ny] of [[.5,1],[-.5,-1]]){
+  const k=pos.length/3;pos.push(0,y,0);nrm.push(0,ny,0);uv.push(.5,.5);
+  for(const [x,z] of P){pos.push(x,y,z);nrm.push(0,ny,0);uv.push(x+.5,z+.5)}
+  for(let i=0;i<n;i++){const a=k+1+i,b=k+1+(i+1)%n;if(ny>0)idx.push(k,b,a);else idx.push(k,a,b)}
+ }
+ const g=new THREE.BufferGeometry();
+ g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(nrm,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);
+ return g;
+}
+const blockR=new THREE.Mesh(blockGeoFor(1),blockMatR),blockL=new THREE.Mesh(blockGeoFor(-1),blockMatR);
+book.add(blockR,blockL);
+
+/* ---------- метки на торце стопки (нарисованные на страницах боковые ступеньки) ---------- */
+const ACC_HEX={green:'#1F9D55',blue:'#2F5BEA',orange:'#E8590C',violet:'#7B3FE4',mono:'#111413',amber:'#D9650F',sky:'#2A6FD4',ochre:'#A06C00'};
+let tabsData=null;
+const FCW=512,FROW=8,NREAL=98;     // 98 реальных листов = 196 страниц
+// какие страницы на каком развороте просмотра: по ним берём метки реальных листов
+const SPREADS=[['F',1],[2,3],[4,5],[6,7],[8,9],[10,11],[12,13],[14,15],[116,117],[150,151],[152,153],[154,155],[156,157],[158,159],[160,161],[162,163],[164,165],[166,167],[168,169],[170,171],[172,173],[174,175],[176,177],[178,179],[180,181],[182,183],[184,185],[186,187],[188,189],[190,191],[192,193],[194,195],[196,'B']];
+function realLeaves(){   // сколько реальных листов лежит слева и справа на текущем развороте
+ const nl=Math.max(0,Math.min(NSP,Math.floor(f+1e-6))),nr=Math.max(0,Math.min(NSP,Math.ceil(f-1e-6)));
+ const L=nl===0?0:SPREADS[nl-1][0],R=nr===0?1:SPREADS[nr-1][1];
+ return [L==='F'?0:L/2,R==='B'?0:NREAL-(R-1)/2];
+}
+function makeForeTex(reverse,left){
+ const c=document.createElement('canvas');c.width=FCW;c.height=NREAL*FROW;const x=c.getContext('2d');
+ const tabs=tabsData?tabsData[set]:null,col=ACC_HEX[KITS[kit].acc];
+ let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ for(let j=0;j<NREAL;j++){
+  const y=(reverse?NREAL-1-j:j)*FROW;
+  const g=Math.round(247+rnd()*8);                       // лист чуть светлее или темнее соседнего
+  x.fillStyle=`rgb(${g},${g},${g-2})`;x.fillRect(0,y,FCW,FROW);
+  if(tabs){
+   // метки лицевой (2j+1) и оборотной (2j+2) сторон листа: на торце видны как полоски цветом краски, ровно там же, где на странице
+   for(const n of [2*j+1,2*j+2]){
+    const t=tabs[n-1];if(!t)continue;
+    const top=t[0],hh=t[1],x0=left?FCW*(top/210):FCW*(1-(top+hh)/210),w=FCW*hh/210;
+    x.fillStyle=t[2]?'#15191a':col;x.fillRect(x0,y,w,FROW);
+    x.fillStyle=`rgba(255,255,255,${.06+rnd()*.12})`;x.fillRect(x0,y,w,2);        // блик на верхней кромке листа
+    x.fillStyle=`rgba(0,0,0,${.12+rnd()*.10})`;x.fillRect(x0,y+FROW-2,w,2);       // тень между листами
+   }
+  }
+  x.fillStyle='rgba(70,70,64,.16)';x.fillRect(0,y+FROW-1,FCW,1);                    // щель между листами
+  x.fillStyle='rgba(255,255,255,.55)';x.fillRect(0,y,FCW,1);
+ }
+ const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;
+ t.generateMipmaps=true;t.minFilter=THREE.LinearMipmapLinearFilter;t.magFilter=THREE.LinearFilter;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+ return t;
+}
+// торец без освещения, чтобы цветные метки не тонули в тени
+const foreMatR=new THREE.MeshBasicMaterial({color:0xf2f2f2}),foreMatL=new THREE.MeshBasicMaterial({color:0xf2f2f2});
+function foreGeo(dir){   // торец стопки только на прямом участке между скруглениями
+ const L2=PHT-.05-2*PR_ROUND,g=new THREE.PlaneGeometry(L2,1).rotateY(dir*Math.PI/2),a=(PR_ROUND+.025)/PHT,uv=g.attributes.uv;
+ for(let i=0;i<uv.count;i++)uv.setX(i,a+(1-2*a)*uv.getX(i));
+ return g;
+}
+const foreR=new THREE.Mesh(foreGeo(1),foreMatR);
+const foreL=new THREE.Mesh(foreGeo(-1),foreMatL);
+foreR.position.x=PWD-.045+.025;foreL.position.x=-(PWD-.045+.025);
+book.add(foreR,foreL);
+function buildFore(){
+ foreMatR.map&&foreMatR.map.dispose();foreMatL.map&&foreMatL.map.dispose();
+ foreMatR.map=makeForeTex(false,false);foreMatL.map=makeForeTex(true,true);
+ foreMatR.needsUpdate=foreMatL.needsUpdate=true;dirty=true;
+}
+fetch(`${TEX}/tabs.json${TV}`).then(r=>r.json()).then(d=>{tabsData=d;buildFore()}).catch(()=>{});
+
+/* ---------- листы ---------- */
+const NSEG=14;
+const leaves=[];
+function makeLeaf(j){
+ const nv=(NSEG+1)*2;
+ const posA=new THREE.BufferAttribute(new Float32Array(nv*3),3);
+ const nrmA=new THREE.BufferAttribute(new Float32Array(nv*3),3);
+ const uvF=new Float32Array(nv*2),uvB=new Float32Array(nv*2);
+ const idx=[];
+ for(let i=0;i<=NSEG;i++){
+  const s=i/NSEG;
+  // ряд 0: верх страницы (z=-), ряд 1: низ
+  uvF.set([.5+.5*s,1,.5+.5*s,0],i*4);
+  uvB.set([.5-.5*s,1,.5-.5*s,0],i*4);
+  if(i<NSEG){const a=i*2,b=i*2+1,c=i*2+2,d=i*2+3;idx.push(a,b,c,c,b,d)}
+ }
+ const gF=new THREE.BufferGeometry(),gB=new THREE.BufferGeometry();
+ gF.boundingSphere=new THREE.Sphere(new THREE.Vector3(),40);gB.boundingSphere=new THREE.Sphere(new THREE.Vector3(),40);
+ for(const [g,uv] of [[gF,uvF],[gB,uvB]]){
+  g.setAttribute('position',posA);g.setAttribute('normal',nrmA);
+  g.setAttribute('uv',new THREE.BufferAttribute(uv,2));g.setIndex(idx);
+ }
+ const mF=new THREE.MeshLambertMaterial({color:0xffffff,alphaTest:.5,side:THREE.FrontSide});
+ const mB=new THREE.MeshLambertMaterial({color:0xffffff,alphaTest:.5,side:THREE.BackSide});
+ const meshF=new THREE.Mesh(gF,mF),meshB=new THREE.Mesh(gB,mB);
+ meshF.frustumCulled=meshB.frustumCulled=false;
+ const grp=new THREE.Group();grp.add(meshF,meshB);book.add(grp);
+ return {j,posA,nrmA,gF,gB,mF,mB,grp,p:-1};
+}
+for(let j=0;j<NL;j++)leaves.push(makeLeaf(j));
+
+/* ---------- ляссе: два цвета на комплект, с надписями (как в макете) ---------- */
+// [фон 1, фон 2, текст 1, текст 2]
+const RB={ai:['#4FD283','#101412','#0C120F','#4FD283'],di:['#E6EDFF','#2F5BEA','#1D3A9E','#FFFFFF'],hi:['#A57CFF','#1F1147','#1F1147','#F3EEFF'],ei:['#FF9A4D','#0B2D33','#0B2D33','#EAF6F7'],fi:['#7FB0FF','#0F1E3D','#0F1E3D','#EAF0FF'],bi:['#E2B04A','#2B2F36','#2B2F36','#F1EEE6'],a:['#101412','#4FD283','#ECF1ED','#0C120F'],b:['#2B2F36','#E2B04A','#F1EEE6','#2B2F36'],d:['#2F5BEA','#E6EDFF','#FFFFFF','#1D3A9E'],e:['#0B2D33','#FF9A4D','#EAF6F7','#0B2D33'],f:['#0F1E3D','#7FB0FF','#EAF0FF','#0F1E3D'],h:['#1F1147','#A57CFF','#F3EEFF','#1F1147']};
+const RT=['COMMIT','HEAD'];
+const RW=.6, RLEN=[H-.4+2.2,H-.4+1.8];   // ширина и длина (хвост торчит снизу на 22 и 18 мм)
+const ribTexCache={};
+function ribTex(bg,fg,word){
+ const key=bg+fg+word;if(ribTexCache[key])return ribTexCache[key];
+ const c=document.createElement('canvas');c.width=2048;c.height=32;const x=c.getContext('2d');
+ x.fillStyle=bg;x.fillRect(0,0,2048,32);x.fillStyle=fg;x.font='700 12px ui-monospace,Menlo,Consolas,monospace';x.textBaseline='middle';
+ if('letterSpacing' in x)x.letterSpacing='2.5px';
+ const unit=word+' · ',uw=Math.max(20,x.measureText(unit).width);
+ for(let px=10;px<2048;px+=uw)x.fillText(unit,px,17);
+ if('letterSpacing' in x)x.letterSpacing='0px';
+ x.fillStyle='rgba(0,0,0,.10)';for(let i=0;i<2048;i+=3)x.fillRect(i,0,1,32);
+ x.fillStyle='rgba(255,255,255,.07)';for(let i=1;i<2048;i+=3)x.fillRect(i,0,1,32);
+ x.fillStyle='rgba(0,0,0,.28)';x.fillRect(0,0,2048,2);x.fillRect(0,30,2048,2);x.fillStyle='rgba(255,255,255,.16)';x.fillRect(0,3,2048,1);
+ const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=4;
+ return ribTexCache[key]=tx;
+}
+function ribbonGeo(len,w,x0){
+ const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(w,0);sh.lineTo(w,len);sh.lineTo(w/2,len-.22);sh.lineTo(0,len);sh.closePath();
+ const g=new THREE.ShapeGeometry(sh);const p=g.attributes.position,uv=g.attributes.uv;
+ for(let i=0;i<p.count;i++){uv.setXY(i,p.getY(i)/len,p.getX(i)/w);p.setX(i,p.getX(i)+x0)}
+ g.rotateX(Math.PI/2);   // форма: y -> +z (вниз по странице)
+ return g;
+}
+// ляссе: тканевая лента. Видимая лента строится по цепочке узлов, цепочка подчиняется инерции, весу и мягко тянется к «опорной» позе
+const RN=44;                                   // сегментов по длине
+const ribbons=[0,1].map(k=>{
+ const hit=new THREE.Mesh(ribbonGeo(RLEN[k],RW+.9,-.45),new THREE.MeshBasicMaterial({visible:false,side:THREE.DoubleSide}));
+ hit.userData.ribbon=k;hit.frustumCulled=false;
+ const g=new THREE.Group();g.add(hit);book.add(g);return g;
+});
+const ribMesh=[0,1].map(k=>{
+ const nv=2*(RN+1)+1,pos=new Float32Array(nv*3),uv=new Float32Array(nv*2),idx=[];
+ for(let i=0;i<=RN;i++){uv[i*4]=i/RN;uv[i*4+1]=0;uv[i*4+2]=i/RN;uv[i*4+3]=1}
+ const C=2*(RN+1);uv[C*2]=1-.22/RLEN[k];uv[C*2+1]=.5;
+ for(let i=0;i<RN-1;i++){const a=2*i,b=2*i+1,c=2*i+2,d=2*i+3;idx.push(a,b,c,b,d,c)}
+ {const a=2*(RN-1),b=a+1,c=2*RN,d=c+1;idx.push(a,b,C,a,C,c,b,d,C)}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('uv',new THREE.BufferAttribute(uv,2));g.setIndex(idx);
+ const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({color:0xffffff,side:THREE.DoubleSide}));
+ m.frustumCulled=false;book.add(m);return m;
+});
+const rp=[0,1].map(()=>Array.from({length:RN+1},()=>new THREE.Vector3())),rq=[0,1].map(()=>Array.from({length:RN+1},()=>new THREE.Vector3())),rinit=[false,false];
+const _sv=new THREE.Vector3(),_sr=new THREE.Vector3(),_ss=new THREE.Vector3(),_st=new THREE.Vector3();
+let ribEnergy=0,curHR=TB,curHL=0;
+const _qa=new THREE.Quaternion(),_qb=new THREE.Quaternion(),_zax=new THREE.Vector3(0,0,1),_ul=new THREE.Vector3();
+function simRibbon(k,dt){
+ const g=ribbons[k],P=rp[k],Q=rq[k],L=RLEN[k],sc=g.scale.z,seg=L*sc/RN,e=smooth(sv[k]);
+ g.updateMatrix();
+ const ang=Math.PI*smooth(backFlip),tr=Math.sin(Math.PI*sv[k]);
+ _qa.copy(lift.quaternion).multiply(_qb.setFromAxisAngle(_zax,ang)).invert();
+ const upL=_ul.set(0,1,0).applyQuaternion(_qa).clone();
+ const rest=[],sd0=_ss.set(1,0,0).applyQuaternion(g.quaternion).clone();
+ for(let i=0;i<=RN;i++){
+  const v=new THREE.Vector3(0,0,L*i/RN).applyMatrix4(g.matrix);
+  v.addScaledVector(sd0,Math.sin(i*.85*18/RN+k*2)*(.05+.09*e)*Math.min(1,i/(3*RN/18)));   // ткань лежит не по линейке
+  const over=v.z-(H/2+.1);if(over>0)v.addScaledVector(upL,-over*3*(1-e));                      // хвост свисает с нижнего обреза
+  rest.push(v);
+ }
+ if(!rinit[k]){for(let i=0;i<=RN;i++){P[i].copy(rest[i]);Q[i].copy(rest[i])}rinit[k]=true}
+ const n=Math.max(1,Math.ceil(dt/.012)),h=dt/n,tableY=-T/2+.03-lift.position.y;let en=0;
+ for(let s=0;s<n;s++){
+  for(let i=1;i<=RN;i++){
+   const p=P[i],q=Q[i];_sv.copy(p).sub(q).multiplyScalar(.955+.02*tr);q.copy(p);
+   p.add(_sv);p.addScaledVector(upL,-70*h*h);
+   p.addScaledVector(_sr.copy(rest[i]).sub(p),(.035+.025*(1-i/RN))*(1-.88*tr));
+  }
+  for(let it=0;it<9;it++){
+   P[0].copy(rest[0]);
+   for(let i=0;i<RN;i++){
+    const a=P[i],b=P[i+1];_st.copy(b).sub(a);const d=_st.length()||1e-6,df=(d-seg)/d;
+    if(i===0){b.addScaledVector(_st,-df)}else{a.addScaledVector(_st,df*.5);b.addScaledVector(_st,-df*.5)}
+   }
+  }
+  for(let i=1;i<=RN;i++){
+   const wy=P[i].dot(upL),fl=Math.max(rest[i].dot(upL)*(1-e)-.004*(1-e),tableY)*(1-e)+tableY*e;if(wy<fl)P[i].addScaledVector(upL,fl-wy);
+   // не проходить сквозь нижнюю доску и торец блока
+   if(e<.9&&P[i].y<Y0+.03&&P[i].z<H/2+.08&&P[i].z>PHT/2-.15&&Math.abs(P[i].x)<W+.5)P[i].z=H/2+.08;
+   // выйдя из блока, лента не заходит обратно в стопку: ложится сверху или свисает вдоль торца
+   if(e<.98&&rest[i].z>PHT/2-.15){
+    const q=P[i],top=Y0+(q.x>=0?curHR:curHL);
+    if(Math.abs(q.x)<PWD&&q.z<PHT/2+(rest[i].y>top-.02?.2:.03)&&q.z>-PHT/2&&q.y>Y0-.02&&q.y<top+.015){
+     if(rest[i].y>top-.02)q.y=top+.015;else q.z=PHT/2+.03;
+    }
+   }
+  }
+ }
+ for(let i=1;i<=RN;i++)en+=P[i].distanceToSquared(Q[i]);
+ ribEnergy=Math.max(ribEnergy,en/(h*h)*1e-6*0+Math.sqrt(en));
+ // сторона ленты: из опорной позы, ортогонально направлению ленты
+ const sd=_ss.set(1,0,0).applyQuaternion(g.quaternion);
+ const pos=ribMesh[k].geometry.attributes.position.array,w=RW/2;
+ for(let i=0;i<=RN;i++){
+  const a=P[Math.max(0,i-1)],b=P[Math.min(RN,i+1)];_st.copy(b).sub(a).normalize();
+  _sr.copy(sd).addScaledVector(_st,-sd.dot(_st));if(_sr.lengthSq()<1e-6)_sr.set(1,0,0);_sr.normalize();
+  const c=P[i];
+  pos[i*6]=c.x;pos[i*6+1]=c.y;pos[i*6+2]=c.z;
+  pos[i*6+3]=c.x+_sr.x*2*w;pos[i*6+4]=c.y+_sr.y*2*w;pos[i*6+5]=c.z+_sr.z*2*w;
+ }
+ // выемка ласточкина хвоста
+ {const C=2*(RN+1),a=P[RN-1],b=P[RN];_st.copy(b).sub(a).normalize();const m=(P[RN]);
+  _sr.copy(sd).addScaledVector(_st,-sd.dot(_st)).normalize();
+  pos[C*3]=m.x-_st.x*.22+_sr.x*w;pos[C*3+1]=m.y-_st.y*.22+_sr.y*w;pos[C*3+2]=m.z-_st.z*.22+_sr.z*w}
+ const ga=ribMesh[k].geometry;ga.attributes.position.needsUpdate=true;ga.computeVertexNormals();
+}
+const ribbonHits=ribbons.map(g=>g.children[0]);
+function setRibbons(){
+ const c=RB[kit]||RB.a;
+ ribbons.forEach((g,k)=>{const m=ribMesh[k].material;m.map=ribTex(c[k],c[2+k],RT[k]);m.map.wrapS=THREE.RepeatWrapping;m.needsUpdate=true});
+}
+// Где лежит каждое ляссе: заложено в слот между листами m-1 и m (хвост выходит снизу) либо откинуто наверх (m = null).
+const marks=[0,0];   // по умолчанию оба ляссе заложены на первой странице
+try{const m=JSON.parse(localStorage.getItem('kommit3d-marks2')||'null');if(Array.isArray(m)&&m.length===2)for(let k=0;k<2;k++)marks[k]=Number.isInteger(m[k])&&m[k]>=0&&m[k]<=NL?m[k]:null}catch(e){}
+function saveMarks(){try{localStorage.setItem('kommit3d-marks2',JSON.stringify(marks))}catch(e){}}
+let ribHover=-1;
+const sv=marks.map(m=>m===null?1:0);          // 1: откинуто наверх, 0: лежит на странице
+const slotMark=marks.slice();                  // слот, в котором ляссе лежит сейчас (пока оно не откинуто)
+const _rp=new THREE.Vector3();
+const UP_SCALE=.8;                             // откинутое ляссе показываем короче, чтобы не уезжало далеко за корешок
+function slotPos(k,m,out){
+ m=m===null?0:m;
+ const pr=m<NL?Math.max(0,Math.min(1,f-1-m)):0;
+ const t=sstep(.3,.7,pr);
+ const yR=Y0+TB*(NL-m)/NL,yL=m>0?Y0+TB*m/NL:Y0;
+ const xR=k?1.35:.55,xL=k?-1.85:-1.05;
+ return out.set(xR+(xL-xR)*t,yR+(yL-yR)*t+.014,0);
+}
+let simDt=.016;
+function placeRibbons(){
+ const o=smooth(Math.min(1,f));ribEnergy=0;
+ for(let k=0;k<2;k++){
+  const e=smooth(sv[k]),g=ribbons[k];
+  slotPos(k,slotMark[k],_rp);
+  // откинутое положение: лента выходит из головки у корешка и лежит на столе за верхним обрезом, уходит вверх по экрану
+  const ux=(k?1.35:.55)+((k?.6:-.6)-(k?1.35:.55))*o,uz=-H/2+.2,uy=(-T/2+.05)*Math.cos(Math.PI*smooth(backFlip));
+  g.position.set(_rp.x+(ux-_rp.x)*e,_rp.y+(uy-_rp.y)*e+(ribHover===k?.06:0),(-H/2+.2)+(uz-(-H/2+.2))*e);
+  g.rotation.order='YXZ';g.rotation.y=e*(k?-.07:.07)+(1-e)*(k?.015:-.015);g.rotation.x=-Math.PI*e;
+  const sc=1+(UP_SCALE-1)*e;g.scale.z=sc;
+  const mat=ribMesh[k].material;if(mat.map)mat.map.repeat.x=sc;
+  mat.emissive.setScalar(ribHover===k?.18:0);
+  simRibbon(k,simDt);
+ }
+}
+// заложить или откинуть ляссе
+function setMark(k,m){
+ marks[k]=m;if(m!==null)slotMark[k]=m;
+ saveMarks();renderMarks();dirty=true;
+}
+
+const smooth=t=>t*t*(3-2*t);
+const sstep=(a,b,x)=>smooth(Math.max(0,Math.min(1,(x-a)/(b-a))));
+function updateLeaf(L,prog){
+ const j=L.j,p=smooth(prog);
+ L.grp.visible=true;
+ const yR=Y0+TB*(NL-j)/NL, yL=Y0+TB*(j+1)/NL;
+ const d=(1-p)*yR+p*(-yL);
+ const phi=Math.PI*p;
+ const lag=1.15*Math.sin(Math.PI*p);
+ let x=-d*Math.sin(phi),y=d*Math.cos(phi);
+ const ds=PWD/NSEG,pa=L.posA.array,hz=PHT/2;
+ for(let i=0;i<=NSEG;i++){
+  pa.set([x,y,-hz,x,y,hz],i*6);
+  const s=(i+.5)/NSEG,th=phi-lag*Math.pow(s,1.4);
+  x+=Math.cos(th)*ds;y+=Math.sin(th)*ds;
+ }
+ L.posA.needsUpdate=true;
+ // нормали (по сегментам, усредняем)
+ const na=L.nrmA.array;
+ for(let i=0;i<=NSEG;i++){
+  const a=Math.max(0,i-1),b=Math.min(NSEG,i+1);
+  const dx=pa[b*6]-pa[a*6],dy=pa[b*6+1]-pa[a*6+1];
+  const l=Math.hypot(dx,dy)||1;
+  // касательная (dx,dy), нормаль лицевой стороны = (-dy,dx) повёрнутая: для плоского (1,0) -> (0,1)
+  const nx=-dy/l,ny=dx/l;
+  na.set([nx,ny,0,nx,ny,0],i*6);
+ }
+ L.nrmA.needsUpdate=true;
+}
+/* ---------- «подвязка» блока к корешку: плавный спуск от высокой стопки к низкой, торец блока у корешка не виден ---------- */
+const GN=10,gutGeo=new THREE.BufferGeometry();
+gutGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array((GN+1)*2*3),3));
+{const idx=[];for(let i=0;i<GN;i++){const a=2*i,b=a+1,c=a+2,d=a+3;idx.push(a,c,b,b,c,d)}gutGeo.setIndex(idx)}
+const gutMat=new THREE.MeshLambertMaterial({color:0xf3f3f0,side:THREE.DoubleSide});
+const gutter=new THREE.Mesh(gutGeo,gutMat);gutter.frustumCulled=false;book.add(gutter);
+function mixHex(a,b,t){const A=new THREE.Color(a),B=new THREE.Color(b);return A.lerp(B,t)}
+// форзацная «марля» над канавкой корешка: у раскрытой книги между досками нет щели
+const linerMat=new THREE.MeshLambertMaterial({color:0xf3f3f0,side:THREE.DoubleSide});
+const liner=new THREE.Mesh(new THREE.PlaneGeometry(.4,H-.02).rotateX(-Math.PI/2),linerMat);liner.position.set(.0,Y0+.003,0);book.add(liner);
+function placeGutter(hR,hL){
+ linerMat.color.copy(mixHex('#ffffff',ACC_HEX[KITS[kit].acc],.14));
+ const diff=Math.abs(hR-hL),rightHigh=hR>=hL;
+ const open=sstep(.55,1,rightHigh?f:NSP-f);
+ const w=(.3+Math.min(.6,diff*.9))*open;
+ gutter.visible=diff>.03&&w>.02;if(!gutter.visible)return;
+ const hi=Math.max(hR,hL),lo=Math.min(hR,hL),pa=gutGeo.attributes.position.array,zz=(PHT-.05)/2,x0=rightHigh?-.045:.045;
+ for(let i=0;i<=GN;i++){
+  const t=i/GN,u=smooth(t),x=x0+(rightHigh?-1:1)*w*t,y=Y0+hi-(hi-lo)*u+.004;
+  pa.set([x,y,-zz,x,y,zz],i*6);
+ }
+ gutGeo.attributes.position.needsUpdate=true;gutGeo.computeVertexNormals();
+ // цвет: белая бумага, а если на низкой стороне только обложка, то форзац цвета акцента
+ const lowCount=rightHigh?hL:hR;
+ gutMat.color.copy(lowCount>.02?new THREE.Color(0xf3f3f0):mixHex('#ffffff',ACC_HEX[KITS[kit].acc],.14));
+}
+function placeLeaves(){
+ let nF=0,nS=0;
+ for(const L of leaves){
+  const prog=Math.max(0,Math.min(1,f-1-L.j));
+  if(prog>0)nS++;
+  if(prog>=1)nF++;
+  if(prog!==L.p){updateLeaf(L,prog);L.p=prog}
+ }
+ // блоки страниц: лист в полёте не лежит ни в одной стопке
+ const hR=TB*(NL-nS)/NL,hL=TB*nF/NL;curHR=hR;curHL=hL;
+ setBlock(blockR,1,hR);setBlock(blockL,-1,hL);
+ {const [lc,rc]=realLeaves();placeFore(foreR,foreMatR,hR,Math.max(.01,rc/NREAL));placeFore(foreL,foreMatL,hL,Math.max(.01,lc/NREAL))}
+ placeGutter(hR,hL);
+ placeRibbons();
+ // оставляем каждый лист, что скрыт внутри блока, видимым: их много, но дёшево
+}
+function placeFore(m,mat,h,frac){
+ const hh=Math.max(0,h-.006);
+ m.visible=hh>.001;m.scale.y=Math.max(.001,hh);m.position.y=Y0+hh/2;
+ if(mat.map){mat.map.repeat.y=frac;mat.map.offset.y=0}
+}
+function setBlock(m,side,h){
+ const hh=Math.max(0,h-.006);
+ m.visible=hh>.001;
+ m.scale.set(PWD-.05,hh,PHT-.05);
+ m.position.set(side*(PWD/2-.02),Y0+hh/2,0);
+}
+
+/* ---------- текстуры -> материалы ---------- */
+function setMap(m,t){if(m.map!==t){const had=!!m.map;m.map=t;if(had!==!!t)m.needsUpdate=true}}
+function applyTex(){
+ const c=currentSpreadIndex();
+ setMap(coverMat,pick(frontUrl(),coverMat.map,true));
+ setMap(backMat,pick(backUrl(),backMat.map,true));
+ setMap(innerFMat,pick(spreadUrl(0),innerFMat.map,true));
+ setMap(innerBMat,pick(spreadUrl(NSP-1),innerBMat.map,true));
+ for(const L of leaves){
+  setMap(L.mF,pick(spreadUrl(L.j),L.mF.map,Math.abs(L.j-c)<=3));
+  setMap(L.mB,pick(spreadUrl(L.j+1),L.mB.map,Math.abs(L.j+1-c)<=3));
+ }
+ if(!readyFlag&&coverMat.map){readyFlag=true;document.getElementById('load').classList.add('off')}
+ gc();dirty=true;
+}
+
+/* ---------- анимация ---------- */
+function applyState(){
+ const c=Math.max(0,Math.min(1,f));
+ frontPivot.rotation.z=Math.PI*smooth(c);
+ const open=smooth(Math.min(1,f));
+ book.position.x=-(W/2)*(1-open);      // закрытая книга по центру, раскрытая: корешок в центре
+ shadow.scale.set(W*1.5+W*1.6*open,H*1.35,1);
+ const sh=T+.01+(CB-.03-T-.01)*smooth(Math.min(1,f));
+ spineMesh.scale.y=sh;spineMesh.position.set(-SPT/2,-T/2+sh/2,0);
+ placeLeaves();
+ pivot.rotation.z=Math.PI*smooth(backFlip);placeElastic();posePen();
+}
+
+/* ---------- камера ---------- */
+const camTarget=new THREE.Vector3(0,0,0);
+let camGoal=60,fitD=60,zoom=1;
+const ZMIN=.55,ZMAX=3.2;
+function uiH(){return document.getElementById('ui').offsetHeight}
+// расстояние, при котором вся книга (с хвостами ляссе) помещается в свободную область экрана при текущем ракурсе
+const _tc=new THREE.PerspectiveCamera(28,1,1,600),_v=new THREE.Vector3();
+function fitPts(){
+ const pts=[];
+ if(mode==='shelf'){const hx=3*(T+GAP)+.5;for(const x of [-hx,hx])for(const y of [SHELF_Y-1.8,SHELF_Y+H+.5])for(const z of [SHELF_Z-W/2,SHELF_Z+W/2+1])pts.push(new THREE.Vector3(x,y,z));return pts}
+ const openG=Math.round(target)>=1;
+ const x0=openG?-W:-W/2,x1=openG?W:W/2;
+ for(const x of [x0,x1])for(const y of [-T/2,T/2])for(const z of [-H/2-1.4,H/2+2.2])pts.push(new THREE.Vector3(x,y,z));
+ return pts;
+}
+function fitDistance(){
+ if(mode==='shelf')return fitFor(BOOK_DIR,_z0.set(0,0,0),'book')*(canvas.parentElement.clientWidth>canvas.parentElement.clientHeight*1.1?1.55:1.28);  // полка чуть мельче книги, чтобы поместились декор и фон
+ const el=canvas.parentElement,w=Math.max(1,el.clientWidth),fh=Math.max(1,el.clientHeight);
+ const avail=Math.max(120,fh-uiH()-6),pad=Math.min(24,w*.04);
+ const limX=Math.max(.3,1-2*pad/w),limY=Math.max(.3,(avail-2*pad)/fh);
+ const pts=fitPts();
+ _tc.fov=camera.fov;_tc.aspect=w/fh;_tc.updateProjectionMatrix();_tc.up.copy(camera.up);
+ const dir=camera.position.clone().sub(camTarget).normalize();
+ const ok=d=>{
+  _tc.position.copy(camTarget).addScaledVector(dir,d);_tc.lookAt(camTarget);_tc.updateMatrixWorld(true);
+  for(const p of pts){_v.copy(p).project(_tc);if(Math.abs(_v.x)>limX||Math.abs(_v.y)>limY)return false}
+  return true;
+ };
+ let lo=8,hi=500;for(let i=0;i<30;i++){const m=(lo+hi)/2;ok(m)?hi=m:lo=m}
+ return hi;
+}
+function refit(){fitD=fitDistance();camGoal=Math.max(9,fitD/zoom);dirty=true}
+function resize(){
+ const el=canvas.parentElement,w=el.clientWidth,h=el.clientHeight;
+ renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+ renderer.setSize(w,h,false);camera.aspect=w/h;
+ camera.setViewOffset(w,h,0,Math.round((uiH()+6)/2),w,h);camera.updateProjectionMatrix();
+ refit();
+ if(typeof placeMarksPanel==='function')placeMarksPanel();
+}
+new ResizeObserver(resize).observe(canvas.parentElement);
+new ResizeObserver(()=>{if(mode==='book'||mode==='shelf')resize()}).observe(document.getElementById('ui'));
+camera.position.set(14,30,34);
+
+/* ---------- цикл ---------- */
+let last=performance.now();
+function tick(now){
+ requestAnimationFrame(tick);
+
+ const dt=Math.min(.1,(now-last)/1000);last=now;
+ let moving=false;
+ if(f!==target){
+  const diff=target-f,sp=reduce?30:Math.abs(diff)>1.2?Math.min(22,Math.max(2.6,Math.abs(diff)/1.1)):Math.max(.7,Math.min(2.6,Math.abs(diff)*3.2));
+  const st=Math.min(Math.abs(diff),sp*dt);f+=Math.sign(diff)*st;if(Math.abs(target-f)<1e-4)f=target;
+  moving=true;manageTex();
+ }
+ if(backFlip!==backTarget){
+  const diff=backTarget-backFlip,st=Math.min(Math.abs(diff),(reduce?30:1.5)*dt);
+  backFlip+=Math.sign(diff)*st;moving=true;
+ }
+ // радиус камеры
+ const off=camera.position.clone().sub(camTarget),cur=off.length();
+ if(Math.abs(cur-camGoal)>.01){
+  const nr=cur+(camGoal-cur)*(1-Math.exp(-dt*(reduce?40:5)));
+  camera.position.copy(camTarget).add(off.setLength(nr));moving=true;
+ }
+ if(upQ.length){uploadOne();moving=true}
+ if(bandT!==bandTarget){const st=dt/(reduce?.05:1.1);bandT=bandT<bandTarget?Math.min(bandTarget,bandT+st):Math.max(bandTarget,bandT-st);moving=true}
+ if(penT!==penTarget){const st=dt/(reduce?.05:1.5);penT=penT<penTarget?Math.min(penTarget,penT+st):Math.max(penTarget,penT-st);moving=true}
+ if(pendingOpen!==null&&bandT>=1){const n=pendingOpen;pendingOpen=null;goTo(n)}
+ for(let k=0;k<2;k++){
+  const tg=marks[k]===null?1:0;
+  if(sv[k]!==tg){const st=dt/(reduce?.05:.8);sv[k]=sv[k]<tg?Math.min(tg,sv[k]+st):Math.max(tg,sv[k]-st);moving=true}
+  if(sv[k]>=1&&marks[k]===null&&slotMark[k]!==null)slotMark[k]=null;
+ }
+ if(stepShelf(dt))moving=true;
+ simDt=Math.min(.033,Math.max(.008,dt));
+ if(moving||ribEnergy>.004)dirty=true;
+ if(controls.update())dirty=true;
+ if(dirty){
+  dirty=false;applyState();renderer.render(scene,camera);updateUI();
+  if(mode==='shelf'){placeShelfBtns();document.body.dataset.shelfReady='1'}
+ }
+}
+
+/* ---------- интерфейс ---------- */
+const $=id=>document.getElementById(id);
+const lbl=$('lbl'),prevB=$('prev'),nextB=$('next'),backB=$('back');
+// разделы ежедневника: номер первого разворота из 33 в просмотре
+const BLOCKS=[['Обложка',0],['Начало',1],['Год',4],['Квартал',5],['Месяц и недели',6],['Итоги',9],['Инструменты',13],['Справочник',22],['Заметки',27],['Конец',32]];
+const blockOf=t=>{let b=BLOCKS[1];for(const x of BLOCKS)if(x[1]<=t&&x[1]>0)b=x;return b};
+const secMenu=$('secmenu');
+BLOCKS.forEach(([n,st])=>{
+ const b=document.createElement('button');b.type='button';b.setAttribute('role','option');b.dataset.st=st;
+ b.innerHTML=`${n}<span>${st===0?'закрыта':'разв. '+st}</span>`;
+ b.onclick=()=>{closeSections();goTo(st)};secMenu.appendChild(b);
+});
+function syncSections(t){
+ const cur=t===0?0:blockOf(t)[1];
+ for(const b of secMenu.children)b.setAttribute('aria-selected',String(+b.dataset.st===cur));
+}
+function closeSections(){secMenu.classList.remove('on');lbl.setAttribute('aria-expanded','false')}
+lbl.onclick=e=>{e.stopPropagation();const on=!secMenu.classList.contains('on');secMenu.classList.toggle('on',on);lbl.setAttribute('aria-expanded',String(on))};
+addEventListener('pointerdown',e=>{if(secMenu.classList.contains('on')&&!secMenu.contains(e.target)&&e.target!==lbl)closeSections()});
+addEventListener('keydown',e=>{if(e.key==='Escape')closeSections()});
+function updateUI(){
+ const t=Math.round(target);
+ lbl.textContent=t===0?'Закрыта · разделы':`${blockOf(t)[0]} · ${t}/${NSP}`;
+ syncSections(t);
+ prevB.disabled=t<=0;nextB.disabled=t>=NSP;
+ updateTools();
+}
+function goTo(n){
+ if(n>0&&Math.round(target)===0&&bandTarget===0){bandTarget=1;pendingOpen=n;updateTools();dirty=true;return}   // сначала снимаем резинку
+ pendingOpen=null;
+ const old=Math.round(target)>=1;
+ target=Math.max(0,Math.min(NSP,n));
+ if(backTarget&&target!==0){backTarget=0;backB.setAttribute('aria-pressed','false')}
+ manageTex();if(old!==(Math.round(target)>=1))refit();dirty=true;
+}
+function go(n){goTo(Math.round(target)+n)}
+prevB.onclick=()=>go(-1);nextB.onclick=()=>go(1);
+const bandB=$('bandB'),penB=$('penB');
+function updateTools(){
+ bandB.querySelector('.long').textContent=bandTarget?'Надеть резинку':'Снять резинку';
+ bandB.disabled=Math.round(target)!==0&&bandTarget===1&&pendingOpen===null;
+ penB.querySelector('.long').textContent=penTarget?'Вставить ручку':'Вынуть ручку';
+}
+function toggleBand(){
+ if(Math.round(target)!==0&&bandTarget===1){toast('Закройте книгу, чтобы надеть резинку');return}
+ bandTarget=bandTarget?0:1;pendingOpen=null;updateTools();dirty=true;
+}
+function togglePen(){penTarget=penTarget?0:1;updateTools();dirty=true}
+bandB.onclick=toggleBand;penB.onclick=togglePen;
+backB.onclick=()=>{
+ if(Math.round(target)!==0){target=0;}
+ backTarget=backTarget?0:1;backB.setAttribute('aria-pressed',String(!!backTarget));dirty=true;
+};
+addEventListener('keydown',e=>{
+ if(mode!=='book')return;
+ if(e.key==='+'||e.key==='='){setZoom(zoom*1.2);e.preventDefault()}
+ else if(e.key==='-'||e.key==='_'){setZoom(zoom/1.2);e.preventDefault()}
+ else if(e.key==='0'){setZoom(1);e.preventDefault()}
+ else if(e.key==='ArrowRight'){go(1);e.preventDefault()}
+ else if(e.key==='ArrowLeft'){go(-1);e.preventDefault()}
+});
+// тост
+const toastEl=$('toast');let toastT=0;
+function toast(t){toastEl.textContent=t;toastEl.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('on'),2800)}
+// какое ляссе под курсором (если оно не закрыто страницей)
+const rcast=new THREE.Raycaster();
+function pickRibbon(cx,cy){
+ const r=canvas.getBoundingClientRect();
+ rcast.setFromCamera(new THREE.Vector2((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1),camera);
+ const objs=[...ribbonHits,blockR,blockL,elastic,loopMesh,...penMeshes];
+ for(const L of leaves)if(L.grp.visible)objs.push(...L.grp.children);
+ const hits=rcast.intersectObjects(objs,false);
+ const h=hits[0];if(!h)return -1;
+ if(h.object.userData.act==='pen')return 10;
+ if(h.object.userData.act==='band')return 11;
+ return h.object.userData.ribbon!==undefined?h.object.userData.ribbon:-1;
+}
+function ribbonClick(k){
+ const open=Math.round(target)>=1,c=Math.round(target)-1,m=marks[k];
+ if(m!==null&&!(open&&c===m)){goTo(m+1);toast(`Ляссе ${RT[k]}: разворот ${m+1}`);return}
+ if(!open){toast('Откройте книгу, чтобы заложить ляссе');return}
+ if(m===c){setMark(k,null);toast(`Ляссе ${RT[k]} снято`)}
+ else{setMark(k,c);toast(`Ляссе ${RT[k]} заложено на развороте ${c+1}`)}
+}
+// плашки закладок справа под масштабом
+const marksEl=$('marks');
+function renderMarks(){
+ const c=RB[kit]||RB.a;marksEl.innerHTML='';
+ for(let k=0;k<2;k++){
+  if(marks[k]===null)continue;
+  const d=document.createElement('div');d.className='mk';
+  d.innerHTML=`<button class="go" title="Перейти к закладке"><i style="background:${c[k]}"></i><span>${RT[k]} · ${marks[k]+1}</span></button><button class="x" aria-label="Снять закладку ${RT[k]}">×</button>`;
+  d.querySelector('.go').onclick=()=>{goTo(marks[k]+1)};
+  d.querySelector('.x').onclick=()=>{setMark(k,null);toast(`Ляссе ${RT[k]} снято`)};
+  marksEl.appendChild(d);
+ }
+ placeMarksPanel();
+}
+function placeMarksPanel(){const z=$('zoom');marksEl.style.top=(z.offsetTop+z.offsetHeight+8)+'px'}
+// тап по странице: правая половина вперёд, левая назад; по ляссе: заложить, снять или перейти
+{
+ let sx=0,sy=0,st=0,multi=false;const ptrs=new Map();
+ canvas.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,e);if(ptrs.size>1)multi=true;if(ptrs.size===1){multi=false;sx=e.clientX;sy=e.clientY;st=performance.now()}});
+ canvas.addEventListener('pointermove',e=>{
+  if(mode!=='book')return;
+  if(!ptrs.size&&e.pointerType==='mouse'){
+   const k=backFlip>.01?-1:pickRibbon(e.clientX,e.clientY);
+   if(k!==ribHover){ribHover=k;canvas.style.cursor=k>=0?'pointer':'';dirty=true}
+  }
+ });
+ canvas.addEventListener('pointerleave',()=>{if(ribHover!==-1){ribHover=-1;canvas.style.cursor='';dirty=true}});
+ canvas.addEventListener('pointerup',e=>{
+  if(mode!=='book'){ptrs.delete(e.pointerId);return}
+  const was=ptrs.size;ptrs.delete(e.pointerId);
+  if(multi||was>1||Math.hypot(e.clientX-sx,e.clientY-sy)>6||performance.now()-st>500||backFlip>.01)return;
+  const k=pickRibbon(e.clientX,e.clientY);
+  if(k===10){togglePen();return}
+  if(k===11){toggleBand();return}
+  if(k>=0){ribbonClick(k);return}
+  const r=canvas.getBoundingClientRect();
+  const nd=new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
+  const rc=new THREE.Raycaster();rc.setFromCamera(nd,camera);
+  const pl=new THREE.Plane(new THREE.Vector3(0,1,0),0),pt=new THREE.Vector3();
+  if(!rc.ray.intersectPlane(pl,pt))return;
+  const x=pt.x-pivot.position.x;
+  if(Math.round(target)===0){ if(Math.abs(x)<W)go(1); return }
+  if(Math.abs(x)>W*1.25||Math.abs(pt.z)>H*.6)return;
+  go(x>0?1:-1);
+ });
+ canvas.addEventListener('pointercancel',e=>ptrs.delete(e.pointerId));
+ // щипок двумя пальцами
+ let pd=0;
+ canvas.addEventListener('pointermove',e=>{
+  if(ptrs.size!==2||!ptrs.has(e.pointerId))return;
+  ptrs.set(e.pointerId,e);const [a,b]=[...ptrs.values()];
+  const d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+  if(pd>0&&d>0)setZoom(zoom*d/pd);pd=d;
+ });
+ canvas.addEventListener('pointerup',()=>{if(ptrs.size<2)pd=0});
+}
+// масштаб: колесо, щипок, бегунок, кнопки
+const zr=$('zr');
+const z2v=z=>100*Math.log(z/ZMIN)/Math.log(ZMAX/ZMIN),v2z=v=>ZMIN*Math.pow(ZMAX/ZMIN,v/100);
+function setZoom(z){if(mode!=='book')return;zoom=Math.max(ZMIN,Math.min(ZMAX,z));zr.value=z2v(zoom);camGoal=Math.max(9,fitD/zoom);dirty=true}
+zr.oninput=()=>setZoom(v2z(+zr.value));
+$('zin').onclick=()=>setZoom(zoom*1.25);$('zout').onclick=()=>setZoom(zoom/1.25);
+$('zfit').onclick=()=>{zoom=1;zr.value=z2v(1);refit()};
+// колесо: над самим ежедневником масштаб, вне его (и на полке) прокрутка уходит странице-родителю сообщением
+const wheelRay=new THREE.Raycaster(),wheelV=new THREE.Vector2();
+function wheelOverBook(e){
+ if(e.target!==canvas)return false;
+ const r=canvas.getBoundingClientRect();
+ wheelV.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);
+ wheelRay.setFromCamera(wheelV,camera);
+ return wheelRay.intersectObject(lift,true).some(h=>h.object!==shadow);
+}
+const onWheel=e=>{
+ if(mode==='book'&&wheelOverBook(e)){e.preventDefault();setZoom(zoom*Math.exp(-e.deltaY*(e.deltaMode===1?.04:.0013)));return}
+ if(window.parent===window)return;          // просмотр открыт отдельно: браузер крутит сам
+ e.preventDefault();                          // родитель крутит сам по сообщению, иначе был бы двойной сдвиг
+ window.parent.postMessage({kommit3d:'wheel',dy:e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1)},'*')};
+addEventListener('wheel',onWheel,{passive:false});
+zr.value=z2v(1);
+// наборы
+const setsEl=$('sets');
+SETS.forEach((s,i)=>{
+ const b=document.createElement('button');b.textContent=s.n;b.setAttribute('aria-pressed',String(i===set));
+ b.onclick=()=>{setSet(i,true)};setsEl.appendChild(b);
+});
+const kitsEl=$('kits');
+const MAIN_KEYS=['a','h','d','e','f','b'];
+const baseOf=k=>k[0],isConv=k=>k.length===2;
+const kitBtns={};
+MAIN_KEYS.forEach(k=>{
+ const b=document.createElement('button');b.title=KITS[k].n;b.setAttribute('aria-label','Комплект: '+KITS[k].n);
+ b.innerHTML='<i></i><span>'+KITS[k].n+'</span>';
+ b.onclick=()=>setKit(k+(isConv(kit)?'i':''));kitsEl.appendChild(b);kitBtns[k]=b;
+});
+const varEl=document.createElement('div');varEl.className='seg';varEl.setAttribute('role','group');varEl.setAttribute('aria-label','Вариант');
+const varBtns=[['Основной',false],['Конверсия',true]].map(([t,cv])=>{
+ const b=document.createElement('button');b.textContent=t;b.onclick=()=>setKit(baseOf(kit)+(cv?'i':''));varEl.appendChild(b);return [b,cv];
+});
+kitsEl.appendChild(varEl);
+function syncChips(){
+ [...setsEl.children].forEach((b,i)=>b.setAttribute('aria-pressed',String(i===set)));
+ const cv=isConv(kit);
+ MAIN_KEYS.forEach(k=>{const K=KITS[k+(cv?'i':'')],b=kitBtns[k];b.firstChild.style.background=`linear-gradient(135deg,${K.bg} 50%,${K.sp} 50%)`;b.setAttribute('aria-pressed',String(k===baseOf(kit)))});
+ varBtns.forEach(([b,v])=>b.setAttribute('aria-pressed',String(v===cv)));
+}
+function reloadAll(){
+ const K=KITS[kit];boardMat.color.set(K.bg);spineMat.color.set(K.sp);elMat.color.set(K.sp);penMat.color.set(K.sp);penCapMat.color.set(K.sp);
+ setRibbons();buildFore();drawSpine();buildShelfSpines();manageTex();applyTex();syncChips();if(typeof renderMarks==='function'&&marksEl)renderMarks();dirty=true;
+}
+function setSet(i,useDefaultKit){
+ set=i;if(useDefaultKit)kit=SETS[i].kit;reloadAll();
+}
+function setKit(k){kit=k;reloadAll()}
+
+
+/* ---------- полка: 6 видов корешками ---------- */
+const GAP=.12,SHELF_Y=-T/2,SHELF_Z=-(W/2+H/2+2),PICK_MS=1900;
+const SHELF_T=new THREE.Vector3(0,SHELF_Y+H/2,SHELF_Z);
+const SHELF_DIR=new THREE.Vector3(.5,.28,1).normalize(),BOOK_DIR=new THREE.Vector3(14,30,34).normalize();
+const Q_STAND=new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI/2,Math.PI/2,0,'YXZ')),Q_ID=new THREE.Quaternion();
+const wrapEl=document.getElementById('wrap');
+const START_SHELF=q.get('shelf')==='1'||!(q.has('set')||q.has('kit')||q.has('open'));
+let savedMarks=[null,null],marksReleased=true;
+let mode='book',pk=0,pkDir=1,pkSet=0,pickWait=0,shelfPending=false,hoverI=-1,shelfBuilt=false;
+const dirBook=BOOK_DIR.clone();let camR0=60,camR1=60;
+function fitFor(dir,tgt,m){const sp=camera.position.clone(),st=camTarget.clone(),sm=mode;mode=m;camTarget.copy(tgt);camera.position.copy(tgt).addScaledVector(dir,60);const d=fitDistance();camera.position.copy(sp);camTarget.copy(st);mode=sm;return d}
+const shelfX=i=>(i-2.5)*(T+GAP);
+const shelfG=new THREE.Group();scene.add(shelfG);
+const fadeMats=[];
+const smat=(o)=>{const m=new THREE.MeshLambertMaterial(Object.assign({transparent:true},o));fadeMats.push(m);return m};
+const sEdge=smat({color:0xffffff,map:paperEdge});
+const sCovers=[],sHeads=[],headCs=[],headTexs=[];
+const SHW=Math.round(Math.min(1400,devicePixelRatio>1?1400:1024)),SHH=Math.round(SHW*T/H);
+const shelfC=[],shelfTex=[],shelfSp=[],shelfBooks=[],shelfPos=[],shelfQ=[];
+// ряд: четыре книги стоят прямо, две последние наклонены и опираются на соседа
+const LEAN=12*Math.PI/180,OX=-1.6;
+(()=>{
+ const pitch=T+GAP;let x=OX+(0-2.5)*pitch;
+ for(let i=0;i<4;i++){shelfPos.push(new THREE.Vector3(OX+(i-2.5)*pitch,SHELF_Y+H/2,SHELF_Z+[.0,.18,-.08,.12][i]));shelfQ.push(Q_STAND.clone())}
+ const edge=shelfPos[3].x+T/2,c=Math.cos(LEAN),sn=Math.sin(LEAN);
+ const qL=new THREE.Quaternion().setFromEuler(new THREE.Euler(0,0,LEAN)).multiply(Q_STAND);
+ for(let k=0;k<2;k++){
+  shelfPos.push(new THREE.Vector3(edge+T/2*c+H/2*sn+.06+k*pitch/c,SHELF_Y+H/2*c+T/2*sn,SHELF_Z));shelfQ.push(qL.clone());
+ }
+})();
+const resetShelfPoses=()=>shelfBooks.forEach((g,i)=>{g.visible=true;g.position.copy(shelfPos[i]);g.quaternion.copy(shelfQ[i])});
+const boxG=new THREE.BoxGeometry(W,T,H);
+for(let i=0;i<6;i++){
+ const c=document.createElement('canvas');c.width=SHW;c.height=SHH;shelfC.push(c);
+ const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;shelfTex.push(t);
+ const sp=smat({map:t});shelfSp.push(sp);
+ const hc=document.createElement('canvas');hc.width=16;hc.height=128;headCs.push(hc);
+ const ht=new THREE.CanvasTexture(hc);ht.colorSpace=THREE.SRGBColorSpace;headTexs.push(ht);
+ const sc=smat({color:KITS[SETS[i].kit].bg}),sh2=smat({map:ht});sCovers.push(sc);sHeads.push(sh2);
+ const g=new THREE.Group(),m=new THREE.Mesh(boxG,[sEdge,sp,sc,sc,sh2,sh2]);g.add(m);
+ g.quaternion.copy(shelfQ[i]);g.position.copy(shelfPos[i]);shelfG.add(g);shelfBooks.push(g);
+}
+{
+ const bw=6*T+5*GAP+3;
+ const wc=document.createElement('canvas');wc.width=1024;wc.height=128;const wx=wc.getContext('2d');
+ wx.fillStyle=SITE?'#9c7a56':'#c6ad84';wx.fillRect(0,0,1024,128);
+ let sd=7;const rnd=()=>(sd=(sd*16807)%2147483647)/2147483647;
+ for(let k=0;k<90;k++){const y=rnd()*128,a=.04+rnd()*.1;wx.strokeStyle=rnd()>.5?`rgba(90,60,30,${a})`:`rgba(255,240,210,${a})`;wx.lineWidth=.6+rnd()*2.2;wx.beginPath();wx.moveTo(0,y);for(let x=0;x<=1024;x+=64)wx.lineTo(x,y+Math.sin(x/160+k)*2.2+rnd()*1.2);wx.stroke()}
+ const wt=new THREE.CanvasTexture(wc);wt.colorSpace=THREE.SRGBColorSpace;wt.wrapS=THREE.RepeatWrapping;wt.repeat.set(5,1);wt.anisotropy=8;
+ const board=new THREE.Mesh(new THREE.BoxGeometry(520,1.8,W+2),smat({color:0xffffff,map:wt}));board.position.set(0,SHELF_Y-.9,SHELF_Z+1);shelfG.add(board);
+ const wall=new THREE.Mesh(new THREE.PlaneGeometry(520,420),smat({color:SITE?0xe6e7ea:0xece8df}));wall.position.set(0,SHELF_Y+H/2-60,SHELF_Z-W/2-.05);shelfG.add(wall);
+const wsc=document.createElement('canvas');wsc.width=wsc.height=128;const wsx=wsc.getContext('2d');
+ const wg=wsx.createRadialGradient(64,64,10,64,64,64);wg.addColorStop(0,'rgba(40,34,26,.26)');wg.addColorStop(.6,'rgba(40,34,26,.1)');wg.addColorStop(1,'rgba(40,34,26,0)');wsx.fillStyle=wg;wsx.fillRect(0,0,128,128);
+ const wsh=new THREE.Mesh(new THREE.PlaneGeometry(26,H*1.5),smat({map:new THREE.CanvasTexture(wsc),depthWrite:false}));wsh.position.set(OX+2.4,SHELF_Y+H/2+.6,SHELF_Z-W/2-.02);shelfG.add(wsh);
+ const under=new THREE.Mesh(new THREE.PlaneGeometry(520,300),smat({color:SITE?0xcfd1d6:0xd9d2c3}));under.position.set(0,SHELF_Y-1.8-150,SHELF_Z+W/2+2.1);shelfG.add(under);
+ const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');
+ const gr=x.createRadialGradient(64,64,6,64,64,64);gr.addColorStop(0,'rgba(20,24,22,.62)');gr.addColorStop(.5,'rgba(20,24,22,.26)');gr.addColorStop(1,'rgba(0,0,0,0)');
+ x.fillStyle=gr;x.fillRect(0,0,128,128);
+ const sh=new THREE.Mesh(new THREE.PlaneGeometry((6*T+5*GAP)*1.4,W*1.1),smat({map:new THREE.CanvasTexture(c),depthWrite:false}));
+ sh.rotation.x=-Math.PI/2;sh.position.set(0,SHELF_Y+.02,SHELF_Z);shelfG.add(sh);
+}
+
+// декор полки: два ежедневника под наклоном, ваза, будильник
+{
+ // ваза с веточками
+ const vp=[[0,0],[2.4,0],[3.1,1],[3.4,4.5],[2.8,8],[1.7,10],[1.9,10.6],[1.5,10.8],[0,10.8]].map(p=>new THREE.Vector2(p[0],p[1]));
+ const vase=new THREE.Mesh(new THREE.LatheGeometry(vp,28),smat({color:SITE?0xf1efe9:0xc9774b,side:THREE.DoubleSide}));
+ const vx=-18;vase.position.set(vx,SHELF_Y,SHELF_Z+2);shelfG.add(vase);
+ [[-.6,.12,13,0x4f8a58,0xf1d77a],[0,.0,16,0x4f8a58,0xf4f4f1],[.7,-.1,12,0x4f8a58,0xe58fa3]].forEach(([dx,tilt,len,sc,fc])=>{
+  const st=new THREE.Mesh(new THREE.CylinderGeometry(.1,.12,len,6),smat({color:sc}));
+  st.position.set(vx+dx+Math.sin(tilt)*len/2,SHELF_Y+10+Math.cos(tilt)*len/2,SHELF_Z+2);st.rotation.z=-tilt;shelfG.add(st);
+  const fl=new THREE.Mesh(new THREE.SphereGeometry(.85,12,10),smat({color:fc}));
+  fl.position.set(vx+dx+Math.sin(tilt)*len,SHELF_Y+10+Math.cos(tilt)*len,SHELF_Z+2);shelfG.add(fl);
+ });
+ // будильник
+ const cx=18,cy=SHELF_Y+4.1,cz=SHELF_Z+3;
+ const fc=document.createElement('canvas');fc.width=fc.height=256;const fx=fc.getContext('2d');
+ fx.fillStyle='#f4f4f1';fx.fillRect(0,0,256,256);fx.strokeStyle='#111413';fx.fillStyle='#111413';fx.lineCap='round';
+ for(let k=0;k<12;k++){const a=k*Math.PI/6;fx.lineWidth=k%3?3:6;fx.beginPath();fx.moveTo(128+Math.sin(a)*98,128-Math.cos(a)*98);fx.lineTo(128+Math.sin(a)*114,128-Math.cos(a)*114);fx.stroke()}
+ fx.lineWidth=9;fx.beginPath();fx.moveTo(128,128);fx.lineTo(128+Math.sin(-.9)*52,128-Math.cos(-.9)*52);fx.stroke();
+ fx.lineWidth=6;fx.beginPath();fx.moveTo(128,128);fx.lineTo(128+Math.sin(.35)*84,128-Math.cos(.35)*84);fx.stroke();
+ fx.beginPath();fx.arc(128,128,8,0,7);fx.fill();
+ const ft=new THREE.CanvasTexture(fc);ft.colorSpace=THREE.SRGBColorSpace;
+ const body=new THREE.Mesh(new THREE.CylinderGeometry(3.8,3.8,3,36),smat({color:0x1f9d55}));body.rotation.x=Math.PI/2;body.position.set(cx,cy,cz);shelfG.add(body);
+ const face=new THREE.Mesh(new THREE.CircleGeometry(3.2,36),smat({map:ft}));face.position.set(cx,cy,cz+1.52);shelfG.add(face);
+ for(const sx of [-1,1]){
+  const bell=new THREE.Mesh(new THREE.SphereGeometry(1.6,16,10,0,Math.PI*2,0,Math.PI/2),smat({color:0x111413,side:THREE.DoubleSide}));bell.position.set(cx+sx*2.5,cy+3.6,cz);bell.rotation.z=-sx*.5;shelfG.add(bell);
+  const lg=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,2.2,6),smat({color:0x111413}));lg.position.set(cx+sx*2.3,SHELF_Y+.7,cz);lg.rotation.z=sx*.45;shelfG.add(lg);
+ }
+}
+
+// у каждой книги на полке: обложка, закрывающая резинка и хвосты ляссе
+{
+ const ldr=new THREE.TextureLoader();
+ const EWs=.5;
+ shelfBooks.forEach((g,i)=>{
+  const kk=SETS[i].kit,K=KITS[kk],mesh=g.children[0];
+  // обложка
+  const fm=smat({color:K.bg});
+  mesh.material=mesh.material.slice();mesh.material[2]=fm;
+  ldr.load(`${TEX}/g${i}/covers/front_${kk}.webp${TV}`,t=>{t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;fm.map=t;fm.color.set(0xffffff);fm.needsUpdate=true;dirty=true});
+  // резинка: по лицевой и задней обложке и вокруг переднего обреза
+  const bm=smat({color:K.sp});
+  const strip=(w,h,d,x,y)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),bm);m.position.set(x,y,0);g.add(m)};
+  strip(EWs,.06,H+.12,W/2-.6,T/2+.03);strip(EWs,.06,H+.12,W/2-.6,-T/2-.03);
+  // ляссе: два хвоста лежат на полке перед корешком
+  const q=shelfQ[i].clone().invert(),c=RB[kk]||RB.a;
+  for(let k=0;k<2;k++){
+   const w=RW,len=k?1.8:2.2,N=14,pos=[],uv=[],idx=[],L=RLEN[k],u0=1-len/L;
+   const base=new THREE.Vector3(-W/2+.9,(k?.25:-.25),H/2).applyQuaternion(shelfQ[i]).add(shelfPos[i]);
+   const pt=(u)=>{const sx=Math.sin(u*3.4+k*2.1+i)*.22*u,sz=u*(len+.9)-.9+Math.sin(u*5+i)*.05;return [base.x+sx,SHELF_Y+.025+.03*Math.sin(u*Math.PI),base.z+sz+.3,sx]};
+   const toL=(x,y,z)=>new THREE.Vector3(x,y,z).sub(shelfPos[i]).applyQuaternion(q);
+   for(let n=0;n<=N;n++){
+    const u=n/N,[cxw,y,czw,sx]=pt(u),uu=u0+(1-u0)*(.0+(u*(len+.9)-.9+.9)/(len+.9)*0+u)*1;
+    for(const sd2 of [-1,1]){
+     const v=toL(cxw+sd2*w/2*Math.cos(sx*3),y,czw);pos.push(v.x,v.y,v.z);uv.push(u0+(1-u0)*u,sd2<0?0:1);
+    }
+    if(n<N-1){const a=n*2;idx.push(a,a+1,a+2,a+1,a+3,a+2)}
+   }
+   // V-вырез на конце
+   {const [mx,my,mz]=pt(1);const v=toL(mx,my,mz-.22);pos.push(v.x,v.y,v.z);uv.push(1-.22/L,.5);
+    const Lp=(N-1)*2,Rp=Lp+1,Ln=N*2,Rn=Ln+1,M=(N+1)*2;idx.push(Lp,Ln,M,Lp,M,Rp,Rp,M,Rn);}
+   const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();
+   const tx=ribTex(c[k],c[2+k],RT[k]);tx.wrapS=THREE.RepeatWrapping;
+   const m=new THREE.Mesh(geo,smat({map:tx,side:THREE.DoubleSide}));g.add(m);
+  }
+ });
+}
+function buildShelfSpines(){
+ if(shelfBuilt)return;shelfBuilt=true;
+ // на полке у каждого вида свой комплект по умолчанию
+ for(let i=0;i<6;i++){
+  const kk=SETS[i].kit,K=KITS[kk];
+  drawSpineTo(shelfC[i],i,kk);shelfTex[i].needsUpdate=true;
+  const x=headCs[i].getContext('2d'),f=CB/T;
+  x.fillStyle='#f4f4f1';x.fillRect(0,0,16,128);
+  x.fillStyle=K.bg;x.fillRect(0,0,16,128*f);x.fillRect(0,128*(1-f),16,128*f+1);
+  headTexs[i].needsUpdate=true;
+ }
+ dirty=true;
+}
+function setShelfFade(a){
+ for(const m of fadeMats){m.opacity=a}
+ shelfG.visible=a>.01;
+}
+const shelfBtns=document.getElementById('shelfBtns');
+const shelfBtnEls=SETS.map((s,i)=>{
+ const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',s.n+', открыть');
+ b.onclick=()=>choose(i);
+ b.onmouseenter=b.onfocus=()=>{hoverI=i;dirty=true};b.onmouseleave=b.onblur=()=>{if(hoverI===i)hoverI=-1;dirty=true};
+ shelfBtns.appendChild(b);return b;
+});
+const _sp=new THREE.Vector3();
+function placeShelfBtns(){
+ const el=canvas.parentElement,w=el.clientWidth,h=el.clientHeight;
+ shelfBooks.forEach((g,i)=>{
+  const b=shelfBtnEls[i];g.updateMatrixWorld(true);
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;const P=[];
+  for(const [dy,dz] of [[-1,-1],[1,-1],[1,1],[-1,1]]){
+   _sp.set(-W/2,dy*T/2,dz*H/2).applyMatrix4(g.matrixWorld).project(camera);
+   const px=(_sp.x+1)/2*w,py=(1-_sp.y)/2*h;P.push([px,py]);x0=Math.min(x0,px);x1=Math.max(x1,px);y0=Math.min(y0,py);y1=Math.max(y1,py);
+  }
+  b.style.left=x0+'px';b.style.top=y0+'px';b.style.width=(x1-x0)+'px';b.style.height=(y1-y0)+'px';
+  b.style.clipPath='polygon('+P.map(([px,py])=>(px-x0).toFixed(1)+'px '+(py-y0).toFixed(1)+'px').join(',')+')';
+ });
+}
+const _a=new THREE.Vector3(),_b=new THREE.Vector3(),_c=new THREE.Vector3();
+const eo=t=>1-Math.pow(1-t,3),eio=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,cl=t=>Math.max(0,Math.min(1,t));
+const _p0=new THREE.Vector3(),_p1=new THREE.Vector3(),_p2=new THREE.Vector3(),_p3=new THREE.Vector3();
+const eio2=t=>t*t*t*(t*(t*6-15)+10);
+function poseLift(p,i){
+ const u=eio2(cl(p));
+ _p0.copy(shelfPos[i]);
+ _p1.set(shelfPos[i].x*.8,SHELF_Y+H/2+2,SHELF_Z+W*.75);
+ _p2.set(0,7,SHELF_Z+W*1.3);
+ _p3.set(0,0,0);
+ const v=1-u;
+ lift.position.set(0,0,0).addScaledVector(_p0,v*v*v).addScaledVector(_p1,3*v*v*u).addScaledVector(_p2,3*v*u*u).addScaledVector(_p3,u*u*u);
+ lift.quaternion.slerpQuaternions(shelfQ[i],Q_ID,cl((u-.15)/.7)*cl((u-.15)/.7)*(3-2*cl((u-.15)/.7)));
+}
+function poseCam(p){
+ const s=eio2(cl(p));
+ const r=camR0+(camR1-camR0)*s;camGoal=r;
+ camTarget.lerpVectors(SHELF_T,_a.set(0,0,0),s);controls.target.copy(camTarget);
+ _b.lerpVectors(SHELF_DIR,dirBook,s).normalize();
+ camera.position.copy(camTarget).addScaledVector(_b,r);
+}
+function bookHidden(on){shadow.material.opacity=on?0:1}
+function enterShelfState(){
+ mode='shelf';wrapEl.classList.add('shelf','shelfidle');wrapEl.classList.remove('book');
+ lift.visible=false;lift.position.set(0,0,0);lift.quaternion.copy(Q_ID);bookHidden(false);
+ resetShelfPoses();setShelfFade(1);
+ document.getElementById('load').classList.add('off');
+ camTarget.copy(SHELF_T);controls.target.copy(SHELF_T);controls.enableRotate=false;
+ camera.position.copy(SHELF_T).addScaledVector(SHELF_DIR,60);camera.lookAt(SHELF_T);
+ resize();camera.position.copy(SHELF_T).addScaledVector(SHELF_DIR,camGoal);camera.lookAt(SHELF_T);controls.update();
+ dirty=true;
+}
+function enterBookState(){
+ mode='book';wrapEl.classList.remove('shelf','shelfidle');wrapEl.classList.add('book');
+ lift.visible=true;lift.position.set(0,0,0);lift.quaternion.copy(Q_ID);bookHidden(false);
+ for(const g of ribbons)rinit[0]=rinit[1]=false;
+ shelfG.visible=false;
+ camTarget.set(0,0,0);controls.target.set(0,0,0);controls.enableRotate=true;
+ pk=0;shelfPending=false;
+ resize();camera.position.copy(BOOK_DIR).multiplyScalar(camGoal);camera.lookAt(camTarget);controls.update();dirty=true;
+}
+function choose(i){
+ if(mode!=='shelf')return;
+ setSet(i,true);pkSet=i;rinit[0]=rinit[1]=false;
+ savedMarks=[marks[0],marks[1]];marks[0]=marks[1]=0;slotMark[0]=slotMark[1]=0;sv[0]=sv[1]=0;marksReleased=false;
+ if(reduce){mode='book';enterBookState();return}
+ camR0=camera.position.distanceTo(controls.target);camR1=fitFor(BOOK_DIR,_z0.set(0,0,0),'book')/zoom;
+ mode='pick';pk=0;pkDir=1;pickWait=0;wrapEl.classList.remove('shelfidle','shelf');wrapEl.classList.add('book');
+ shelfBooks[i].visible=false;lift.visible=true;lift.position.copy(shelfPos[i]);lift.quaternion.copy(shelfQ[i]);poseLift(0,i);bookHidden(true);
+ dirBook.copy(BOOK_DIR);
+ dirty=true;
+}
+const _z0=new THREE.Vector3();
+function startReturn(){
+ zoom=1;zr.value=z2v(1);
+ pkSet=set;camR1=camera.position.distanceTo(controls.target);camR0=fitFor(SHELF_DIR,SHELF_T,'shelf');mode='return';pk=1;pkDir=-1;
+ wrapEl.classList.add('shelf');wrapEl.classList.remove('book');
+ dirBook.copy(camera.position).sub(controls.target).normalize();
+ resetShelfPoses();shelfBooks[pkSet].visible=false;setShelfFade(0);
+ bookHidden(true);resize();dirty=true;
+}
+function toShelf(){
+ if(mode!=='book')return;
+ if(reduce){goTo(0);backTarget=0;penTarget=0;bandTarget=0;f=target=0;backFlip=0;penT=0;bandT=0;enterShelfState();return}
+ goTo(0);backTarget=0;backB.setAttribute('aria-pressed','false');penTarget=0;bandTarget=0;pendingOpen=null;shelfPending=true;updateTools();dirty=true;
+}
+function enterBookInstant(){
+ if(mode==='pick'){pk=1}
+ else if(mode==='shelf'){enterBookState()}
+}
+function stepShelf(dt){
+ // возвращает true, если нужен кадр
+ let moving=false;
+ if(shelfPending&&mode==='book'&&f===0&&target===0&&backFlip===0&&penT===0&&bandT===0){shelfPending=false;startReturn()}
+ if(mode==='pick'||mode==='return'){
+  const e=cache.get(frontUrl()),rdy=e&&e.state==='ready';
+  pk+=pkDir*dt/(PICK_MS/1000);
+  if(mode==='pick'&&pk>=.2&&!rdy&&pickWait<1.5){pk=.2;pickWait+=dt}
+  moving=true;
+  if(mode==='pick'&&pk>=1){pk=1;poseLift(1,pkSet);poseCam(1);if(!marksReleased){marksReleased=true;for(let k=0;k<2;k++){marks[k]=savedMarks[k];slotMark[k]=savedMarks[k]}}enterBookState();canvas.focus({preventScroll:true});return true}
+  if(mode==='return'&&pk<=0){pk=0;shelfBooks[pkSet].visible=true;enterShelfState();return true}
+  poseLift(pk,pkSet);poseCam(pk);setShelfFade(cl(1-(pk-.55)/.35));
+  shadow.material.opacity=cl((pk-.7)/.3);
+  if(mode==='pick'&&!marksReleased&&pk>=.8){marksReleased=true;for(let k=0;k<2;k++){marks[k]=savedMarks[k];slotMark[k]=savedMarks[k]}}
+  shelfBooks.forEach((g,j)=>{if(j!==pkSet)g.visible=true});
+ }
+ if(mode==='shelf'){
+  shelfBooks.forEach((g,i)=>{
+   const tgt=hoverI===i&&!reduce?.8:0,cur=g.position.z-shelfPos[i].z;
+   if(Math.abs(tgt-cur)>.005){g.position.z=shelfPos[i].z+cur+(tgt-cur)*(1-Math.exp(-dt*18));moving=true}
+   else if(cur!==tgt){g.position.z=shelfPos[i].z+tgt;moving=true}
+   shelfSp[i].emissive.setScalar(hoverI===i?.08:0);
+  });
+ }
+ return moving;
+}
+document.getElementById('toShelf').onclick=toShelf;
+addEventListener('keydown',e=>{if(e.key==='Escape')escMenuWasOn=secMenu.classList.contains('on')},true);
+let escMenuWasOn=false;
+addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&mode==='book'&&!escMenuWasOn){toShelf();return}
+ if(mode==='shelf'&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){
+  const i=shelfBtnEls.indexOf(document.activeElement),n=i<0?(e.key==='ArrowRight'?0:5):(i+(e.key==='ArrowRight'?1:5))%6;
+  shelfBtnEls[n].focus();e.preventDefault();
+ }
+});
+
+/* ---------- старт ---------- */
+reloadAll();renderMarks();
+if(q.get('open'))target=Math.min(NSP,Math.max(0,+q.get('open')));
+if(target>0){bandT=bandTarget=1}
+f=target;
+camera.position.set(14,30,34);camera.lookAt(camTarget);
+resize();
+camera.position.set(14,30,34).setLength(camGoal);camera.lookAt(camTarget);controls.update();
+wrapEl.classList.add('book');
+if(START_SHELF)enterShelfState();else shelfG.visible=false;
+requestAnimationFrame(tick);
+// публичный API для лендинга: window.kommit3d
+window.kommit3d={dbg:()=>({camR1,fit:fitDistance(),goal:camGoal,ui:uiH(),d:camera.position.distanceTo(controls.target),mode,zoom}),go:n=>{enterBookInstant();go(n)},setSet:(i,u)=>{enterBookInstant();setSet(i,u)},setKit,open:n=>{enterBookInstant();goTo(n)},zoom:z=>{enterBookInstant();setZoom(z)},shelf:toShelf,choose,get mode(){return mode}};
+</script>
+</body>
+</html>
