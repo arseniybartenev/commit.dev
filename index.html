@@ -308,7 +308,7 @@ html.veil body{background:#fff}
 
 /* горизонтальная лента со свайпом */
 .hs{position:relative;margin-top:44px}
-.hs-track{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;cursor:grab;
+.hs-track{display:flex;align-items:flex-start;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;cursor:grab;
   padding:4px max(20px,calc((100% - 1200px)/2)) 8px;scroll-padding-inline:max(20px,calc((100% - 1200px)/2));touch-action:pan-x pan-y}
 .hs-track::-webkit-scrollbar{display:none}
 .hs-track.drag{cursor:grabbing;scroll-snap-type:none;scroll-behavior:auto}
@@ -388,7 +388,7 @@ html.noscroll,html.noscroll body{overflow:hidden}
   .hero h1{font-size:clamp(56px,19vw,96px)}
   .hero .cta{flex-direction:column;gap:6px}
   .hero .cta .btn{width:min(100%,360px)}
-  .hero .shot img{aspect-ratio:4/5;object-fit:cover;max-height:none;object-position:50% 50%}
+  .hero .shot img{aspect-ratio:1/1;height:auto;object-fit:cover;max-height:none;object-position:50% 50%}
   .story .grid>div:first-child .steps{display:none}
   .story .grid>.hs-story{display:block;margin-left:-20px;margin-right:-20px}
   .story .grid>.hs-story .hs{margin-top:28px}
@@ -396,11 +396,11 @@ html.noscroll,html.noscroll body{overflow:hidden}
   .hs-track{gap:12px;padding-inline:20px;scroll-padding-inline:20px}
   .hs-i{flex-basis:88vw}
   .hs-i img{border-radius:18px;aspect-ratio:4/3}
-  .hs-i.sp img{aspect-ratio:16/10;object-fit:contain}
-  .hs-i.film-s img{aspect-ratio:4/5;object-position:50% 50%}
+  .hs-i.sp img{aspect-ratio:4/3;object-fit:contain}
+  .hs-i.film-s img{aspect-ratio:4/3}
   .hs-i h3{font-size:18px}
   .hs-arrows{display:none}
-  .hs-count{display:block}
+  .hs-count{display:none}
   .hs-ui{padding-inline:0;margin-top:12px}
   .film{padding-top:64px}
   .film-track{display:none}
@@ -419,6 +419,27 @@ html.noscroll,html.noscroll body{overflow:hidden}
 }
 @media(prefers-reduced-motion:reduce){.hs-track{scroll-behavior:auto}}
 @media(max-width:820px){.film-track{display:none!important}}
+
+.core{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
+.core>div{background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:32px}
+.core .mk{font:500 13px/1 var(--mono);color:var(--accent-ink);display:block;margin-bottom:28px}
+.core h3{font-size:22px;letter-spacing:-.02em;margin-bottom:12px}
+.core p{color:var(--ink-2);font-size:16px;line-height:1.5}
+@media(max-width:820px){.core{grid-template-columns:1fr;gap:12px;margin-top:32px}.core>div{padding:24px;border-radius:22px}.core .mk{margin-bottom:16px}}
+.setsticky{background:var(--bg-alt)}
+.setsticky .tabs{margin-top:28px}
+@media(max-width:820px){.setsticky{position:sticky;top:56px;z-index:30;padding:8px 0;border-bottom:1px solid var(--line);margin-top:20px}.setsticky .tabs{margin-top:0;padding-bottom:0}}
+.setmore{display:block;margin-top:24px}
+.setinfo{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--k,var(--accent));border-radius:28px;padding:28px}
+.si-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.setinfo h3{font-size:22px;letter-spacing:-.02em}
+.si-note{color:var(--ink-2);font-size:15px;margin-top:6px}
+.setinfo .seg b{font:500 12px/1 var(--mono);margin-left:8px;opacity:.7}
+.chips2{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.chip2{font:500 14px/1.25 var(--mono);padding:12px 16px;border-radius:14px;background:var(--bg-alt);border:1px solid var(--line);display:inline-flex;align-items:center;gap:10px}
+.chip2 i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--k)}
+@media(max-width:820px){.setinfo{padding:20px;border-radius:22px}.si-top{display:block}.setinfo .seg{width:100%;margin-top:16px}.setinfo .seg button{flex:1;padding:0 8px}.chips2{gap:8px}.chip2{font-size:13px;padding:11px 13px;flex:1 1 calc(50% - 8px)}}
+#viewer3d .full{top:auto;bottom:20px;right:20px}
 </style>
 </head>
 <body>
@@ -490,14 +511,14 @@ html.noscroll,html.noscroll body{overflow:hidden}
 <section id="vnutri" class="inside" aria-labelledby="in-h">
   <div class="wrap">
     <p class="eyebrow rv">// внутри</p>
-    <h2 class="rv" id="in-h">Одно ядро. Шесть наборов.</h2>
-    <p class="lead rv d1">Основа у всех одинаковая: год, кварталы, недели, итоги и шаблоны для рабочих дел. Справочник и мелкие тексты зависят от набора.</p>
-    <div class="tpl-grid">
-      <div class="card rv"><span class="tag">ADR</span><h3>Решение</h3><p>Название, статус, причина. Рядом матрица решения: вес и оценка по каждому варианту.</p></div>
-      <div class="card rv d1"><span class="tag">bug</span><h3>Баг</h3><p>Отдельные страницы под баг и под разбор очереди багов.</p></div>
-      <div class="card rv d2"><span class="tag">1:1</span><h3>Встречи и разговоры</h3><p>Страницы под встречи и под разговоры один на один.</p></div>
-      <div class="card rv"><span class="tag">brag doc</span><h3>Список побед</h3><p>Таблица: когда, что, эффект. Записываешь сразу, пригодится на ревью.</p></div>
+    <h2 class="rv" id="in-h">Что внутри ежедневника.</h2>
+    <p class="lead rv d1">Не пустая тетрадь, а рабочая система на год. Страницы идут от больших целей к задачам на сегодня, а ещё в ней есть место для того, что обычно теряется.</p>
+    <div class="core">
+      <div class="rv"><span class="mk">01</span><h3>Планирование</h3><p>Цели года и шкала, карта квартала, календарь месяца, неделя с тремя задачами в день и итогом в пятницу. Всё идёт сверху вниз: от большой цели к сегодняшнему дню.</p></div>
+      <div class="rv d1"><span class="mk">02</span><h3>Рабочие записи</h3><p>Страницы под то, что обычно остаётся в голове или в переписке: решение с причиной и сравнением вариантов, баг, встреча, разговор один на один, список побед для ревью. Через месяц видно, что решили и почему.</p></div>
+      <div class="rv d2"><span class="mk">03</span><h3>Справочник</h3><p>В конце справочник под твою работу: Git, Shell, HTTP-коды, SQL и другое по набору. Не нужно искать шпаргалку, она под рукой.</p></div>
     </div>
+    <p class="vnote rv">Основа у всех наборов одна и та же. Набор меняет справочник и несколько шаблонов, всё остальное остаётся как есть.</p>
   </div>
   <div class="hs " data-hs id="hs-inside"><div class="hs-track" role="group" aria-roledescription="карусель" aria-label="Что на страницах" tabindex="0"><figure class="hs-i sp"><img src="img2/web/main/04-spread-4-5.webp" srcset="img2/web/main/04-spread-4-5-sm.webp 900w, img2/web/main/04-spread-4-5.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Первый разворот: как вести ежедневник и карта обучения" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Как вести ежедневник</h3><p>Первый разворот объясняет систему. Дальше карта обучения набора.</p></figcaption></figure><figure class="hs-i "><img src="img2/web/main/09-flip.webp" srcset="img2/web/main/09-flip-sm.webp 900w, img2/web/main/09-flip.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Страницы ежедневника листаются" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Недатированные страницы</h3><p>Начни в любой день: пустых дат нет, ни одна страница не пропадёт.</p></figcaption></figure><figure class="hs-i "><img src="img2/web/main/14-git-row.webp" srcset="img2/web/main/14-git-row-sm.webp 900w, img2/web/main/14-git-row.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Лента git log вдоль сгиба страницы" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Метки и git log</h3><p>Вдоль сгиба бежит лента в стиле git log. Хэш-номера страниц, ссылки на нужное.</p></figcaption></figure><figure class="hs-i "><img src="img2/web/main/03-back.webp" srcset="img2/web/main/03-back-sm.webp 900w, img2/web/main/03-back.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Задняя обложка с надписью exit(0)" loading="lazy" decoding="async" draggable="false"><figcaption><h3>exit(0)</h3><p>На задней обложке напоминание: закончили день, закоммитьте его.</p></figcaption></figure></div></div>
   <div class="wrap"></div>
@@ -508,7 +529,11 @@ html.noscroll,html.noscroll body{overflow:hidden}
     <p class="eyebrow rv">// наборы</p>
     <h2 class="rv" id="nb-h">Выберите свой набор.</h2>
     <p class="lead rv d1">У каждого свой справочник, шаблоны и цвета. Пролистайте кадры вбок.</p>
-    <div class="tabs rv" role="tablist" aria-label="Наборы" id="tabs"></div>
+  </div>
+  <div class="setsticky"><div class="wrap">
+    <div class="tabs" role="tablist" aria-label="Наборы" id="tabs"></div>
+  </div></div>
+  <div class="wrap">
     <div class="setbar rv">
       <div class="seg" role="group" aria-label="Вариант цвета"><button type="button" id="v-main" aria-pressed="true">Основной</button><button type="button" id="v-conv" aria-pressed="false">Конверсия</button></div>
       <p class="kitline" id="kitline"></p>
@@ -576,9 +601,6 @@ html.noscroll,html.noscroll body{overflow:hidden}
   </div>
 </section>
 
-<div id="v3full" hidden role="dialog" aria-modal="true" aria-label="3D-просмотр ежедневника">
-  <button class="x" id="v3x" type="button"><span aria-hidden="true">✕</span> Закрыть</button>
-</div>
 
 <section class="alt" id="video">
   <div class="wrap">
@@ -586,6 +608,21 @@ html.noscroll,html.noscroll body{overflow:hidden}
     <h2 class="rv">Как это выглядит.</h2>
     <div class="vid ph-vid rv" role="img" aria-label="Место под видео об ежедневнике">
       <div><span class="badge">скоро</span><p>Здесь будет ролик об ежедневнике.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="voprosy">
+  <div class="wrap">
+    <p class="eyebrow rv">// вопросы</p>
+    <h2 class="rv">Коротко о главном.</h2>
+    <div class="faq rv">
+      <details><summary>Когда начнутся продажи?</summary><p>Дату пока не назначил. Сначала смотрю, сколько людей ждёт ежедневник, потом решаю с печатью.</p></details>
+      <details><summary>Сколько будет стоить ежедневник?</summary><p>Цену назову до оплаты. Сейчас считаю печать в типографиях, поэтому цифру не обещаю.</p></details>
+      <details><summary>Бронь меня к чему-то обязывает?</summary><p>Нет. Платить сейчас ничего не нужно, а купить потом можно или не купить.</p></details>
+      <details><summary>Чем отличаются наборы и «Конверсия»?</summary><p>Ядро у всех одно. Набор меняет справочник и несколько шаблонов. «Конверсия» меняет цвета: обложка и корешок меняются местами.</p></details>
+      <details><summary>Как получить ежедневник?</summary><p>Способ доставки определю к старту продаж и напишу вам.</p></details>
+      <details><summary>Как удалить мой контакт?</summary><p>Напишите на почту или в Telegram, я удалю.</p></details>
     </div>
   </div>
 </section>
@@ -607,21 +644,6 @@ html.noscroll,html.noscroll body{overflow:hidden}
   </div>
 </section>
 
-<section id="voprosy">
-  <div class="wrap">
-    <p class="eyebrow rv">// вопросы</p>
-    <h2 class="rv">Коротко о главном.</h2>
-    <div class="faq rv">
-      <details><summary>Когда начнутся продажи?</summary><p>Дату пока не назначил. Сначала смотрю, сколько людей ждёт ежедневник, потом решаю с печатью.</p></details>
-      <details><summary>Сколько будет стоить ежедневник?</summary><p>Цену назову до оплаты. Сейчас считаю печать в типографиях, поэтому цифру не обещаю.</p></details>
-      <details><summary>Бронь меня к чему-то обязывает?</summary><p>Нет. Платить сейчас ничего не нужно, а купить потом можно или не купить.</p></details>
-      <details><summary>Чем отличаются наборы и «Конверсия»?</summary><p>Ядро у всех одно. Набор меняет справочник и несколько шаблонов. «Конверсия» меняет цвета: обложка и корешок меняются местами.</p></details>
-      <details><summary>Как получить ежедневник?</summary><p>Способ доставки определю к старту продаж и напишу вам.</p></details>
-      <details><summary>Как удалить мой контакт?</summary><p>Напишите на почту или в Telegram, я удалю.</p></details>
-    </div>
-  </div>
-</section>
-
 </main>
 
 <footer>
@@ -631,6 +653,9 @@ html.noscroll,html.noscroll body{overflow:hidden}
   </div>
 </footer>
 
+<div id="v3full" hidden role="dialog" aria-modal="true" aria-label="3D-просмотр ежедневника">
+  <button class="x" id="v3x" type="button"><span aria-hidden="true">✕</span> Закрыть</button>
+</div>
 <div id="shield" hidden></div>
 <script>
 (function(){
@@ -744,14 +769,6 @@ html.noscroll,html.noscroll body{overflow:hidden}
   window.addEventListener('afterprint',function(){shield.hidden=true});
 
 
-  /* телефон: быстрый уход со страницы и возврат похож на снимок экрана; точно это определить нельзя */
-  var hidAt=0;
-  document.addEventListener('visibilitychange',function(){
-    if(document.hidden){hidAt=Date.now();return}
-    if(isTouch&&hidAt&&Date.now()-hidAt<1400&&!v3.open)showShield(false);
-    hidAt=0;
-  });
-
   /* появление при прокрутке */
   var rv=[].slice.call(document.querySelectorAll('.rv'));
   if('IntersectionObserver' in window){
@@ -819,7 +836,6 @@ html.noscroll,html.noscroll body{overflow:hidden}
     var dl=ui.querySelector('.hs-dots'),cnt=ui.querySelector('.hs-count'),pv=ui.querySelector('.pv'),nx=ui.querySelector('.nx'),cur=0;
     var many=n>8;
     items.forEach(function(it,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Кадр '+(i+1)+' из '+n);b.addEventListener('click',function(){go(i)});dl.appendChild(b)});
-    if(many)dl.style.display='none';
     function left(i){return items[i].offsetLeft-items[0].offsetLeft}
     function go(i){i=Math.max(0,Math.min(n-1,i));tr.scrollTo({left:left(i),behavior:'smooth'})}
     function upd(){
@@ -842,6 +858,19 @@ html.noscroll,html.noscroll body{overflow:hidden}
     tr.addEventListener('dragstart',function(e){e.preventDefault()});
     window.addEventListener('resize',upd);
     root._go=go;root._upd=upd;upd();
+    /* автолистание: идёт, пока лента на экране; касание, наведение или клавиша ставят на паузу */
+    if(!mq('(prefers-reduced-motion:reduce)')){
+      var vis=false,pause=0;
+      var hold=function(ms){pause=Date.now()+ms};
+      ['pointerdown','touchstart','wheel','keydown'].forEach(function(ev){tr.addEventListener(ev,function(){hold(9000)},{passive:true})});
+      ui.addEventListener('pointerdown',function(){hold(9000)});
+      if('IntersectionObserver' in window)new IntersectionObserver(function(es){vis=es[0].isIntersecting},{threshold:.5}).observe(root);
+      setInterval(function(){
+        if(!vis||document.hidden||v3.open||!lb.hidden||Date.now()<pause)return;
+        if(root.matches(':hover')||tr.contains(document.activeElement))return;
+        go(cur>=n-1?0:cur+1);
+      },4500);
+    }
     if('ResizeObserver' in window)new ResizeObserver(upd).observe(tr);
     window.addEventListener('load',upd);
   }
@@ -897,6 +926,12 @@ html.noscroll,html.noscroll body{overflow:hidden}
     var b=document.createElement('button');b.className='tab';b.type='button';b.id='tab'+i;b.setAttribute('role','tab');b.setAttribute('aria-selected',i===0);b.tabIndex=i===0?0:-1;
     b.style.setProperty('--k',s.k);b.innerHTML='<i></i>'+s.n;tabs.appendChild(b);
   });
+  var infoTab=0;
+  function renderInfo(){
+    var s=SETS[curSet],list=infoTab===0?s.t:s.r;
+    setmore.innerHTML='<div class="setinfo" style="--k:'+s.k+'"><div class="si-top"><div><h3>Что в наборе «'+s.n+'»</h3><p class="si-note">'+(infoTab===0?'Шаблоны для рабочих записей.':'Справочник в конце ежедневника.')+'</p></div><div class="seg" role="group" aria-label="Что показать"><button type="button" data-i="0" aria-pressed="'+(infoTab===0)+'">Шаблоны <b>'+s.t.length+'</b></button><button type="button" data-i="1" aria-pressed="'+(infoTab===1)+'">Справочник <b>'+s.r.length+'</b></button></div></div><div class="chips2">'+list.map(function(x){return'<span class="chip2"><i></i>'+x+'</span>'}).join('')+'</div></div>';
+  }
+  setmore.addEventListener('click',function(e){var b=e.target.closest('.seg button');if(!b)return;infoTab=+b.dataset.i;renderInfo()});
   function renderSet(){
     var s=SETS[curSet],vn=curVar==='main'?'Основной':'Конверсия';
     var html='<div class="hs" data-hs><div class="hs-track" role="group" aria-roledescription="карусель" aria-label="Кадры набора «'+s.n+'»" tabindex="0">'+FR.map(function(f,j){
@@ -905,7 +940,7 @@ html.noscroll,html.noscroll body{overflow:hidden}
     }).join('')+'</div></div>';
     setgal.innerHTML=html;initHS(setgal.firstChild);
     kitline.textContent='Комплект: '+s.kit+(curVar==='conv'?', вариант «Конверсия»':'');
-    setmore.innerHTML='<div class="card"><h3>Инструменты</h3><ul>'+s.t.map(function(x){return'<li>'+x+'</li>'}).join('')+'</ul></div><div class="card"><h3>Справочник</h3><ul>'+s.r.map(function(x){return'<li>'+x+'</li>'}).join('')+'</ul></div>';
+    renderInfo();
   }
   function pickSet(i,focus){
     curSet=i;
