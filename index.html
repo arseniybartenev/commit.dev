@@ -215,6 +215,7 @@ header.nav .wrap{display:flex;align-items:center;justify-content:space-between;h
 
 /* видео */
 .vid{margin-top:56px;border-radius:28px;overflow:hidden;background:#000;border:1px solid var(--line)}
+.vid video{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#000}
 .ph-vid{aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(135deg,#0b0c0d,#1a1d1f);color:#f5f5f7;padding:24px}
 .ph-vid .badge{display:inline-block;font:500 13px/1 var(--mono);color:#3df0a0;border:1px solid #3df0a0;border-radius:999px;padding:8px 14px;margin-bottom:16px}
 .ph-vid p{font:500 clamp(15px,2vw,20px)/1.4 var(--mono);max-width:36ch;margin:0 auto}
@@ -615,9 +616,8 @@ html.noscroll,html.noscroll body{overflow:hidden}
   <div class="wrap">
     <p class="eyebrow rv">// видео</p>
     <h2 class="rv">Как это выглядит.</h2>
-    <div class="vid ph-vid rv" role="img" aria-label="Место под видео об ежедневнике">
-      <div><span class="badge">скоро</span><p>Здесь будет ролик об ежедневнике.</p></div>
-    </div>
+    <div class="vid rv"><video id="kv" controls controlslist="nodownload" playsinline preload="none" poster="video/poster.webp" width="2560" height="1440" aria-label="Ролик: как выглядит ежедневник «Коммит»" src="video/kommit-kak-eto-vyglyadit-1080.mp4">Ваш браузер не показывает видео. <a href="video/kommit-kak-eto-vyglyadit-1080.mp4">Скачать ролик</a>.</video></div>
+    <p class="lead rv" style="margin-top:14px;font-size:14px">Ролик со звуком: включится, когда нажмёшь воспроизведение.</p>
   </div>
 </section>
 
@@ -892,6 +892,11 @@ html.noscroll,html.noscroll body{overflow:hidden}
     });
     var d=document.createElement('div');d.className='hs hs-det';d.setAttribute('data-hs','');d.innerHTML=h+'</div>';
     b.parentNode.insertBefore(d,b.nextSibling);})();
+  (function(){var v=document.getElementById('kv');if(!v)return;
+    var big=Math.max(screen.width,window.innerWidth)>=1000&&!(navigator.connection&&navigator.connection.saveData);
+    if(big)v.src='video/kommit-kak-eto-vyglyadit-2560.mp4';
+    // на время лайтбокса/3D остановить
+    document.addEventListener('visibilitychange',function(){if(document.hidden)v.pause()});})();
   [].forEach.call(document.querySelectorAll('[data-hs]'),initHS);
 
   /* 3D: на весь экран с выходом; на компьютере ещё и встроенный просмотр */
