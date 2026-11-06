@@ -293,9 +293,11 @@ html.veil body{background:#fff}
 @media print{body>*:not(#shield){display:none!important}#shield{display:flex!important}}
 
 /* ===== v3: новые рендеры, ленты, мобильная версия ===== */
+.btn,.nav .btn{background:#3df0a0;color:#04140c}
+.btn.alt,#shield .btn.alt{background:#f5f5f7;color:#1d1d1f}
+#viewer3d .ph .btn.alt{background:rgba(255,255,255,.14);color:#f5f5f7}
 .btn.lg{min-height:64px;padding:0 40px;font-size:20px}
 .btn .ar{font-family:var(--mono);font-weight:500}
-.nav .btn .short{display:none}
 .hero .shot{background:#fff;margin-top:clamp(36px,5vw,64px)}
 .hero .shot img{aspect-ratio:16/9;max-height:84svh;object-fit:contain;margin:0 auto}
 .story .grid>.hs-story{display:none}
@@ -376,14 +378,12 @@ html.noscroll,html.noscroll body{overflow:hidden}
 @media(max-width:820px){#lb img{width:100vw;border-radius:0}#lb img.wide{width:230vw}#lb .view{align-items:flex-start;justify-content:flex-start}}
 
 /* кнопка снизу на телефоне */
-.mcta{display:none}
 .foot-share{background:none;border:0;padding:0;color:var(--ink);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:44px}
 
 @media(max-width:820px){
   section{padding:64px 0}
   h2{font-size:clamp(30px,9vw,40px)}
   .lead{font-size:18px;margin-top:18px}
-  .nav .btn .long{display:none}.nav .btn .short{display:inline}
   .hero{padding-top:96px}
   .hero h1{font-size:clamp(56px,19vw,96px)}
   .hero .cta{flex-direction:column;gap:6px}
@@ -416,10 +416,6 @@ html.noscroll,html.noscroll body{overflow:hidden}
   #viewer3d{height:min(78svh,640px);min-height:440px;margin-top:32px}
   #viewer3d .full{display:none}
   .book .grid{gap:28px}
-  .mcta{position:fixed;left:0;right:0;bottom:0;z-index:60;display:block;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.35) 40%);transform:translateY(120%);transition:transform .4s var(--ease);pointer-events:none}
-  .mcta.on{transform:none}
-  .mcta .btn{width:100%;pointer-events:auto;box-shadow:0 8px 28px rgba(0,0,0,.28)}
-  footer{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 }
 @media(prefers-reduced-motion:reduce){.hs-track{scroll-behavior:auto}}
 @media(max-width:820px){.film-track{display:none!important}}
@@ -438,7 +434,7 @@ html.noscroll,html.noscroll body{overflow:hidden}
       <a href="#model">3D</a>
       <a href="#voprosy">Вопросы</a>
     </nav>
-    <a class="btn sm" href="#hochu"><span class="long">Сообщить о поступлении</span><span class="short">Сообщить</span></a>
+    <a class="btn sm" href="#hochu">Сообщить о поступлении</a>
   </div>
 </header>
 
@@ -635,7 +631,6 @@ html.noscroll,html.noscroll body{overflow:hidden}
   </div>
 </footer>
 
-<div class="mcta" id="mcta"><a class="btn lg" href="#hochu">Сообщить о поступлении <span class="ar" aria-hidden="true">→</span></a></div>
 <div id="shield" hidden></div>
 <script>
 (function(){
@@ -765,12 +760,10 @@ html.noscroll,html.noscroll body{overflow:hidden}
   } else rv.forEach(function(el){el.classList.add('in')});
 
   /* шапка и кнопка снизу */
-  var nav=document.getElementById('nav'),mcta=document.getElementById('mcta'),hochu=document.getElementById('hochu');
+  var nav=document.getElementById('nav');
   var ticking=false;
   function onScroll(){
     nav.classList.toggle('scrolled',window.scrollY>8);story();film();
-    var r=hochu.getBoundingClientRect();
-    mcta.classList.toggle('on',window.scrollY>window.innerHeight*.8&&r.top>window.innerHeight*.9);
   }
   window.addEventListener('scroll',function(){if(ticking)return;ticking=true;requestAnimationFrame(function(){ticking=false;onScroll()})},{passive:true});
 
