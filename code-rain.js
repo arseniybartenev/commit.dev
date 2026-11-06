@@ -1,12 +1,11 @@
 /* Строки кода падают на первое большое фото, ложатся кучей и исчезают.
-   Один раз за визит, после первого пролистывания. Без prefers-reduced-motion и без canvas ничего не делает.
+   На каждой загрузке страницы, после первого пролистывания. Без prefers-reduced-motion и без canvas ничего не делает.
    Шрифт тот же, что на сайте (JetBrains Mono), HTML и стили страницы не трогаем. */
 (function(){
   'use strict';
   var shot=document.querySelector('.hero .shot');
   if(!shot||!window.requestAnimationFrame)return;
   if(window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
-  try{if(sessionStorage.getItem('rain-done'))return}catch(e){}
 
   var LINES=[
     'git commit -m "порядок"',
@@ -30,15 +29,15 @@
   ];
 
   var mobile=window.matchMedia('(max-width:600px)').matches;
-  var COUNT=mobile?22:40;
+  var COUNT=mobile?34:56;
   var cv=document.createElement('canvas');
   cv.setAttribute('aria-hidden','true');
-  cv.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:1;transition:opacity .9s ease';
+  cv.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:1;transition:opacity 1s ease';
   shot.appendChild(cv);
   var ctx=cv.getContext('2d');
   if(!ctx){cv.remove();return}
 
-  var W=0,H=0,dpr=1,items=[],heap=[],BUCKET=12,floor=0,fontPx=13;
+  var W=0,H=0,dpr=1,items=[],heap=[],BUCKET=10,floor=0,fontPx=13,row=16;
   var started=false,raf=0,t0=0,fading=false;
   var ink='#1d1d1f',green='#00875a';
 
@@ -48,33 +47,10 @@
     dpr=Math.min(window.devicePixelRatio||1,2);
     cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    fontPx=mobile?11:Math.max(12,Math.min(15,W/90));
+    fontPx=mobile?10:Math.max(11,Math.min(13,W/105));
+    row=fontPx*1.35;
     ctx.font='500 '+fontPx+'px "JetBrains Mono",ui-monospace,Menlo,Consolas,monospace';
-    floor=H*(mobile?0.93:0.9);
-  }
-
-  function build(){
-    heap=[];for(var i=0;i<Math.ceil(W/BUCKET)+2;i++)heap.push(0);
-    items=[];
-    var cx=W/2,spread=mobile?W*0.5:Math.min(W*0.42,560);
-    for(var k=0;k<COUNT;k++){
-      var s=LINES[Math.floor(Math.random()*LINES.length)];
-      var w=ctx.measureText(s).width;
-      items.push({
-        s:s,w:w,
-        x:cx+(Math.random()*2-1)*spread-w/2,
-        y:-20-Math.random()*H*0.9,
-        vy:0,
-        g:0.0009*H*(0.8+Math.random()*0.5),
-        rot:(Math.random()*2-1)*0.5,
-        vr:(Math.random()*2-1)*0.002,
-        delay:k*(mobile?95:70)+Math.random()*120,
-        landed:false,
-        green:Math.random()<0.28,
-        a:0
-      });
-    }
-    items.sort(function(a,b){return a.delay-b.delay});
+    floor=H*(mobile?0.94:0.91);
   }
 
   function heapAt(x0,x1){
@@ -87,57 +63,81 @@
     for(var i=a;i<=b;i++)heap[i]=Math.max(heap[i],top);
   }
 
-  var last=0;
+  /* куча считается заранее: строки выбирают самое низкое место по всей ширине и обходят ежедневник */
+  function build(){
+    heap=[];for(var i=0;i<Math.ceil(W/BUCKET)+3;i++)heap.push(0);
+    var imgW=Math.min(W,H*16/9),imgX=(W-imgW)/2;
+    var zl=mobile?W*0.24:imgX+imgW*0.35, zr=mobile?W*0.74:imgX+imgW*0.65;
+    var cap=row*(mobile?2:1.6);
+    var pool=LINES.filter(function(s){return !mobile||s.length<=20});
+    items=[];
+    for(var k=0;k<COUNT;k++){
+      var s=pool[Math.floor(Math.random()*pool.length)];
+      var w=ctx.measureText(s).width;
+      var best=null;
+      for(var c=0;c<12;c++){
+        var x=-w*0.15+Math.random()*(W-w*0.7);
+        var x1=x+w;
+        var h=heapAt(x,x1);
+        var inZone=x1>zl&&x<zr;
+        var pen=h+(inZone&&h+row>cap?1e6:0);
+        if(!best||pen<best.pen)best={x:x,pen:pen,h:h};
+      }
+      var rot=(Math.random()*2-1)*0.06;
+      heapAdd(best.x,best.x+w,best.h+row);
+      items.push({
+        s:s,w:w,x:best.x,
+        y0:-30-Math.random()*H*0.25,
+        y1:floor-best.h,
+        rot0:(Math.random()*2-1)*0.7,rot:rot,
+        delay:k*(mobile?150:85)+Math.random()*200,
+        dur:(mobile?3600:4200)+Math.random()*1800,
+        green:Math.random()<0.28
+      });
+    }
+  }
+
   function frame(now){
-    if(!t0){t0=now;last=now}
-    var dt=Math.min(40,now-last);last=now;
+    if(!t0)t0=now;
     var t=now-t0;
     ctx.clearRect(0,0,W,H);
     var done=0;
     for(var i=0;i<items.length;i++){
       var it=items[i];
-      if(t<it.delay)continue;
-      if(!it.landed){
-        it.vy+=it.g*dt;
-        it.y+=it.vy*dt*0.06;
-        it.rot=it.rot*0.995+it.vr*dt;
-        it.a=Math.min(1,it.a+dt/150);
-        var x0=it.x,x1=it.x+it.w*0.9;
-        var ground=floor-heapAt(x0,x1);
-        if(it.y>=ground){
-          it.y=ground;it.landed=true;
-          it.rot=Math.max(-0.35,Math.min(0.35,it.rot*0.5));
-          heapAdd(x0,x1,floor-it.y+fontPx*1.25);
-        }
-      }else done++;
+      var p=(t-it.delay)/it.dur;
+      if(p<=0)continue;
+      if(p>1)p=1;
+      var e=p*p;               /* разгон вниз, как при падении */
+      var y=it.y0+(it.y1-it.y0)*e;
+      var rot=it.rot0+(it.rot-it.rot0)*Math.min(1,p*1.6);
+      if(p>=1)done++;
       ctx.save();
-      ctx.globalAlpha=it.a*(it.landed?0.92:0.85);
-      ctx.translate(it.x+it.w/2,it.y);
-      ctx.rotate(it.rot);
+      ctx.globalAlpha=Math.min(1,p*6)*0.9;
+      ctx.translate(it.x+it.w/2,y);
+      ctx.rotate(rot);
       ctx.fillStyle=it.green?green:ink;
       ctx.fillText(it.s,-it.w/2,0);
       ctx.restore();
     }
     if(done===items.length&&!fading){
       fading=true;
-      setTimeout(function(){cv.style.opacity='0'},1800);
-      setTimeout(finish,1800+950);
+      setTimeout(function(){cv.style.opacity='0'},2200);
+      setTimeout(finish,2200+1050);
     }
-    if(!document.hidden||!fading)raf=requestAnimationFrame(frame);
+    raf=requestAnimationFrame(frame);
   }
 
   function finish(){
     cancelAnimationFrame(raf);
-    window.removeEventListener('resize',size);
+    window.removeEventListener('resize',finish);
     cv.remove();
     items=[];
-    try{sessionStorage.setItem('rain-done','1')}catch(e){}
   }
 
   function start(){
     if(started)return;started=true;
     size();build();
-    window.addEventListener('resize',size,{passive:true});
+    window.addEventListener('resize',finish,{passive:true});
     raf=requestAnimationFrame(frame);
   }
 
@@ -150,6 +150,5 @@
   if('IntersectionObserver' in window){
     new IntersectionObserver(function(es){visible=es[0].isIntersecting;maybe()},{threshold:.3}).observe(shot);
   }else{visible=true}
-  /* страница открыта уже ниже верха (якорь, восстановление прокрутки) */
   if(window.scrollY>24)scrolled=true;
 })();
