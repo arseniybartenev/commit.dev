@@ -398,6 +398,7 @@ const penCapMat=new THREE.MeshLambertMaterial({color:KITS[kit].sp}),penBodyMat=n
  add(cyl(PR,PR,8.0),penBodyMat,.8);                       // корпус
  add(cyl(.09,PR,1.9),penBodyMat,5.75);                    // конус
  add(new THREE.SphereGeometry(.09,12,8),penMetal,6.7);    // шарик
+ { const hb=add(new THREE.BoxGeometry(2.2,2.2,13.8),new THREE.MeshBasicMaterial({visible:false}),0);hb.userData.hit=true }   // невидимая зона нажатия шире ручки
  add(new THREE.BoxGeometry(.07,.05,2.8),penMetal,-5.1,0,PR+.06);   // клип
 }
 const PX_T=W+4.6,PY_T=-T/2+PR,PZ_T=-2.5;
@@ -1028,7 +1029,7 @@ function wheelOverBook(e){
  const r=canvas.getBoundingClientRect();
  wheelV.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);
  wheelRay.setFromCamera(wheelV,camera);
- return wheelRay.intersectObject(lift,true).some(h=>h.object!==shadow);
+ return wheelRay.intersectObject(lift,true).some(h=>h.object!==shadow&&!h.object.userData.hit);
 }
 const onWheel=e=>{
  if(mode==='book'&&wheelOverBook(e)){e.preventDefault();setZoom(zoom*Math.exp(-e.deltaY*(e.deltaMode===1?.04:.0013)));return}
@@ -1375,7 +1376,7 @@ wrapEl.classList.add('book');
 if(START_SHELF)enterShelfState();else shelfG.visible=false;
 requestAnimationFrame(tick);
 // публичный API для лендинга: window.kommit3d
-window.kommit3d={shelfHit,hit:(x,y)=>wheelOverBook({target:canvas,clientX:x,clientY:y}),dbg:()=>({camR1,fit:fitDistance(),goal:camGoal,ui:uiH(),d:camera.position.distanceTo(controls.target),mode,zoom}),go:n=>{enterBookInstant();go(n)},setSet:(i,u)=>{enterBookInstant();setSet(i,u)},setKit,open:n=>{enterBookInstant();goTo(n)},zoom:z=>{enterBookInstant();setZoom(z)},shelf:toShelf,choose,get mode(){return mode}};
+window.kommit3d={pick:pickRibbon,shelfHit,hit:(x,y)=>wheelOverBook({target:canvas,clientX:x,clientY:y}),dbg:()=>({camR1,fit:fitDistance(),goal:camGoal,ui:uiH(),d:camera.position.distanceTo(controls.target),mode,zoom}),go:n=>{enterBookInstant();go(n)},setSet:(i,u)=>{enterBookInstant();setSet(i,u)},setKit,open:n=>{enterBookInstant();goTo(n)},zoom:z=>{enterBookInstant();setZoom(z)},shelf:toShelf,choose,get mode(){return mode}};
 </script>
 </body>
 </html>
