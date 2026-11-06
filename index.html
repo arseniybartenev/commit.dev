@@ -317,6 +317,15 @@ html.veil body{background:#fff}
 .hs-i figcaption{padding:14px 6px 0}
 .hs-i.sp img{object-fit:contain}
 .zoomable{cursor:zoom-in}
+/* детали: на мобильной лента */
+.hs-det{display:none}
+.hs-det .hs-track{align-items:stretch}
+.hs-i.tx{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px 20px}
+.hs-i.tx .mk{font:500 14px/1 var(--mono);color:var(--accent-ink);margin-bottom:18px;display:block}
+.hs-i.tx h3{font-size:19px;margin-bottom:6px}
+.hs-i .link{margin-top:6px;display:inline-block}
+@media(max-width:820px){.bento{display:none}.hs-det{display:block;margin-top:28px}.hs-i.tx{flex-basis:70vw}}
+
 .hs-i h3{font-size:19px;letter-spacing:-.02em;margin-bottom:4px}
 .hs-i p{color:var(--ink-2);font-size:15px;line-height:1.45}
 .hs-ui{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:20px}
@@ -874,6 +883,15 @@ html.noscroll,html.noscroll body{overflow:hidden}
     if('ResizeObserver' in window)new ResizeObserver(upd).observe(tr);
     window.addEventListener('load',upd);
   }
+  (function(){var b=document.querySelector('.bento');if(!b)return;
+    var h='<div class="hs-track" role="group" aria-roledescription="карусель" aria-label="Детали ежедневника" tabindex="0">';
+    [].forEach.call(b.children,function(t){
+      var im=t.querySelector('img'),tb=t.querySelector('.tb');
+      if(im&&tb){var c=im.cloneNode(true);c.removeAttribute('sizes');c.setAttribute('sizes','88vw');h+='<figure class="hs-i">'+c.outerHTML+'<figcaption>'+tb.innerHTML+'</figcaption></figure>'}
+      else{h+='<figure class="hs-i tx">'+t.innerHTML+'</figure>'}
+    });
+    var d=document.createElement('div');d.className='hs hs-det';d.setAttribute('data-hs','');d.innerHTML=h+'</div>';
+    b.parentNode.insertBefore(d,b.nextSibling);})();
   [].forEach.call(document.querySelectorAll('[data-hs]'),initHS);
 
   /* 3D: на весь экран с выходом; на компьютере ещё и встроенный просмотр */
