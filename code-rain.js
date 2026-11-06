@@ -117,8 +117,8 @@
     }
     if(done===items.length&&!fading){
       fading=true;
-      setTimeout(function(){cv.style.opacity='0'},reduced?3000:2200);
-      setTimeout(finish,(reduced?3000:2200)+1050);
+      setTimeout(function(){cv.style.opacity='0'},reduced?7000:2200);
+      setTimeout(finish,(reduced?7000:2200)+1050);
     }
     raf=requestAnimationFrame(frame);
   }
