@@ -30,12 +30,7 @@
 
   var mobile=window.matchMedia('(max-width:600px)').matches;
   var COUNT=mobile?34:56;
-  var cv=document.createElement('canvas');
-  cv.setAttribute('aria-hidden','true');
-  cv.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:1;transition:opacity 1s ease';
-  shot.appendChild(cv);
-  var ctx=cv.getContext('2d');
-  if(!ctx){cv.remove();return}
+  var cv=null,ctx=null;
 
   var W=0,H=0,dpr=1,items=[],heap=[],BUCKET=10,floor=0,fontPx=13,row=16;
   var started=false,raf=0,t0=0,fading=false;
@@ -130,12 +125,19 @@
   function finish(){
     cancelAnimationFrame(raf);
     window.removeEventListener('resize',finish);
-    cv.remove();
+    if(cv)cv.remove();
     items=[];
   }
 
   function start(){
     if(started)return;started=true;
+    /* canvas создаём только перед показом, чтобы не трогать страницу при загрузке */
+    cv=document.createElement('canvas');
+    cv.setAttribute('aria-hidden','true');
+    cv.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:1;transition:opacity 1s ease';
+    ctx=cv.getContext('2d');
+    if(!ctx)return;
+    shot.appendChild(cv);
     size();build();
     window.addEventListener('resize',finish,{passive:true});
     raf=requestAnimationFrame(frame);
@@ -143,7 +145,12 @@
 
   /* старт: после первого пролистывания, когда фото хотя бы на треть в кадре */
   var scrolled=false,visible=false;
-  function maybe(){if(scrolled&&visible)start()}
+  function inView(){
+    var r=shot.getBoundingClientRect(),vh=window.innerHeight||document.documentElement.clientHeight;
+    var v=Math.min(r.bottom,vh)-Math.max(r.top,0);
+    return v>=r.height*0.3;
+  }
+  function maybe(){if(scrolled&&visible&&inView())start()}
   window.addEventListener('scroll',function(){
     if(window.scrollY>24){scrolled=true;maybe()}
   },{passive:true});
