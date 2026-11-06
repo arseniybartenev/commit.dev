@@ -1,11 +1,11 @@
 /* Строки кода падают на первое большое фото, ложатся кучей и исчезают.
-   На каждой загрузке страницы, после первого пролистывания. Без prefers-reduced-motion и без canvas ничего не делает.
+   На каждой загрузке страницы, после первого пролистывания. При prefers-reduced-motion строки не падают, а плавно проявляются уже лежащей кучей.
    Шрифт тот же, что на сайте (JetBrains Mono), HTML и стили страницы не трогаем. */
 (function(){
   'use strict';
   var shot=document.querySelector('.hero .shot');
   if(!shot||!window.requestAnimationFrame)return;
-  if(window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  var reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
 
   var LINES=[
     'git commit -m "порядок"',
@@ -90,6 +90,7 @@
         green:Math.random()<0.28
       });
     }
+    if(reduced)items.forEach(function(it){it.y0=it.y1;it.rot0=it.rot;it.delay=0;it.dur=1});
   }
 
   function frame(now){
@@ -116,8 +117,8 @@
     }
     if(done===items.length&&!fading){
       fading=true;
-      setTimeout(function(){cv.style.opacity='0'},2200);
-      setTimeout(finish,2200+1050);
+      setTimeout(function(){cv.style.opacity='0'},reduced?3000:2200);
+      setTimeout(finish,(reduced?3000:2200)+1050);
     }
     raf=requestAnimationFrame(frame);
   }
@@ -139,23 +140,30 @@
     if(!ctx)return;
     shot.appendChild(cv);
     size();build();
+    if(reduced){cv.style.opacity='0';requestAnimationFrame(function(){requestAnimationFrame(function(){cv.style.opacity='1'})})}
     window.addEventListener('resize',finish,{passive:true});
     raf=requestAnimationFrame(frame);
   }
 
-  /* старт: после первого пролистывания, когда фото хотя бы на треть в кадре */
-  var scrolled=false,visible=false;
+  /* старт: после первого пролистывания (скролл, касание, колесо, клавиша), когда фото хотя бы на треть в кадре.
+     Опираемся на реальные размеры (getBoundingClientRect), а не только на IntersectionObserver:
+     на телефоне с адресной строкой он иногда запаздывает. Запасной опрос раз в полсекунды. */
+  var scrolled=false,poll=0;
   function inView(){
     var r=shot.getBoundingClientRect(),vh=window.innerHeight||document.documentElement.clientHeight;
     var v=Math.min(r.bottom,vh)-Math.max(r.top,0);
     return v>=r.height*0.3;
   }
-  function maybe(){if(scrolled&&visible&&inView())start()}
-  window.addEventListener('scroll',function(){
-    if(window.scrollY>24){scrolled=true;maybe()}
-  },{passive:true});
-  if('IntersectionObserver' in window){
-    new IntersectionObserver(function(es){visible=es[0].isIntersecting;maybe()},{threshold:.3}).observe(shot);
-  }else{visible=true}
-  if(window.scrollY>24)scrolled=true;
+  function maybe(){
+    if(started)return;
+    if(window.pageYOffset>8)scrolled=true;
+    if(scrolled&&inView()){start();clearInterval(poll)}
+  }
+  function touched(){scrolled=true;maybe()}
+  window.addEventListener('scroll',maybe,{passive:true});
+  ['touchmove','wheel','keydown'].forEach(function(ev){window.addEventListener(ev,touched,{passive:true})});
+  if('IntersectionObserver' in window){new IntersectionObserver(maybe,{threshold:[0,.3,.6]}).observe(shot)}
+  var ticks=0;
+  poll=setInterval(function(){maybe();if(started||++ticks>120)clearInterval(poll)},500);
+  maybe();
 })();
