@@ -1219,9 +1219,19 @@ function setShelfFade(a){
  shelfG.visible=a>.01;
 }
 const shelfBtns=document.getElementById('shelfBtns');
+const shelfRay=new THREE.Raycaster(),shelfV=new THREE.Vector2();
+function shelfHit(ev){
+ if(!ev||!ev.clientX&&!ev.clientY)return -1;
+ const r=canvas.getBoundingClientRect();
+ shelfV.set((ev.clientX-r.left)/r.width*2-1,-((ev.clientY-r.top)/r.height)*2+1);
+ shelfRay.setFromCamera(shelfV,camera);
+ let best=-1,bd=1e9;
+ shelfBooks.forEach((g,i)=>{g.updateMatrixWorld(true);const h=shelfRay.intersectObject(g,true)[0];if(h&&h.distance<bd){bd=h.distance;best=i}});
+ return best;
+}
 const shelfBtnEls=SETS.map((s,i)=>{
  const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',s.n+', открыть');
- b.onclick=()=>choose(i);
+ b.onclick=ev=>{const j=shelfHit(ev);choose(j>=0?j:i)};
  b.onmouseenter=b.onfocus=()=>{hoverI=i;dirty=true};b.onmouseleave=b.onblur=()=>{if(hoverI===i)hoverI=-1;dirty=true};
  shelfBtns.appendChild(b);return b;
 });
@@ -1231,10 +1241,17 @@ function placeShelfBtns(){
  shelfBooks.forEach((g,i)=>{
   const b=shelfBtnEls[i];g.updateMatrixWorld(true);
   let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;const P=[];
-  for(const [dy,dz] of [[-1,-1],[1,-1],[1,1],[-1,1]]){
-   _sp.set(-W/2,dy*T/2,dz*H/2).applyMatrix4(g.matrixWorld).project(camera);
-   const px=(_sp.x+1)/2*w,py=(1-_sp.y)/2*h;P.push([px,py]);x0=Math.min(x0,px);x1=Math.max(x1,px);y0=Math.min(y0,py);y1=Math.max(y1,py);
+  const A=[];
+  for(const dx of [-1,1])for(const dy of [-1,1])for(const dz of [-1,1]){
+   _sp.set(dx*W/2,dy*T/2,dz*H/2).applyMatrix4(g.matrixWorld).project(camera);
+   const px=(_sp.x+1)/2*w,py=(1-_sp.y)/2*h;A.push([px,py]);x0=Math.min(x0,px);x1=Math.max(x1,px);y0=Math.min(y0,py);y1=Math.max(y1,py);
   }
+  A.sort((m,n)=>m[0]-n[0]||m[1]-n[1]);
+  const cr=(o,p,q)=>(p[0]-o[0])*(q[1]-o[1])-(p[1]-o[1])*(q[0]-o[0]);
+  const lo=[],up=[];
+  for(const p of A){while(lo.length>1&&cr(lo[lo.length-2],lo[lo.length-1],p)<=0)lo.pop();lo.push(p)}
+  for(const p of [...A].reverse()){while(up.length>1&&cr(up[up.length-2],up[up.length-1],p)<=0)up.pop();up.push(p)}
+  P.push(...lo.slice(0,-1),...up.slice(0,-1));
   b.style.left=x0+'px';b.style.top=y0+'px';b.style.width=(x1-x0)+'px';b.style.height=(y1-y0)+'px';
   b.style.clipPath='polygon('+P.map(([px,py])=>(px-x0).toFixed(1)+'px '+(py-y0).toFixed(1)+'px').join(',')+')';
  });
@@ -1358,7 +1375,7 @@ wrapEl.classList.add('book');
 if(START_SHELF)enterShelfState();else shelfG.visible=false;
 requestAnimationFrame(tick);
 // публичный API для лендинга: window.kommit3d
-window.kommit3d={dbg:()=>({camR1,fit:fitDistance(),goal:camGoal,ui:uiH(),d:camera.position.distanceTo(controls.target),mode,zoom}),go:n=>{enterBookInstant();go(n)},setSet:(i,u)=>{enterBookInstant();setSet(i,u)},setKit,open:n=>{enterBookInstant();goTo(n)},zoom:z=>{enterBookInstant();setZoom(z)},shelf:toShelf,choose,get mode(){return mode}};
+window.kommit3d={shelfHit,hit:(x,y)=>wheelOverBook({target:canvas,clientX:x,clientY:y}),dbg:()=>({camR1,fit:fitDistance(),goal:camGoal,ui:uiH(),d:camera.position.distanceTo(controls.target),mode,zoom}),go:n=>{enterBookInstant();go(n)},setSet:(i,u)=>{enterBookInstant();setSet(i,u)},setKit,open:n=>{enterBookInstant();goTo(n)},zoom:z=>{enterBookInstant();setZoom(z)},shelf:toShelf,choose,get mode(){return mode}};
 </script>
 </body>
 </html>
