@@ -74,7 +74,7 @@ header.nav .wrap{display:flex;align-items:center;justify-content:space-between;h
 .hero .cta{display:flex;gap:12px 28px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:36px}
 .hero .link{color:#3df0a0}
 .hero .shot{margin:clamp(40px,6vw,80px) 0 0;width:100%;position:relative;overflow:hidden}
-.hero .shot img{width:100%;aspect-ratio:16/9;max-height:92svh;object-fit:cover}
+.hero .shot img{width:100%}
 @media(max-width:600px){.hero .shot img{aspect-ratio:16/9}.hero .eyebrow{font-size:11px}.hero{padding-top:104px}}
 
 /* появление */
@@ -291,6 +291,138 @@ html.veil body{background:#fff}
 #shield .btn.alt{background:#f5f5f7;color:#1d1d1f}
 #shield .st{min-height:24px;margin:18px 0 0;font-size:15px;color:#1d1d1f}
 @media print{body>*:not(#shield){display:none!important}#shield{display:flex!important}}
+
+/* ===== v3: новые рендеры, ленты, мобильная версия ===== */
+.btn.lg{min-height:64px;padding:0 40px;font-size:20px}
+.btn .ar{font-family:var(--mono);font-weight:500}
+.nav .btn .short{display:none}
+.hero .shot{background:#fff;margin-top:clamp(36px,5vw,64px)}
+.hero .shot img{aspect-ratio:16/9;max-height:84svh;object-fit:contain;margin:0 auto}
+.story .grid>.hs-story{display:none}
+.story .grid>*{min-width:0}
+.panel{background:#fff}
+.panel .frames{aspect-ratio:16/9;background:#fff}
+.panel .frames img{object-fit:contain}
+
+/* горизонтальная лента со свайпом */
+.hs{position:relative;margin-top:44px}
+.hs-track{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;cursor:grab;
+  padding:4px max(20px,calc((100% - 1200px)/2)) 8px;scroll-padding-inline:max(20px,calc((100% - 1200px)/2));touch-action:pan-x pan-y}
+.hs-track::-webkit-scrollbar{display:none}
+.hs-track.drag{cursor:grabbing;scroll-snap-type:none;scroll-behavior:auto}
+.hs-i{flex:0 0 min(78vw,880px);scroll-snap-align:start;margin:0;min-width:0}
+.hs-i img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:24px;background:#fff;border:1px solid var(--line)}
+.hs-i figcaption{padding:14px 6px 0}
+.hs-i.sp img{object-fit:contain}
+.zoomable{cursor:zoom-in}
+.hs-i h3{font-size:19px;letter-spacing:-.02em;margin-bottom:4px}
+.hs-i p{color:var(--ink-2);font-size:15px;line-height:1.45}
+.hs-ui{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:20px}
+.hs-dots{display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-height:44px}
+.hs-dots button{width:8px;height:8px;border-radius:50%;border:0;background:var(--line);padding:0;cursor:pointer;position:relative;transition:transform .3s var(--ease),background .3s}
+.hs-dots button::after{content:"";position:absolute;inset:-18px -4px}
+.hs-dots button.on{background:var(--accent);transform:scale(1.5)}
+.hs-arrows{display:flex;gap:8px}
+.hs-arrows button{width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:500 20px/1 var(--mono);cursor:pointer;transition:background .2s,opacity .2s}
+.hs-arrows button:hover{background:var(--bg-alt)}
+.hs-arrows button:disabled{opacity:.35;cursor:default}
+.hs-count{display:none;font:500 13px/1 var(--mono);color:var(--ink-2)}
+.alt .hs-i img{border-color:transparent}
+
+/* шаблоны внутри */
+.inside .tpl-grid{margin-top:40px}
+.inside .sub{margin-top:clamp(48px,6vw,72px)}
+
+/* наборы: переключатель вида */
+.setbar{display:flex;flex-wrap:wrap;align-items:center;gap:14px 24px;margin-top:20px}
+.seg{display:inline-flex;padding:4px;border-radius:999px;background:var(--bg-alt);border:1px solid var(--line)}
+.seg button{min-height:44px;padding:0 20px;border-radius:999px;border:0;background:transparent;color:var(--ink-2);font:600 15px/1 var(--sans);cursor:pointer;transition:all .25s var(--ease)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.kitline{font:400 13px/1.4 var(--mono);color:var(--ink-2)}
+#setgal{margin-top:8px}
+.setmore{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+@media(max-width:820px){.setmore{grid-template-columns:1fr}}
+.vnote{margin-top:16px;font-size:15px;color:var(--ink-2);max-width:62ch}
+
+/* лента на весь экран: светлые кадры, подпись карточкой */
+.film-stage{background:#fff}
+.film-f::after{display:none}
+.film-f img{object-position:50% 50%}
+.film-f figcaption{background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#1d1d1f;text-shadow:none;padding:22px 26px;border-radius:22px;max-width:440px;right:auto;border:1px solid rgba(0,0,0,.06)}
+.film-f figcaption h3{font-size:clamp(24px,3vw,34px);margin-bottom:8px}
+.film-f figcaption p{color:#4a4a4f;font-size:clamp(15px,1.5vw,18px)}
+.film-dots li{background:rgba(0,0,0,.22)}
+.film-dots li.on{background:var(--accent)}
+.film-m{display:none}
+
+/* 3D: на весь экран */
+#viewer3d .full{position:absolute;z-index:3;right:16px;top:16px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.28);background:rgba(0,0,0,.55);color:#f5f5f7;font:500 14px/1 var(--sans);cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+#viewer3d .ph .row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+#viewer3d .ph .btn.alt{background:rgba(255,255,255,.14);color:#f5f5f7}
+#v3full{position:fixed;inset:0;z-index:900;background:#0b0c0d}
+#v3full[hidden]{display:none}
+#v3full iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+#v3full .x{position:absolute;z-index:2;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));min-height:48px;padding:0 20px 0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.72);color:#fff;font:600 16px/1 var(--sans);cursor:pointer;display:inline-flex;align-items:center;gap:8px;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+html.noscroll,html.noscroll body{overflow:hidden}
+#lb{position:fixed;inset:0;z-index:950;background:rgba(10,11,12,.96);display:flex;flex-direction:column}
+#lb[hidden]{display:none}
+#lb .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:max(10px,env(safe-area-inset-top)) 14px 10px;color:#f5f5f7;flex:none}
+#lb .bar p{font:500 14px/1.3 var(--mono);color:#a1a1a6;min-width:0}
+#lb .bar button{min-height:48px;padding:0 18px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font:600 16px/1 var(--sans);cursor:pointer}
+#lb .view{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;align-items:center;justify-content:center;touch-action:pan-x pan-y pinch-zoom}
+#lb img{display:block;max-width:none;width:min(100vw,calc((100vh - 120px)*1.78));height:auto;background:#fff;border-radius:8px;margin:auto}
+#lb .nv{display:flex;justify-content:center;gap:12px;padding:8px 14px calc(10px + env(safe-area-inset-bottom));flex:none}
+#lb .nv button{min-width:64px;min-height:48px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font:500 22px/1 var(--mono);cursor:pointer}
+@media(max-width:820px){#lb img{width:100vw;border-radius:0}#lb img.wide{width:230vw}#lb .view{align-items:flex-start;justify-content:flex-start}}
+
+/* кнопка снизу на телефоне */
+.mcta{display:none}
+.foot-share{background:none;border:0;padding:0;color:var(--ink);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:44px}
+
+@media(max-width:820px){
+  section{padding:64px 0}
+  h2{font-size:clamp(30px,9vw,40px)}
+  .lead{font-size:18px;margin-top:18px}
+  .nav .btn .long{display:none}.nav .btn .short{display:inline}
+  .hero{padding-top:96px}
+  .hero h1{font-size:clamp(56px,19vw,96px)}
+  .hero .cta{flex-direction:column;gap:6px}
+  .hero .cta .btn{width:min(100%,360px)}
+  .hero .shot img{aspect-ratio:4/5;object-fit:cover;max-height:none;object-position:50% 50%}
+  .story .grid>div:first-child .steps{display:none}
+  .story .grid>.hs-story{display:block;margin-left:-20px;margin-right:-20px}
+  .story .grid>.hs-story .hs{margin-top:28px}
+  .hs{margin-top:28px}
+  .hs-track{gap:12px;padding-inline:20px;scroll-padding-inline:20px}
+  .hs-i{flex-basis:88vw}
+  .hs-i img{border-radius:18px;aspect-ratio:4/3}
+  .hs-i.sp img{aspect-ratio:16/10;object-fit:contain}
+  .hs-i.film-s img{aspect-ratio:4/5;object-position:50% 50%}
+  .hs-i h3{font-size:18px}
+  .hs-arrows{display:none}
+  .hs-count{display:block}
+  .hs-ui{padding-inline:0;margin-top:12px}
+  .film{padding-top:64px}
+  .film-track{display:none}
+  .film-m{display:block}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;margin-inline:-20px;padding:0 20px 6px;scroll-snap-type:x proximity}
+  .tab{scroll-snap-align:center}
+  .setbar{margin-top:16px}
+  .seg{width:100%}.seg button{flex:1}
+  .tpl-grid{margin-top:32px;gap:12px}
+  .card{padding:24px;border-radius:22px}
+  .bento{margin-top:32px}
+  .specs{margin-top:36px}
+  #viewer3d{height:min(78svh,640px);min-height:440px;margin-top:32px}
+  #viewer3d .full{display:none}
+  .book .grid{gap:28px}
+  .mcta{position:fixed;left:0;right:0;bottom:0;z-index:60;display:block;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.35) 40%);transform:translateY(120%);transition:transform .4s var(--ease);pointer-events:none}
+  .mcta.on{transform:none}
+  .mcta .btn{width:100%;pointer-events:auto;box-shadow:0 8px 28px rgba(0,0,0,.28)}
+  footer{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+}
+@media(prefers-reduced-motion:reduce){.hs-track{scroll-behavior:auto}}
+@media(max-width:820px){.film-track{display:none!important}}
 </style>
 </head>
 <body>
@@ -301,18 +433,17 @@ html.veil body{background:#fff}
     <a class="logo" href="#top" aria-label="Коммит, в начало">Коммит<i>_</i></a>
     <nav aria-label="Разделы">
       <a href="#kak">Как устроен</a>
+      <a href="#vnutri">Внутри</a>
       <a href="#nabory">Наборы</a>
-      <a href="#detali">Детали</a>
       <a href="#model">3D</a>
       <a href="#voprosy">Вопросы</a>
     </nav>
-    <a class="btn sm" href="#hochu">Хочу</a>
+    <a class="btn sm" href="#hochu"><span class="long">Сообщить о поступлении</span><span class="short">Сообщить</span></a>
   </div>
 </header>
 
 <main id="top">
 
-<!-- Герой -->
 <section class="hero">
   <div class="wrap">
     <p class="eyebrow rv">Бумажный ежедневник · недатированный · 196 страниц</p>
@@ -320,28 +451,26 @@ html.veil body{background:#fff}
     <p class="code rv d2"><b>print</b>("Ежедневник для тех, кто управляет сложностью")</p>
     <p class="lead rv d2">Твёрдая обложка, приятная на ощупь. Внутри год, кварталы, недели и шаблоны для рабочих решений.</p>
     <div class="cta rv d2">
-      <a class="btn" href="#hochu">Хочу, сообщите о старте продаж</a>
+      <a class="btn lg" href="#hochu">Сообщить о поступлении <span class="ar" aria-hidden="true">→</span></a>
       <a class="link" href="#kak">Посмотреть, как устроен&nbsp;›</a>
     </div>
   </div>
   <div class="shot">
-    <img src="img/06-hero-green.webp" width="1920" height="1080" fetchpriority="high" decoding="async" alt="Зелёный ежедневник «Коммит» на столе">
+    <img src="img2/web/main/02-standing.webp" srcset="img2/web/main/02-standing-sm.webp 900w, img2/web/main/02-standing.webp 2200w" sizes="100vw" width="2200" height="1238" alt="Ежедневник «Коммит» с графитовой обложкой и зелёным корешком" fetchpriority="high" decoding="async" draggable="false">
   </div>
 </section>
 
-<!-- Зачем -->
 <section class="why">
   <div class="wrap">
     <p class="eyebrow rv">// зачем</p>
     <h2 class="rv">Тикет помнит задачу, а не решение.</h2>
     <div class="cols">
       <p class="rv"><strong>В трекере есть задача и статус.</strong> Нет того, что вы взвешивали, от чего отказались и что пообещали на встрече.</p>
-      <p class="rv d1">Это нужно через месяц, а восстановить нечем. В «Коммите» у таких записей есть своё место: решение, баг, встреча, победа для ревью. На бумаге, без уведомлений и вкладок. <strong>Открыл и записал.</strong></p>
+      <p class="rv d1">Через месяц это нужно, а восстановить нечем. В «Коммите» у таких записей есть своё место: решение, баг, встреча, победа для ревью. На бумаге, без уведомлений и вкладок. <strong>Открыл и записал.</strong></p>
     </div>
   </div>
 </section>
 
-<!-- Как устроен -->
 <section class="story alt" id="kak" aria-labelledby="kak-h">
   <div class="stick">
     <div class="wrap">
@@ -350,32 +479,22 @@ html.veil body{background:#fff}
           <p class="eyebrow">// как устроен</p>
           <h2 id="kak-h">Год, квартал, месяц, неделя.</h2>
           <p class="lead">От большой цели до трёх задач на сегодня. Ежедневник недатированный: начни в любой день, ни одна страница не пропадёт.</p>
-          <ol class="steps" id="steps">
-            <li class="on"><span class="n">01</span><h3>Год</h3><p>Цели на год и шкала, на которой видно, сколько уже прошло.</p><img class="m-shot" src="img/s-year-sm.webp" width="960" height="720" loading="lazy" decoding="async" alt="Разворот года: цели года и год в коммитах" draggable="false"></li>
-            <li><span class="n">02</span><h3>Квартал</h3><p>У каждого квартала своя обложка: план, месяцы и недели собраны вместе.</p><img class="m-shot" src="img/s-quarter-sm.webp" width="960" height="720" loading="lazy" decoding="async" alt="Разворот квартала: Q1 и карта квартала" draggable="false"></li>
-            <li><span class="n">03</span><h3>Месяц</h3><p>Что важно в этом месяце и когда.</p><img class="m-shot" src="img/s-month-sm.webp" width="960" height="720" loading="lazy" decoding="async" alt="Разворот месяца: календарь и цели месяца" draggable="false"></li>
-            <li><span class="n">04</span><h3>Неделя</h3><p>Три задачи в день, одна главная и две помельче. В пятницу итог недели.</p><img class="m-shot" src="img/s-week-sm.webp" width="960" height="720" loading="lazy" decoding="async" alt="Разворот недели: три задачи в день и итог недели" draggable="false"></li>
-          </ol>
+          <ol class="steps" id="steps"><li class=on><span class="n">01</span><h3>Год</h3><p>Цели на год и шкала, на которой видно, сколько уже прошло.</p></li><li><span class="n">02</span><h3>Квартал</h3><p>У каждого квартала своя обложка: план, месяцы и недели собраны вместе.</p></li><li><span class="n">03</span><h3>Месяц</h3><p>Что важно в этом месяце и когда.</p></li><li><span class="n">04</span><h3>Неделя</h3><p>Три задачи в день, одна главная и две помельче. В пятницу итог недели.</p></li></ol>
         </div>
         <div class="panel" id="panel" data-step="0">
           <div class="path mono" id="path" aria-hidden="true">$ cd <em>год/</em></div>
-          <div class="frames">
-            <img class="on" src="img/s-year.webp" width="1240" height="930" alt="Разворот года: цели года и год в коммитах" loading="eager" decoding="async" draggable="false">
-            <img  src="img/s-quarter.webp" width="1240" height="930" alt="Разворот квартала: Q1 и карта квартала" loading="lazy" decoding="async" draggable="false" aria-hidden="true">
-            <img  src="img/s-month.webp" width="1240" height="930" alt="Разворот месяца: календарь и цели месяца" loading="lazy" decoding="async" draggable="false" aria-hidden="true">
-            <img  src="img/s-week.webp" width="1240" height="930" alt="Разворот недели: три задачи в день и итог недели" loading="lazy" decoding="async" draggable="false" aria-hidden="true">
-          </div>
+          <div class="frames"><img class="on" src="img2/web/main/05-year.webp" srcset="img2/web/main/05-year-sm.webp 900w, img2/web/main/05-year.webp 2200w" sizes="(max-width:820px) 0px, 760px" width="2200" height="1238" alt="Разворот года: цели года и год в коммитах" loading="eager" decoding="async" draggable="false"><img src="img2/web/main/06-quarter.webp" srcset="img2/web/main/06-quarter-sm.webp 900w, img2/web/main/06-quarter.webp 2200w" sizes="(max-width:820px) 0px, 760px" width="2200" height="1238" alt="Разворот квартала: Q1 и карта квартала" loading="lazy" aria-hidden="true" decoding="async" draggable="false"><img src="img2/web/main/07-month.webp" srcset="img2/web/main/07-month-sm.webp 900w, img2/web/main/07-month.webp 2200w" sizes="(max-width:820px) 0px, 760px" width="2200" height="1238" alt="Разворот месяца: календарь и цели месяца" loading="lazy" aria-hidden="true" decoding="async" draggable="false"><img src="img2/web/main/08-week.webp" srcset="img2/web/main/08-week-sm.webp 900w, img2/web/main/08-week.webp 2200w" sizes="(max-width:820px) 0px, 760px" width="2200" height="1238" alt="Разворот недели: три задачи в день и итог недели" loading="lazy" aria-hidden="true" decoding="async" draggable="false"></div>
         </div>
+        <div class="hs-story"><div class="hs " data-hs id="hs-story"><div class="hs-track" role="group" aria-roledescription="карусель" aria-label="Год, квартал, месяц, неделя" tabindex="0"><figure class="hs-i sp"><img src="img2/web/main/05-year.webp" srcset="img2/web/main/05-year-sm.webp 900w, img2/web/main/05-year.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Разворот года: цели года и год в коммитах" loading="lazy" decoding="async" draggable="false"><figcaption><h3><span class="mono" style="color:var(--accent-ink);font-size:13px">01</span> Год</h3><p>Цели на год и шкала, на которой видно, сколько уже прошло.</p></figcaption></figure><figure class="hs-i sp"><img src="img2/web/main/06-quarter.webp" srcset="img2/web/main/06-quarter-sm.webp 900w, img2/web/main/06-quarter.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Разворот квартала: Q1 и карта квартала" loading="lazy" decoding="async" draggable="false"><figcaption><h3><span class="mono" style="color:var(--accent-ink);font-size:13px">02</span> Квартал</h3><p>У каждого квартала своя обложка: план, месяцы и недели собраны вместе.</p></figcaption></figure><figure class="hs-i sp"><img src="img2/web/main/07-month.webp" srcset="img2/web/main/07-month-sm.webp 900w, img2/web/main/07-month.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Разворот месяца: календарь и цели месяца" loading="lazy" decoding="async" draggable="false"><figcaption><h3><span class="mono" style="color:var(--accent-ink);font-size:13px">03</span> Месяц</h3><p>Что важно в этом месяце и когда.</p></figcaption></figure><figure class="hs-i sp"><img src="img2/web/main/08-week.webp" srcset="img2/web/main/08-week-sm.webp 900w, img2/web/main/08-week.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Разворот недели: три задачи в день и итог недели" loading="lazy" decoding="async" draggable="false"><figcaption><h3><span class="mono" style="color:var(--accent-ink);font-size:13px">04</span> Неделя</h3><p>Три задачи в день, одна главная и две помельче. В пятницу итог недели.</p></figcaption></figure></div></div></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Ядро и наборы -->
-<section id="nabory">
+<section id="vnutri" class="inside" aria-labelledby="in-h">
   <div class="wrap">
     <p class="eyebrow rv">// внутри</p>
-    <h2 class="rv">Одно ядро. Шесть наборов.</h2>
+    <h2 class="rv" id="in-h">Одно ядро. Шесть наборов.</h2>
     <p class="lead rv d1">Основа у всех одинаковая: год, кварталы, недели, итоги и шаблоны для рабочих дел. Справочник и мелкие тексты зависят от набора.</p>
     <div class="tpl-grid">
       <div class="card rv"><span class="tag">ADR</span><h3>Решение</h3><p>Название, статус, причина. Рядом матрица решения: вес и оценка по каждому варианту.</p></div>
@@ -383,60 +502,53 @@ html.veil body{background:#fff}
       <div class="card rv d2"><span class="tag">1:1</span><h3>Встречи и разговоры</h3><p>Страницы под встречи и под разговоры один на один.</p></div>
       <div class="card rv"><span class="tag">brag doc</span><h3>Список побед</h3><p>Таблица: когда, что, эффект. Записываешь сразу, пригодится на ревью.</p></div>
     </div>
-    <h3 class="sub rv">Выберите свой набор</h3>
-    <div class="tabs rv" role="tablist" aria-label="Наборы" id="tabs"></div>
-    <div id="panels"></div>
-    <p class="setnote rv">Обложка и акцент идут парой, это комплект. У каждого набора свой цвет по умолчанию: он показан точкой на вкладке.</p>
   </div>
+  <div class="hs " data-hs id="hs-inside"><div class="hs-track" role="group" aria-roledescription="карусель" aria-label="Что на страницах" tabindex="0"><figure class="hs-i sp"><img src="img2/web/main/04-spread-4-5.webp" srcset="img2/web/main/04-spread-4-5-sm.webp 900w, img2/web/main/04-spread-4-5.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Первый разворот: как вести ежедневник и карта обучения" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Как вести ежедневник</h3><p>Первый разворот объясняет систему. Дальше карта обучения набора.</p></figcaption></figure><figure class="hs-i "><img src="img2/web/main/09-flip.webp" srcset="img2/web/main/09-flip-sm.webp 900w, img2/web/main/09-flip.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Страницы ежедневника листаются" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Недатированные страницы</h3><p>Начни в любой день: пустых дат нет, ни одна страница не пропадёт.</p></figcaption></figure><figure class="hs-i "><img src="img2/web/main/14-git-row.webp" srcset="img2/web/main/14-git-row-sm.webp 900w, img2/web/main/14-git-row.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Лента git log вдоль сгиба страницы" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Метки и git log</h3><p>Вдоль сгиба бежит лента в стиле git log. Хэш-номера страниц, ссылки на нужное.</p></figcaption></figure><figure class="hs-i "><img src="img2/web/main/03-back.webp" srcset="img2/web/main/03-back-sm.webp 900w, img2/web/main/03-back.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Задняя обложка с надписью exit(0)" loading="lazy" decoding="async" draggable="false"><figcaption><h3>exit(0)</h3><p>На задней обложке напоминание: закончили день, закоммитьте его.</p></figcaption></figure></div></div>
+  <div class="wrap"></div>
 </section>
 
-<!-- В жизни -->
-<section class="film" id="vruki" aria-labelledby="film-h">
+<section id="nabory" class="alt" aria-labelledby="nb-h">
   <div class="wrap">
-    <p class="eyebrow rv">// в жизни</p>
-    <h2 class="rv" id="film-h">Ежедневник, который приятно открывать.</h2>
-  </div>
-  <div class="film-track" id="film" style="--n:5">
-    <div class="film-stage">
-      <figure class="film-f on">
-        <img src="img/18-on-laptop.webp" width="1920" height="1080" alt="Синий ежедневник «Коммит» на закрытом ноутбуке рядом с чашкой" decoding="async" draggable="false">
-        <figcaption><h3>На рабочем месте</h3><p>Формат А5 лежит рядом с ноутбуком и не мешает.</p></figcaption>
-      </figure>
-      <figure class="film-f" aria-hidden="true">
-        <img src="img/21-desk.webp" width="1920" height="1080" alt="Ежедневник бумажного комплекта на деревянном столе у клавиатуры" loading="lazy" decoding="async" draggable="false">
-        <figcaption><h3>Открыл и записал</h3><p>Без уведомлений и вкладок. Ручка в петле, ежедневник под рукой.</p></figcaption>
-      </figure>
-      <figure class="film-f" aria-hidden="true">
-        <img src="img/20-on-books.webp" width="1920" height="1080" alt="Зелёный ежедневник с тёмным корешком на стопке коробок" loading="lazy" decoding="async" draggable="false">
-        <figcaption><h3>Твёрдая обложка</h3><p>Переплёт 7БЦ с мягкой обивкой soft-touch. Матовая, чуть бархатная на ощупь.</p></figcaption>
-      </figure>
-      <figure class="film-f" aria-hidden="true">
-        <img src="img/19-standing-wall.webp" width="1920" height="1080" alt="Оранжевый ежедневник стоит у стены" loading="lazy" decoding="async" draggable="false">
-        <figcaption><h3>196 страниц без дат</h3><p>Начинай в любой день, ни одна страница не пропадёт.</p></figcaption>
-      </figure>
-      <figure class="film-f" aria-hidden="true">
-        <img src="img/16-shelf-six.webp" width="1920" height="1080" alt="Шесть ежедневников «Коммит» на полке корешками наружу" loading="lazy" decoding="async" draggable="false">
-        <figcaption><h3>Шесть наборов на полке</h3><p>На корешке название, метка набора и версия. Свой видно сразу.</p></figcaption>
-      </figure>
-      <ol class="film-dots" aria-hidden="true"><li class="on"></li><li></li><li></li><li></li><li></li></ol>
+    <p class="eyebrow rv">// наборы</p>
+    <h2 class="rv" id="nb-h">Выберите свой набор.</h2>
+    <p class="lead rv d1">У каждого свой справочник, шаблоны и цвета. Пролистайте кадры вбок.</p>
+    <div class="tabs rv" role="tablist" aria-label="Наборы" id="tabs"></div>
+    <div class="setbar rv">
+      <div class="seg" role="group" aria-label="Вариант цвета"><button type="button" id="v-main" aria-pressed="true">Основной</button><button type="button" id="v-conv" aria-pressed="false">Конверсия</button></div>
+      <p class="kitline" id="kitline"></p>
     </div>
   </div>
+  <div id="setgal"></div>
+  <div class="wrap">
+    <div class="setmore" id="setmore"></div>
+    <p class="vnote rv">Основной: тёмная обложка и цветной корешок. Конверсия: обложка и корешок меняются цветами. Резинка и петля всегда в цвет корешка.</p>
+  </div>
 </section>
 
-<!-- Детали -->
+<section class="film" id="vruki" aria-labelledby="film-h">
+  <div class="wrap">
+    <p class="eyebrow rv">// вблизи</p>
+    <h2 class="rv" id="film-h">Ежедневник, который приятно держать.</h2>
+  </div>
+  <div class="film-track" id="film" style="--n:6">
+    <div class="film-stage"><figure class="film-f on"><img src="img2/web/main/02-standing.webp" srcset="img2/web/main/02-standing-sm.webp 900w, img2/web/main/02-standing.webp 2200w" sizes="100vw" width="2200" height="1238" alt="Ежедневник «Коммит» стоит на столе" decoding="async" draggable="false"><figcaption><h3>Твёрдая обложка</h3><p>Переплёт 7БЦ с мягкой обивкой soft-touch. Матовая, чуть бархатная на ощупь.</p></figcaption></figure><figure class="film-f" aria-hidden="true"><img src="img2/data/main/10-stack.webp" srcset="img2/data/main/10-stack-sm.webp 900w, img2/data/main/10-stack.webp 2200w" sizes="100vw" width="2200" height="1238" alt="Стопка ежедневников «Коммит»" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Недатированный, 196 страниц</h3><p>Начни в любой день. Один закончился, берёшь следующий.</p></figcaption></figure><figure class="film-f" aria-hidden="true"><img src="img2/infra/main/12-spine.webp" srcset="img2/infra/main/12-spine-sm.webp 900w, img2/infra/main/12-spine.webp 2200w" sizes="100vw" width="2200" height="1238" alt="Корешок ежедневника «Коммит» с названием и версией" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Корешок с названием</h3><p>Название, метка набора и версия. Свой видно на полке сразу.</p></figcaption></figure><figure class="film-f" aria-hidden="true"><img src="img2/qa/main/13-ribbons.webp" srcset="img2/qa/main/13-ribbons-sm.webp 900w, img2/qa/main/13-ribbons.webp 2200w" sizes="100vw" width="2200" height="1238" alt="Два тканых ляссе COMMIT и HEAD" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Два ляссе</h3><p>Тканые, с надписями COMMIT и HEAD. Крепятся сверху в корешок.</p></figcaption></figure><figure class="film-f" aria-hidden="true"><img src="img2/mobile/main/15-elastic-loop.webp" srcset="img2/mobile/main/15-elastic-loop-sm.webp 900w, img2/mobile/main/15-elastic-loop.webp 2200w" sizes="100vw" width="2200" height="1238" alt="Ручка в петле на задней обложке" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Резинка и петля для ручки</h3><p>Резинка держит ежедневник закрытым, в петле остаётся ручка.</p></figcaption></figure><figure class="film-f" aria-hidden="true"><img src="img2/web/main/11-shelf.webp" srcset="img2/web/main/11-shelf-sm.webp 900w, img2/web/main/11-shelf.webp 2200w" sizes="100vw" width="2200" height="1238" alt="Шесть ежедневников «Коммит» на полке корешками наружу" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Шесть наборов на полке</h3><p>Один формат, шесть цветовых комплектов. Свой видно по корешку.</p></figcaption></figure><ol class="film-dots" aria-hidden="true"><li class="on"></li><li></li><li></li><li></li><li></li><li></li></ol></div>
+  </div>
+  <div class="film-m"><div class="hs " data-hs id="hs-film"><div class="hs-track" role="group" aria-roledescription="карусель" aria-label="Вблизи" tabindex="0"><figure class="hs-i film-s"><img src="img2/web/main/02-standing.webp" srcset="img2/web/main/02-standing-sm.webp 900w, img2/web/main/02-standing.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Ежедневник «Коммит» стоит на столе" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Твёрдая обложка</h3><p>Переплёт 7БЦ с мягкой обивкой soft-touch. Матовая, чуть бархатная на ощупь.</p></figcaption></figure><figure class="hs-i film-s"><img src="img2/data/main/10-stack.webp" srcset="img2/data/main/10-stack-sm.webp 900w, img2/data/main/10-stack.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Стопка ежедневников «Коммит»" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Недатированный, 196 страниц</h3><p>Начни в любой день. Один закончился, берёшь следующий.</p></figcaption></figure><figure class="hs-i film-s"><img src="img2/infra/main/12-spine.webp" srcset="img2/infra/main/12-spine-sm.webp 900w, img2/infra/main/12-spine.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Корешок ежедневника «Коммит» с названием и версией" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Корешок с названием</h3><p>Название, метка набора и версия. Свой видно на полке сразу.</p></figcaption></figure><figure class="hs-i film-s"><img src="img2/qa/main/13-ribbons.webp" srcset="img2/qa/main/13-ribbons-sm.webp 900w, img2/qa/main/13-ribbons.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Два тканых ляссе COMMIT и HEAD" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Два ляссе</h3><p>Тканые, с надписями COMMIT и HEAD. Крепятся сверху в корешок.</p></figcaption></figure><figure class="hs-i film-s"><img src="img2/mobile/main/15-elastic-loop.webp" srcset="img2/mobile/main/15-elastic-loop-sm.webp 900w, img2/mobile/main/15-elastic-loop.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Ручка в петле на задней обложке" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Резинка и петля для ручки</h3><p>Резинка держит ежедневник закрытым, в петле остаётся ручка.</p></figcaption></figure><figure class="hs-i film-s"><img src="img2/web/main/11-shelf.webp" srcset="img2/web/main/11-shelf-sm.webp 900w, img2/web/main/11-shelf.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Шесть ежедневников «Коммит» на полке корешками наружу" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Шесть наборов на полке</h3><p>Один формат, шесть цветовых комплектов. Свой видно по корешку.</p></figcaption></figure></div></div></div>
+</section>
+
 <section id="detali" class="alt" aria-labelledby="det-h">
   <div class="wrap">
     <p class="eyebrow rv">// детали</p>
     <h2 class="rv" id="det-h">Из чего он собран.</h2>
     <p class="lead rv d1">Обложка, закладки, резинка и то, что спрятано внутри.</p>
     <div class="bento">
-      <article class="tile wide rv"><img src="img/09-spine-macro.webp" width="1920" height="1080" loading="lazy" decoding="async" alt="Корешок графитового ежедневника: название, метка INFRA · SRE, версия v1.0.0" draggable="false"><div class="tb"><h3>Корешок</h3><p>Название, метка набора и версия. Цвет зависит от комплекта: у графитового зелёный, у чернильного светло-синий, у остальных тёмный.</p></div></article>
-      <article class="tile fill rv"><img src="img/11-ribbons-macro.webp" width="1920" height="1080" loading="lazy" decoding="async" alt="Ляссе COMMIT и HEAD выходят из ежедневника" draggable="false"><div class="tb"><h3>Два ляссе</h3><p>Тканые, с надписями COMMIT и HEAD. Крепятся сверху в корешок.</p></div></article>
-      <article class="tile rv"><img src="img/10-pen-loop-macro.webp" width="1920" height="1080" loading="lazy" decoding="async" alt="Ручка в петле у края ежедневника бумажного комплекта" draggable="false"><div class="tb"><h3>Петля для ручки</h3><p>Внутри задней обложки, справа посередине. Ручка остаётся при ежедневнике.</p></div></article>
-      <article class="tile rv"><img src="img/12-edge-macro.webp" width="1920" height="1080" loading="lazy" decoding="async" alt="Зелёный ежедневник, закрытый резинкой, с ручкой в петле" draggable="false"><div class="tb"><h3>Резинка</h3><p>Крепится на задней обложке и держит ежедневник закрытым. Цвет в тон комплекта.</p></div></article>
-      <article class="tile rv"><img src="img/07-back-ink.webp" width="1920" height="1080" loading="lazy" decoding="async" alt="Задняя обложка чернильного комплекта с надписью exit(0)" draggable="false"><div class="tb"><h3>exit(0)</h3><p>На задней обложке напоминание: закончили день, закоммитьте его.</p></div></article>
-      <article class="tile half fill rv"><img src="img/13-open-week-green.webp" width="1920" height="1080" loading="lazy" decoding="async" alt="Разворот недели W02 с метками на краю страниц" draggable="false"><div class="tb"><h3>Метки и git log</h3><p>Метки ступенькой по краю, свои у каждого набора. Вдоль сгиба бежит лента в стиле git log.</p></div></article>
-      <article class="tile half rv"><img class="r43" src="img/17-six-covers.webp" width="1920" height="1440" loading="lazy" decoding="async" alt="Шесть обложек «Коммит»: графит, зелёный, синий, оранжевый, чернильный, бумажный" draggable="false"><div class="tb"><h3>Шесть наборов</h3><p>Одно ядро и шесть наборов под группы. Комплект: обложка и акцент.</p><a class="link" href="#nabory">Выбрать набор ›</a></div></article>
+      <article class="tile wide rv"><img src="img2/infra/main/12-spine.webp" srcset="img2/infra/main/12-spine-sm.webp 900w, img2/infra/main/12-spine.webp 2200w" sizes="(max-width:820px) 90vw, 780px" width="2200" height="1238" alt="Корешок ежедневника: название, метка набора, версия" loading="lazy" decoding="async" draggable="false"><div class="tb"><h3>Корешок</h3><p>Название, метка набора и версия. Цвет у каждого набора свой, корешок контрастный.</p></div></article>
+      <article class="tile fill rv"><img src="img2/web/main/13-ribbons.webp" srcset="img2/web/main/13-ribbons-sm.webp 900w, img2/web/main/13-ribbons.webp 2200w" sizes="(max-width:820px) 90vw, 380px" width="2200" height="1238" alt="Ляссе COMMIT и HEAD выходят из ежедневника" loading="lazy" decoding="async" draggable="false"><div class="tb"><h3>Два ляссе</h3><p>Тканые, с надписями COMMIT и HEAD. Крепятся сверху в корешок.</p></div></article>
+      <article class="tile rv"><img src="img2/mobile/main/15-elastic-loop.webp" srcset="img2/mobile/main/15-elastic-loop-sm.webp 900w, img2/mobile/main/15-elastic-loop.webp 2200w" sizes="(max-width:820px) 90vw, 380px" width="2200" height="1238" alt="Ручка в петле у края ежедневника" loading="lazy" decoding="async" draggable="false"><div class="tb"><h3>Петля для ручки</h3><p>Внутри задней обложки, справа посередине. Ручка остаётся при ежедневнике.</p></div></article>
+      <article class="tile rv"><img src="img2/qa/main/01-cover-top.webp" srcset="img2/qa/main/01-cover-top-sm.webp 900w, img2/qa/main/01-cover-top.webp 2200w" sizes="(max-width:820px) 90vw, 380px" width="2200" height="1238" alt="Обложка ежедневника с резинкой, вид сверху" loading="lazy" decoding="async" draggable="false"><div class="tb"><h3>Резинка</h3><p>Крепится на задней обложке и держит ежедневник закрытым. Цвет в тон комплекта.</p></div></article>
+      <article class="tile rv"><img src="img2/web/main/03-back.webp" srcset="img2/web/main/03-back-sm.webp 900w, img2/web/main/03-back.webp 2200w" sizes="(max-width:820px) 90vw, 380px" width="2200" height="1238" alt="Задняя обложка с надписью exit(0)" loading="lazy" decoding="async" draggable="false"><div class="tb"><h3>exit(0)</h3><p>На задней обложке напоминание: закончили день, закоммитьте его.</p></div></article>
+      <article class="tile half fill rv"><img src="img2/web/main/14-git-row.webp" srcset="img2/web/main/14-git-row-sm.webp 900w, img2/web/main/14-git-row.webp 2200w" sizes="(max-width:820px) 90vw, 590px" width="2200" height="1238" alt="Лента git log и метки на краю страниц" loading="lazy" decoding="async" draggable="false"><div class="tb"><h3>Метки и git log</h3><p>Метки ступенькой по краю, свои у каждого набора. Вдоль сгиба бежит лента в стиле git log.</p></div></article>
+      <article class="tile half rv"><img src="img2/web/main/11-shelf.webp" srcset="img2/web/main/11-shelf-sm.webp 900w, img2/web/main/11-shelf.webp 2200w" sizes="(max-width:820px) 90vw, 590px" width="2200" height="1238" alt="Шесть ежедневников «Коммит» на полке" loading="lazy" decoding="async" draggable="false"><div class="tb"><h3>Шесть наборов</h3><p>Одно ядро и шесть наборов под группы. Комплект: обложка и акцент.</p><a class="link" href="#nabory">Выбрать набор ›</a></div></article>
       <article class="tile txt rv"><span class="mk" aria-hidden="true">0xA6</span><h3>Хэш-номера страниц</h3><p>Страницы нумеруются хэшами. В «Ссылках» на неделю можно указать, где лежит нужное.</p></article>
       <article class="tile txt rv"><span class="mk" aria-hidden="true">Q1</span><h3>Шкала года</h3><p>Видно, сколько года уже прошло.</p></article>
       <article class="tile txt rv"><span class="mk" aria-hidden="true">//</span><h3>Пасхалки</h3><p>Внутри спрятаны шутки для своих. Находите сами.</p></article>
@@ -455,20 +567,23 @@ html.veil body{background:#fff}
   </div>
 </section>
 
-<!-- 3D -->
 <section class="v3d" id="model" aria-labelledby="m-h">
   <div class="wrap">
     <p class="eyebrow rv">// потрогать до печати</p>
     <h2 class="rv" id="m-h">Покрути ежедневник в руках.</h2>
     <p class="lead rv d1">Полка с шестью видами. Выберите ежедневник, листайте развороты, меняйте цвет комплекта.</p>
   </div>
-    <div id="viewer3d" class="rv" data-src="viewer-3d/index.html?look=site&shelf=1">
-      <img width="1920" height="1080" src="img/16-shelf-six.webp" alt="Шесть ежедневников «Коммит» на полке корешками наружу" loading="lazy" decoding="async" draggable="false">
-      <div class="ph"><button class="btn" id="v3open" type="button">Открыть 3D-просмотр</button><p class="cap">Крутить, листать, менять цвет комплекта.</p></div>
-    </div>
+  <div id="viewer3d" class="rv" data-src="viewer-3d/index.html?look=site&amp;shelf=1">
+    <img src="img2/web/main/11-shelf.webp" srcset="img2/web/main/11-shelf-sm.webp 900w, img2/web/main/11-shelf.webp 2200w" sizes="100vw" width="2200" height="1238" alt="Шесть ежедневников «Коммит» на полке корешками наружу" loading="lazy" decoding="async" draggable="false">
+    <div class="ph"><div class="row"><button class="btn lg" id="v3open" type="button">Открыть 3D на весь экран</button></div><p class="cap">Крутить, листать, менять цвет комплекта. Выйти можно в любой момент.</p></div>
+    <button class="full" id="v3fs" type="button" hidden>На весь экран</button>
+  </div>
 </section>
 
-<!-- Видео -->
+<div id="v3full" hidden role="dialog" aria-modal="true" aria-label="3D-просмотр ежедневника">
+  <button class="x" id="v3x" type="button"><span aria-hidden="true">✕</span> Закрыть</button>
+</div>
+
 <section class="alt" id="video">
   <div class="wrap">
     <p class="eyebrow rv">// видео</p>
@@ -479,25 +594,23 @@ html.veil body{background:#fff}
   </div>
 </section>
 
-<!-- Форма -->
 <section class="book" id="hochu">
   <div class="wrap">
     <div class="grid">
       <div>
         <p class="eyebrow rv">// бронь</p>
-        <h2 class="rv">Хочу, сообщите о старте продаж.</h2>
+        <h2 class="rv">Сообщу, когда ежедневник поступит.</h2>
         <p class="lead rv d1">Тираж ещё не напечатан. Оставьте контакт, и я напишу один раз, когда решу печатать и откроются продажи.</p>
         <p class="free rv d2"><span>бесплатно</span><span>без оплаты</span><span>ни к чему не обязывает</span></p>
       </div>
       <div class="rv d1">
-        <a class="btn" style="font-size:20px;padding:20px 48px;min-height:64px" href="https://forms.yandex.ru/u/6aec5dcf2c4f890d117e128a" target="_blank" rel="noopener">Хочу</a>
-        <p style="margin:16px 0 0;font:400 13px/1.5 var(--mono);color:#a1a1a6;text-align:left;position:static">Откроется форма Яндекса: контакт, набор и согласие на обработку. Оператор: Бартенев Арсений Сергеевич, самозанятый.</p>
+        <a class="btn lg" href="https://forms.yandex.ru/u/6aec5dcf2c4f890d117e128a" target="_blank" rel="noopener">Сообщить о поступлении <span class="ar" aria-hidden="true">→</span></a>
+        <p style="margin:16px 0 0;font:400 13px/1.5 var(--mono);color:#a1a1a6">Откроется форма Яндекса: контакт, набор и согласие на обработку. Оператор: Бартенев Арсений Сергеевич, самозанятый.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FAQ -->
 <section id="voprosy">
   <div class="wrap">
     <p class="eyebrow rv">// вопросы</p>
@@ -506,6 +619,7 @@ html.veil body{background:#fff}
       <details><summary>Когда начнутся продажи?</summary><p>Дату пока не назначил. Сначала смотрю, сколько людей ждёт ежедневник, потом решаю с печатью.</p></details>
       <details><summary>Сколько будет стоить ежедневник?</summary><p>Цену назову до оплаты. Сейчас считаю печать в типографиях, поэтому цифру не обещаю.</p></details>
       <details><summary>Бронь меня к чему-то обязывает?</summary><p>Нет. Платить сейчас ничего не нужно, а купить потом можно или не купить.</p></details>
+      <details><summary>Чем отличаются наборы и «Конверсия»?</summary><p>Ядро у всех одно. Набор меняет справочник и несколько шаблонов. «Конверсия» меняет цвета: обложка и корешок меняются местами.</p></details>
       <details><summary>Как получить ежедневник?</summary><p>Способ доставки определю к старту продаж и напишу вам.</p></details>
       <details><summary>Как удалить мой контакт?</summary><p>Напишите на почту или в Telegram, я удалю.</p></details>
     </div>
@@ -517,17 +631,14 @@ html.veil body{background:#fff}
 <footer>
   <div class="wrap">
     <span>«Коммит» — рабочее название.<br>© 2026 Бартенев А. С., самозанятый. Тексты, дизайн и изображения защищены авторским правом, копирование без разрешения запрещено.</span>
-    <span><a href="mailto:arseniybartenev@gmail.com">arseniybartenev@gmail.com</a> · <a href="https://t.me/arseniybartenev">Telegram</a></span>
+    <span><a href="mailto:arseniybartenev@gmail.com">arseniybartenev@gmail.com</a> · <a href="https://t.me/arseniybartenev">Telegram</a> · <button class="foot-share" id="foot-share" type="button">Поделиться страницей</button></span>
   </div>
 </footer>
 
-
+<div class="mcta" id="mcta"><a class="btn lg" href="#hochu">Сообщить о поступлении <span class="ar" aria-hidden="true">→</span></a></div>
 <div id="shield" hidden></div>
 <script>
 (function(){
-  /* куда слать заявки: пока пусто, форма статическая. Подставить адрес формы/вебхука */
-  var FORM_ENDPOINT = '';
-
   var SETS = [
     {n:'Веб и бэкенд',img:'06-hero-green',sp:'тёмный',k:'#2ee59d',kit:'зелёный',
      t:['Проект: холст и план','Решение (ADR)','Матрица решения','Баг и триаж','Встреча','Встреча 1:1','Рост и карьера','Brag doc'],
@@ -550,6 +661,17 @@ html.veil body{background:#fff}
   ];
 
 
+
+  var META=[    {slug:'web',kit:'графит и зелёный',k:'#4fd283'},
+    {slug:'data',kit:'тёмно-фиолетовый и фиолетовый',k:'#936ee2'},
+    {slug:'infra',kit:'кобальт и светлый корешок',k:'#395bdb'},
+    {slug:'mobile',kit:'петроль и оранжевый',k:'#ee9049'},
+    {slug:'qa',kit:'тёмно-синий и голубой',k:'#75a2ea'},
+    {slug:'lead',kit:'сланец и охра',k:'#d4a446'}];
+  SETS.forEach(function(s,i){var m=META[i];s.slug=m.slug;s.kit=m.kit;s.k=m.k});
+  var FR=[['01-cover-top','Обложка'],['02-standing','Набор стоя'],['03-back','Задняя обложка'],['04-spread-4-5','Первый разворот',1],['08-week','Неделя',1],['09-flip','Листание'],['10-stack','Стопка'],['11-shelf','Полка'],['12-spine','Корешок'],['13-ribbons','Ляссе'],['14-git-row','Метки и git log'],['15-elastic-loop','Резинка и петля']];
+  var isTouch=window.matchMedia('(pointer:coarse)').matches||'ontouchstart' in window;
+  function mq(q){return window.matchMedia(q).matches}
   /* защита: сдерживание, не полная защита. Скриншот надёжно перехватить нельзя */
   document.addEventListener('contextmenu',function(e){if(e.target.closest('img,video,.film,.bento img,.panel,#viewer3d'))e.preventDefault()});
   document.addEventListener('dragstart',function(e){if(e.target.tagName==='IMG')e.preventDefault()});
@@ -626,6 +748,15 @@ html.veil body{background:#fff}
   window.addEventListener('beforeprint',function(){buildShield();shield.hidden=false});
   window.addEventListener('afterprint',function(){shield.hidden=true});
 
+
+  /* телефон: быстрый уход со страницы и возврат похож на снимок экрана; точно это определить нельзя */
+  var hidAt=0;
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){hidAt=Date.now();return}
+    if(isTouch&&hidAt&&Date.now()-hidAt<1400&&!v3.open)showShield(false);
+    hidAt=0;
+  });
+
   /* появление при прокрутке */
   var rv=[].slice.call(document.querySelectorAll('.rv'));
   if('IntersectionObserver' in window){
@@ -633,15 +764,21 @@ html.veil body{background:#fff}
     rv.forEach(function(el){io.observe(el)});
   } else rv.forEach(function(el){el.classList.add('in')});
 
-  /* шапка */
-  var nav=document.getElementById('nav');
+  /* шапка и кнопка снизу */
+  var nav=document.getElementById('nav'),mcta=document.getElementById('mcta'),hochu=document.getElementById('hochu');
   var ticking=false;
-  function onScroll(){nav.classList.toggle('scrolled',window.scrollY>8);story();film()}
+  function onScroll(){
+    nav.classList.toggle('scrolled',window.scrollY>8);story();film();
+    var r=hochu.getBoundingClientRect();
+    mcta.classList.toggle('on',window.scrollY>window.innerHeight*.8&&r.top>window.innerHeight*.9);
+  }
   window.addEventListener('scroll',function(){if(ticking)return;ticking=true;requestAnimationFrame(function(){ticking=false;onScroll()})},{passive:true});
-  /* лента в жизни */
+
+  /* лента на весь экран (компьютер) */
   var track=document.getElementById('film'),ffs=[].slice.call(track.querySelectorAll('.film-f')),dots=[].slice.call(track.querySelectorAll('.film-dots li')),curF=0;
   function film(){
-    var i=curF,stacked=window.innerWidth<=820||window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    if(mq('(max-width:820px)'))return;
+    var i=curF,stacked=mq('(prefers-reduced-motion:reduce)');
     if(!stacked){
       var r=track.getBoundingClientRect(),total=track.offsetHeight-window.innerHeight;
       i=Math.floor(Math.min(Math.max(-r.top/total,0),.999)*ffs.length);
@@ -652,9 +789,9 @@ html.veil body{background:#fff}
     dots.forEach(function(d,j){d.classList.toggle('on',j===i)});
     curF=i;
   }
-  window.addEventListener('resize',film);film();film();
+  window.addEventListener('resize',film);film();
 
-  /* история */
+  /* история: год -> неделя (компьютер) */
   var sec=document.getElementById('kak'),steps=[].slice.call(document.querySelectorAll('#steps li')),panel=document.getElementById('panel'),frames=[].slice.call(panel.querySelectorAll('.frames img')),pathEl=document.getElementById('path');
   var PATHS=['$ cd <em>год/</em>','$ cd <em>год/</em>квартал/','$ cd <em>год/квартал/</em>месяц/','$ cd <em>год/квартал/месяц/</em>неделя_'];
   var curStep=0;
@@ -670,59 +807,175 @@ html.veil body{background:#fff}
     frames[i].classList.add('on');curStep=i;
   }
   function story(){
-    if(window.innerWidth<=820)return;
+    if(mq('(max-width:820px)'))return;
     var r=sec.getBoundingClientRect(),total=sec.offsetHeight-window.innerHeight;
     var p=Math.min(Math.max(-r.top/total,0),.999);
     setStep(Math.floor(p*4));
   }
   window.addEventListener('resize',story);
-  if(window.matchMedia('(max-width:820px)').matches||window.matchMedia('(prefers-reduced-motion:reduce)').matches){setStep(3)}
+  if(mq('(prefers-reduced-motion:reduce)')){setStep(3)}
   steps.forEach(function(li,i){li.addEventListener('click',function(){setStep(i)})});
 
-  /* 3D-просмотр: грузится только когда нужен */
-  var v3=document.getElementById('viewer3d'),v3loaded=false;
-  function loadV3(){
-    if(v3loaded)return;v3loaded=true;
-    var f=document.createElement('iframe');f.src=v3.dataset.src+'&v='+Date.now();f.title='3D-просмотр ежедневника «Коммит»';f.allow='fullscreen';f.setAttribute('allowfullscreen','');
-    v3.appendChild(f);v3.classList.add('live');
+  /* горизонтальные ленты: свайп, мышь, стрелки, точки */
+  function initHS(root){
+    if(root._hs)return;root._hs=1;
+    var tr=root.querySelector('.hs-track'),items=[].slice.call(tr.children),n=items.length;
+    var ui=document.createElement('div');ui.className='wrap';
+    ui.innerHTML='<div class="hs-ui"><div class="hs-dots"></div><span class="hs-count" aria-live="off"></span><div class="hs-arrows"><button type="button" aria-label="Назад" class="pv">‹</button><button type="button" aria-label="Вперёд" class="nx">›</button></div></div>';
+    root.appendChild(ui);
+    var dl=ui.querySelector('.hs-dots'),cnt=ui.querySelector('.hs-count'),pv=ui.querySelector('.pv'),nx=ui.querySelector('.nx'),cur=0;
+    var many=n>8;
+    items.forEach(function(it,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Кадр '+(i+1)+' из '+n);b.addEventListener('click',function(){go(i)});dl.appendChild(b)});
+    if(many)dl.style.display='none';
+    function left(i){return items[i].offsetLeft-items[0].offsetLeft}
+    function go(i){i=Math.max(0,Math.min(n-1,i));tr.scrollTo({left:left(i),behavior:'smooth'})}
+    function upd(){
+      var x=tr.scrollLeft,best=0,bd=1e9;
+      for(var i=0;i<n;i++){var d=Math.abs(left(i)-x);if(d<bd){bd=d;best=i}}
+      if(tr.scrollLeft+tr.clientWidth>=tr.scrollWidth-4)best=n-1;
+      cur=best;
+      [].forEach.call(dl.children,function(d,j){d.classList.toggle('on',j===best)});
+      cnt.textContent=(best+1)+' / '+n;
+      pv.disabled=best===0;nx.disabled=best===n-1;
+    }
+    var t=false;tr.addEventListener('scroll',function(){if(t)return;t=true;requestAnimationFrame(function(){t=false;upd()})},{passive:true});
+    pv.addEventListener('click',function(){go(cur-1)});nx.addEventListener('click',function(){go(cur+1)});
+    tr.addEventListener('keydown',function(e){if(e.key==='ArrowRight'){go(cur+1);e.preventDefault()}if(e.key==='ArrowLeft'){go(cur-1);e.preventDefault()}});
+    /* перетаскивание мышью */
+    var down=false,sx=0,sl=0,moved=false;
+    tr.addEventListener('pointerdown',function(e){if(e.pointerType!=='mouse'||e.button!==0)return;down=true;moved=false;sx=e.clientX;sl=tr.scrollLeft});
+    window.addEventListener('pointermove',function(e){if(!down)return;var dx=e.clientX-sx;if(Math.abs(dx)>4){moved=true;tr.classList.add('drag')}if(moved)tr.scrollLeft=sl-dx});
+    window.addEventListener('pointerup',function(){if(!down)return;down=false;if(moved){tr.classList.remove('drag');go(cur)}});
+    tr.addEventListener('dragstart',function(e){e.preventDefault()});
+    window.addEventListener('resize',upd);
+    root._go=go;root._upd=upd;upd();
+    if('ResizeObserver' in window)new ResizeObserver(upd).observe(tr);
+    window.addEventListener('load',upd);
   }
-  document.getElementById('v3open').addEventListener('click',loadV3);
-  /* колесо над пустой полкой: просмотр передаёт прокрутку странице */
+  [].forEach.call(document.querySelectorAll('[data-hs]'),initHS);
+
+  /* 3D: на весь экран с выходом; на компьютере ещё и встроенный просмотр */
+  var viewer=document.getElementById('viewer3d'),vfull=document.getElementById('v3full'),vx=document.getElementById('v3x'),vfs=document.getElementById('v3fs');
+  var v3={open:false,inline:false,url:viewer.dataset.src};
+  function mkFrame(){var f=document.createElement('iframe');f.src=v3.url+'&v='+Date.now();f.title='3D-просмотр ежедневника «Коммит»';f.allow='fullscreen';f.setAttribute('allowfullscreen','');return f}
+  function openFull(push){
+    if(v3.open)return;v3.open=true;
+    vfull.querySelector('iframe')&&vfull.querySelector('iframe').remove();
+    vfull.insertBefore(mkFrame(),vx);vfull.hidden=false;
+    document.documentElement.classList.add('noscroll');
+    bg.forEach(function(el){el.inert=true});
+    if(push!==false)try{history.pushState({v3:1},'')}catch(e){}
+    vx.focus();
+  }
+  function closeFull(fromPop){
+    if(!v3.open)return;v3.open=false;
+    var f=vfull.querySelector('iframe');if(f)f.remove();
+    vfull.hidden=true;document.documentElement.classList.remove('noscroll');
+    bg.forEach(function(el){el.inert=false});
+    if(!fromPop&&history.state&&history.state.v3)try{history.back()}catch(e){}
+    var o=document.getElementById('v3open');if(o)o.focus({preventScroll:true});
+  }
+  document.getElementById('v3open').addEventListener('click',function(){openFull()});
+  vx.addEventListener('click',function(){closeFull(false)});
+  window.addEventListener('popstate',function(){if(v3.open)closeFull(true)});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&v3.open&&shield.hidden)closeFull(false)});
+  vfs.addEventListener('click',function(){openFull()});
+  function loadInline(){
+    if(v3.inline||mq('(max-width:820px)'))return;v3.inline=true;
+    viewer.appendChild(mkFrame());viewer.classList.add('live');vfs.hidden=false;
+  }
   window.addEventListener('message',function(e){
-    var f=v3.querySelector('iframe');
+    var f=viewer.querySelector('iframe');
     if(!f||e.source!==f.contentWindow||!e.data||e.data.kommit3d!=='wheel')return;
     var dy=Number(e.data.dy);if(!isFinite(dy))return;
     window.scrollBy({top:Math.max(-400,Math.min(400,dy)),left:0,behavior:'instant'});
   });
   var saveData=navigator.connection&&navigator.connection.saveData;
-  if('IntersectionObserver' in window&&window.innerWidth>820&&!saveData){
-    var v3io=new IntersectionObserver(function(es){if(es[0].isIntersecting){loadV3();v3io.disconnect()}},{rootMargin:'0px 0px 200px 0px'});
-    v3io.observe(v3);
+  if('IntersectionObserver' in window&&!mq('(max-width:820px)')&&!saveData){
+    var v3io=new IntersectionObserver(function(es){if(es[0].isIntersecting){loadInline();v3io.disconnect()}},{rootMargin:'0px 0px 200px 0px'});
+    v3io.observe(viewer);
   }
 
   /* наборы */
-  var tabs=document.getElementById('tabs'),panels=document.getElementById('panels');
+  var tabs=document.getElementById('tabs'),setgal=document.getElementById('setgal'),setmore=document.getElementById('setmore'),kitline=document.getElementById('kitline');
+  var vMain=document.getElementById('v-main'),vConv=document.getElementById('v-conv');
+  var curSet=0,curVar='main';
   SETS.forEach(function(s,i){
-    var b=document.createElement('button');b.className='tab';b.type='button';b.id='tab'+i;b.setAttribute('role','tab');b.setAttribute('aria-controls','sp'+i);b.setAttribute('aria-selected',i===0);b.tabIndex=i===0?0:-1;
+    var b=document.createElement('button');b.className='tab';b.type='button';b.id='tab'+i;b.setAttribute('role','tab');b.setAttribute('aria-selected',i===0);b.tabIndex=i===0?0:-1;
     b.style.setProperty('--k',s.k);b.innerHTML='<i></i>'+s.n;tabs.appendChild(b);
-    var d=document.createElement('div');d.className='setpanel';d.id='sp'+i;d.setAttribute('role','tabpanel');d.setAttribute('aria-labelledby','tab'+i);d.hidden=i!==0;
-    d.innerHTML='<div class="card setimg"><img src="img/'+s.img+'.webp" alt="Ежедневник набора «'+s.n+'», комплект «'+s.kit+'»" width="1920" height="1080" loading="lazy" decoding="async" draggable="false"><p class="setnote">Корешок: '+s.sp+'.</p></div><div class="card"><h3>Инструменты · комплект «'+s.kit+'»</h3><ul>'+s.t.map(function(x){return'<li>'+x+'</li>'}).join('')+'</ul></div><div class="card"><h3>Справочник</h3><ul>'+s.r.map(function(x){return'<li>'+x+'</li>'}).join('')+'</ul></div>';
-    panels.appendChild(d);
   });
-  function pick(i,focus){
-    [].forEach.call(tabs.children,function(t,j){t.setAttribute('aria-selected',j===i);t.tabIndex=j===i?0:-1});
-    [].forEach.call(panels.children,function(p,j){p.hidden=j!==i});
-    if(focus)tabs.children[i].focus();
+  function renderSet(){
+    var s=SETS[curSet],vn=curVar==='main'?'Основной':'Конверсия';
+    var html='<div class="hs" data-hs><div class="hs-track" role="group" aria-roledescription="карусель" aria-label="Кадры набора «'+s.n+'»" tabindex="0">'+FR.map(function(f,j){
+      var b='img2/'+s.slug+'/'+curVar+'/'+f[0];
+      return'<figure class="hs-i'+(f[2]?' sp':'')+'"><img src="'+b+'.webp" srcset="'+b+'-sm.webp 900w, '+b+'.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="'+f[1]+', набор «'+s.n+'», вариант «'+vn+'»" '+(j<2?'':'loading="lazy" ')+'decoding="async" draggable="false"><figcaption><h3>'+f[1]+'</h3></figcaption></figure>';
+    }).join('')+'</div></div>';
+    setgal.innerHTML=html;initHS(setgal.firstChild);
+    kitline.textContent='Комплект: '+s.kit+(curVar==='conv'?', вариант «Конверсия»':'');
+    setmore.innerHTML='<div class="card"><h3>Инструменты</h3><ul>'+s.t.map(function(x){return'<li>'+x+'</li>'}).join('')+'</ul></div><div class="card"><h3>Справочник</h3><ul>'+s.r.map(function(x){return'<li>'+x+'</li>'}).join('')+'</ul></div>';
   }
-  tabs.addEventListener('click',function(e){var b=e.target.closest('.tab');if(b)pick([].indexOf.call(tabs.children,b))});
+  function pickSet(i,focus){
+    curSet=i;
+    [].forEach.call(tabs.children,function(t,j){t.setAttribute('aria-selected',j===i);t.tabIndex=j===i?0:-1});
+    if(focus)tabs.children[i].focus();
+    renderSet();
+  }
+  function pickVar(v){curVar=v;vMain.setAttribute('aria-pressed',v==='main');vConv.setAttribute('aria-pressed',v==='conv');renderSet()}
+  vMain.addEventListener('click',function(){pickVar('main')});vConv.addEventListener('click',function(){pickVar('conv')});
+  tabs.addEventListener('click',function(e){var b=e.target.closest('.tab');if(b){pickSet([].indexOf.call(tabs.children,b));b.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}});
   tabs.addEventListener('keydown',function(e){
     var c=[].indexOf.call(tabs.children,document.activeElement),n=tabs.children.length;if(c<0)return;
-    if(e.key==='ArrowRight'){pick((c+1)%n,true);e.preventDefault()}
-    if(e.key==='ArrowLeft'){pick((c-1+n)%n,true);e.preventDefault()}
-    if(e.key==='Home'){pick(0,true);e.preventDefault()}
-    if(e.key==='End'){pick(n-1,true);e.preventDefault()}
+    if(e.key==='ArrowRight'){pickSet((c+1)%n,true);e.preventDefault()}
+    if(e.key==='ArrowLeft'){pickSet((c-1+n)%n,true);e.preventDefault()}
+    if(e.key==='Home'){pickSet(0,true);e.preventDefault()}
+    if(e.key==='End'){pickSet(n-1,true);e.preventDefault()}
   });
+  renderSet();
 
+  /* просмотр кадра крупно */
+  var lb=document.createElement('div');lb.id='lb';lb.hidden=true;lb.setAttribute('role','dialog');lb.setAttribute('aria-modal','true');lb.setAttribute('aria-label','Кадр крупно');
+  lb.innerHTML='<div class="bar"><p></p><button type="button" class="cl"><span aria-hidden="true">✕</span> Закрыть</button></div><div class="view"><img alt="" draggable="false"></div><div class="nv"><button type="button" class="pv" aria-label="Предыдущий">‹</button><button type="button" class="nx" aria-label="Следующий">›</button></div>';
+  document.body.appendChild(lb);
+  var lbImg=lb.querySelector('img'),lbCap=lb.querySelector('p'),lbList=[],lbI=0;
+  function lbShow(i){
+    lbI=(i+lbList.length)%lbList.length;var im=lbList[lbI];
+    lbImg.src=(im.currentSrc||im.src).replace('-sm.webp','.webp').replace(/^https?:\/\/[^/]+\/(?:[^/]+\/)?(?=img2)/,'');lbImg.alt=im.alt;lbImg.className=im.closest('.sp')?'wide':'';lbCap.textContent=im.alt;lb.querySelector('.view').scrollTo(0,0);
+  }
+  function lbOpen(im){
+    var scope=im.closest('.hs-track')||im.closest('.bento')||im.parentNode;
+    lbList=[].slice.call(scope.querySelectorAll('img'));lbShow(lbList.indexOf(im));
+    lb.hidden=false;document.documentElement.classList.add('noscroll');bg.forEach(function(el){el.inert=true});
+    try{history.pushState({lb:1},'')}catch(e){}
+    lb.querySelector('.cl').focus();
+  }
+  function lbClose(fromPop){
+    if(lb.hidden)return;lb.hidden=true;lbImg.removeAttribute('src');
+    if(!v3.open){document.documentElement.classList.remove('noscroll');bg.forEach(function(el){el.inert=false})}
+    if(!fromPop&&history.state&&history.state.lb)try{history.back()}catch(e){}
+  }
+  lb.querySelector('.cl').addEventListener('click',function(){lbClose(false)});
+  lb.querySelector('.pv').addEventListener('click',function(){lbShow(lbI-1)});
+  lb.querySelector('.nx').addEventListener('click',function(){lbShow(lbI+1)});
+  window.addEventListener('popstate',function(){if(!lb.hidden)lbClose(true)});
+  document.addEventListener('keydown',function(e){
+    if(lb.hidden||!shield.hidden)return;
+    if(e.key==='Escape'){lbClose(false)}else if(e.key==='ArrowRight'){lbShow(lbI+1)}else if(e.key==='ArrowLeft'){lbShow(lbI-1)}
+  });
+  var dwn=null;
+  document.addEventListener('pointerdown',function(e){dwn={x:e.clientX,y:e.clientY}});
+  document.addEventListener('click',function(e){
+    var im=e.target.closest&&e.target.closest('.hs-i img,.bento .tile img');
+    if(!im||!dwn)return;
+    if(Math.abs(e.clientX-dwn.x)>6||Math.abs(e.clientY-dwn.y)>6)return;
+    lbOpen(im);
+  });
+  [].forEach.call(document.querySelectorAll('.hs-i img,.bento .tile img'),function(i){i.classList.add('zoomable')});
+
+  /* поделиться страницей */
+  document.getElementById('foot-share').addEventListener('click',function(){
+    if(navigator.share){navigator.share({title:'Коммит',url:pageUrl()}).catch(function(){})}
+    else copyLink().then(function(){alert('Ссылка скопирована')}).catch(function(){});
+  });
 })();
 </script>
 </body>
