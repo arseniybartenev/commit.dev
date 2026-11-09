@@ -384,7 +384,7 @@ html.veil body{background:#fff}
   .hs-det .pg .hs-i.tx{padding:16px}
   /* главный экран: ровно полэкрана, текст слева, фото справа во всю высоту блока */
   .hero{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:0;align-items:stretch;height:75svh;min-height:420px;padding:0;text-align:left;overflow:hidden}
-  .hero .wrap{max-width:none;margin:0;display:flex;flex-direction:column;justify-content:center;padding:57px 4vw 0 max(24px,calc((100vw - 1240px)/2))}
+  .hero .wrap{max-width:none;margin:0;display:flex;flex-direction:column;justify-content:center;padding:57px 3vw 0 clamp(24px,5vw,120px)}
   .hero .eyebrow{margin:0 0 1.6svh;font-size:clamp(10px,1.5svh,13px)}
   .hero h1{font-size:clamp(38px,min(6.4vw,10svh),84px);line-height:1}
   .hero .code{font-size:clamp(12px,min(1.3vw,2.4svh),16px);margin:3svh 0 0;max-width:none}
