@@ -319,6 +319,24 @@ html.veil body{background:#fff}
 .hs-i figcaption{padding:14px 6px 0}
 .hs-i.sp img{object-fit:contain}
 .zoomable{cursor:zoom-in}
+/* отличия: сжатый блок */
+.diff{margin-top:48px}
+.cmpd{margin-top:32px;border-top:1px solid var(--line)}
+.cmpd>summary,.specsd>summary{cursor:pointer;list-style:none;padding:18px 0;font-weight:600;letter-spacing:-.01em;min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.cmpd>summary::-webkit-details-marker,.specsd>summary::-webkit-details-marker{display:none}
+.cmpd>summary::after,.specsd>summary::after{content:"+";font:500 20px/1 var(--mono);color:var(--accent-ink)}
+.cmpd[open]>summary::after,.specsd[open]>summary::after{content:"–"}
+.cmpd .cmp{margin-top:8px}
+.specsd{margin-top:40px;border-top:1px solid var(--line)}
+.specsd .specs{margin-top:0}
+.insline{margin-top:48px;padding:28px;border:1px solid var(--line);border-radius:24px;background:var(--surface)}
+.insline h3{font-size:22px;letter-spacing:-.02em;margin-bottom:8px}
+.insline p{color:var(--ink-2);max-width:62ch}
+.insline .szs{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.insline .szs span{font:500 13px/1 var(--mono);border:1px solid var(--line);border-radius:999px;padding:9px 14px;color:var(--ink-2)}
+.insline .soon{display:inline-block;font:500 13px/1.3 var(--mono);color:var(--accent-ink);margin-top:18px}
+@media(max-width:560px){.insline{padding:20px;border-radius:18px}}
+
 /* отличия */
 .cmp{margin-top:48px;border-top:1px solid var(--line)}
 .cmp .r{display:grid;grid-template-columns:1.05fr 1fr 1fr 1.25fr;gap:0 24px;padding:20px 0;border-bottom:1px solid var(--line);align-items:start}
@@ -484,7 +502,6 @@ html.noscroll,html.noscroll body{overflow:hidden}
     <a class="logo" href="#top" aria-label="Коммит, в начало">Коммит<i>_</i></a>
     <nav aria-label="Разделы">
       <a href="#kak">Как устроен</a>
-      <a href="#vnutri">Внутри</a>
       <a href="#otlichiya">Отличия</a>
       <a href="#nabory">Наборы</a>
       <a href="#model">3D</a>
@@ -512,14 +529,34 @@ html.noscroll,html.noscroll body{overflow:hidden}
   </div>
 </section>
 
-<section class="why">
+<section class="why" id="otlichiya">
   <div class="wrap">
     <p class="eyebrow rv">// зачем</p>
     <h2 class="rv">Тикет помнит задачу, а не решение.</h2>
     <div class="cols">
       <p class="rv"><strong>В трекере есть задача и статус.</strong> Нет того, что вы взвешивали, от чего отказались и что пообещали на встрече.</p>
-      <p class="rv d1">Через месяц это нужно, а восстановить нечем. В «Коммите» у таких записей есть своё место: решение, баг, встреча, победа для ревью. На бумаге, без уведомлений и вкладок. <strong>Открыл и записал.</strong></p>
+      <p class="rv d1">Через месяц это нужно, а восстановить нечем. В «Коммите» у таких записей есть своё место, на бумаге и без вкладок. <strong>Открыл и записал.</strong></p>
     </div>
+    <div class="core diff">
+      <div class="rv"><span class="mk">01</span><h3>Не экран</h3><p>Нет уведомлений и вкладок. Страница конечна: день закончился, его закоммитили.</p></div>
+      <div class="rv d1"><span class="mk">02</span><h3>Не пустая тетрадь</h3><p>Холсты для схем, прогнозы и шаблоны под твою работу уже разлинованы. Рисуешь пером, не выходя из кода.</p></div>
+      <div class="rv d2"><span class="mk">03</span><h3>Лист можно вырвать</h3><p>14 страниц инструментов отрываются по перфорации. Вырвал и отдал коллеге.</p></div>
+    </div>
+    <details class="cmpd rv">
+      <summary>Подробное сравнение и где экран сильнее</summary>
+      <div class="cmp" role="table" aria-label="Сравнение способов вести рабочие дни">
+      <div class="r h" role="row"><div role="columnheader"></div><div role="columnheader">Notion и приложения</div><div role="columnheader">Обычный ежедневник</div><div role="columnheader"><b>Коммит</b></div></div>
+      <div class="r rv"><div class="q">Внимание</div><div class="c" data-l="Notion и приложения">Уведомления и вкладки рядом, отвлечься легко.</div><div class="c" data-l="Обычный ежедневник">Ничто не отвлекает.</div><div class="k" data-l="Коммит">Нет уведомлений, страница конечна. День закончился, его закоммитили.</div></div>
+      <div class="r rv"><div class="q">Схемы и рисунки</div><div class="c" data-l="Notion и приложения">Отдельный редактор, нужно переключаться из кода.</div><div class="c" data-l="Обычный ежедневник">Пустая страница, разметку делаешь сам.</div><div class="k" data-l="Коммит">Готовые холсты под набор: sequence, архитектура, раскадровка, пайплайн, топология, дорожная карта. Рисуешь пером.</div></div>
+      <div class="r rv"><div class="q">Рабочие решения</div><div class="c" data-l="Notion и приложения">Шаблоны есть, но их нужно собрать и поддерживать.</div><div class="c" data-l="Обычный ежедневник">Обычно только пустые линии.</div><div class="k" data-l="Коммит">Ключевые шаблоны набора на отрывных листах: баг, постмортем, тест-план, встреча один на один и другие.</div></div>
+      <div class="r rv"><div class="q">Доверие к своим оценкам</div><div class="c" data-l="Notion и приложения">Можно вести, но нужно настроить самому.</div><div class="c" data-l="Обычный ежедневник">Не предусмотрено.</div><div class="k" data-l="Коммит">Страница прогнозов: записал предсказание и уверенность, потом отметил, сбылось ли.</div></div>
+      <div class="r rv"><div class="q">Показать коллеге</div><div class="c" data-l="Notion и приложения">Открыть ссылку и дать доступ.</div><div class="c" data-l="Обычный ежедневник">Показать страницу.</div><div class="k" data-l="Коммит">Вырвал лист по перфорации и отдал. Лист двусторонний, на обороте тот же шаблон.</div></div>
+      <div class="r scr rv"><div class="q">Поиск по истории<small>где экран сильнее</small></div><div class="c" data-l="Notion и приложения">Находит за секунду.</div><div class="c" data-l="Обычный ежедневник">Листаешь.</div><div class="k" data-l="Коммит">Листаешь. Метки M01–M12 на срезе помогают найти нужный месяц.</div></div>
+      <div class="r scr rv"><div class="q">Копия и доступ с телефона<small>где экран сильнее</small></div><div class="c" data-l="Notion и приложения">Синхронизация на всех устройствах.</div><div class="c" data-l="Обычный ежедневник">Одна копия.</div><div class="k" data-l="Коммит">Одна копия. Бумагу не потеряешь при сбое, но и с собой всегда нужно носить.</div></div>
+      <div class="r scr rv"><div class="q">Напоминания<small>где экран сильнее</small></div><div class="c" data-l="Notion и приложения">Напомнит сам.</div><div class="c" data-l="Обычный ежедневник">Не напомнит.</div><div class="k" data-l="Коммит">Не напомнит. Зато и не отвлечёт.</div></div>
+    </div>
+      <p class="vnote">Честно: поиск по истории, синхронизацию и напоминания экран делает лучше. Коммит не заменяет Notion, он нужен там, где экран мешает.</p>
+    </details>
   </div>
 </section>
 
@@ -530,7 +567,7 @@ html.noscroll,html.noscroll body{overflow:hidden}
         <div>
           <p class="eyebrow">// как устроен</p>
           <h2 id="kak-h">Страница на каждый день.</h2>
-          <p class="lead">От радара технологий в начале до колофона в конце. Ежедневник недатированный: начни в любой день, ни одна страница не пропадёт.</p>
+          <p class="lead">Не пустая страница, а день с пятью задачами, заметками и итогом. Ежедневник недатированный: начни в любой день, ни одна страница не пропадёт.</p>
           <ol class="steps" id="steps"><li class=on><span class="n">01</span><h3>Начало</h3><p>Титул с полями профиля, радар технологий и журнал роста. Радар показывает, чем владеешь, журнал помогает подвести итоги самому.</p></li><li><span class="n">02</span><h3>Дни</h3><p>250 страниц, по одной на день, два дня на разворот. Пять задач, заметки и итог дня. Месяц и день недели отмечаешь сам.</p></li><li><span class="n">03</span><h3>Инструменты</h3><p>14 страниц на отрывных листах: холсты для схем, прогнозы, встреча и ключевые шаблоны набора. Лист двусторонний, перфорация у корешка.</p></li><li><span class="n">04</span><h3>Конец</h3><p>Две страницы заметок и колофон с QR-кодами. Справочник собран на форзацах, команды в стиле терминала.</p></li></ol>
         </div>
         <div class="panel" id="panel" data-step="0">
@@ -543,47 +580,11 @@ html.noscroll,html.noscroll body{overflow:hidden}
   </div>
 </section>
 
-<section id="vnutri" class="inside" aria-labelledby="in-h">
-  <div class="wrap">
-    <p class="eyebrow rv">// внутри</p>
-    <h2 class="rv" id="in-h">Что внутри ежедневника.</h2>
-    <p class="lead rv d1">Не пустая тетрадь, а рабочая система на 250 рабочих дней. Страница на каждый день, отрывные инструменты для рабочих ситуаций и место для того, что обычно теряется.</p>
-    <div class="core">
-      <div class="rv"><span class="mk">01</span><h3>Страница дня</h3><p>Пять задач, заметки и итог дня. 250 рабочих дней, два на разворот. Месяц и день недели отмечаешь сам, поэтому начать можно в любой день. Метки M01–M12 на срезе помогают найти нужный месяц.</p></div>
-      <div class="rv d1"><span class="mk">02</span><h3>Инструменты</h3><p>14 отрывных страниц с перфорацией: ключевой шаблон набора, два холста для схем, встреча, прогнозы и ещё один шаблон. Плюс радар технологий и журнал роста в начале.</p></div>
-      <div class="rv d2"><span class="mk">03</span><h3>Справочник на форзацах</h3><p>Git, Shell и другое по набору: команды в стиле терминала, не нужно искать шпаргалку. На заднем форзаце кармашек для визиток и стикеров.</p></div>
-    </div>
-    <p class="vnote rv">Основа у всех наборов одна и та же. Набор меняет справочник, холсты и несколько шаблонов, всё остальное остаётся как есть.</p>
-  </div>
-  <div class="hs " data-hs id="hs-inside"><div class="hs-track" role="group" aria-roledescription="карусель" aria-label="Что на страницах" tabindex="0"><figure class="hs-i sp"><img src="img2/web/main/04-spread-4-5.webp" srcset="img2/web/main/04-spread-4-5-sm.webp 900w, img2/web/main/04-spread-4-5.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Первый разворот: как вести ежедневник и карта обучения" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Страницы ежедневника</h3><p>Рабочая система на каждый день: от радара технологий до колофона.</p></figcaption></figure><figure class="hs-i "><img src="img2/web/main/09-flip.webp" srcset="img2/web/main/09-flip-sm.webp 900w, img2/web/main/09-flip.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Страницы ежедневника листаются" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Недатированные страницы</h3><p>Начни в любой день: пустых дат нет, ни одна страница не пропадёт.</p></figcaption></figure><figure class="hs-i "><img src="img2/web/main/14-git-row.webp" srcset="img2/web/main/14-git-row-sm.webp 900w, img2/web/main/14-git-row.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Лента git log вдоль сгиба страницы" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Метки на срезе</h3><p>Метки M01–M12 ступенькой по краю: быстро открываешь нужный месяц.</p></figcaption></figure><figure class="hs-i "><img src="img2/web/main/03-back.webp" srcset="img2/web/main/03-back-sm.webp 900w, img2/web/main/03-back.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Задняя обложка с надписью exit(0)" loading="lazy" decoding="async" draggable="false"><figcaption><h3>exit(0)</h3><p>На задней обложке напоминание: закончили день, закоммитьте его.</p></figcaption></figure></div></div>
-  <div class="wrap"></div>
-</section>
-
-<section id="otlichiya" class="paper" aria-labelledby="ot-h">
-  <div class="wrap">
-    <p class="eyebrow rv">// отличия</p>
-    <h2 class="rv" id="ot-h">Чем он отличается от экрана и от обычного ежедневника.</h2>
-    <p class="lead rv d1">Коммит не заменяет Notion. Он делает то, чего экран не умеет, и честно не берётся за то, что экран делает лучше.</p>
-    <div class="cmp" role="table" aria-label="Сравнение способов вести рабочие дни">
-      <div class="r h" role="row"><div role="columnheader"></div><div role="columnheader">Notion и приложения</div><div role="columnheader">Обычный ежедневник</div><div role="columnheader"><b>Коммит</b></div></div>
-      <div class="r rv"><div class="q">Внимание</div><div class="c" data-l="Notion и приложения">Уведомления и вкладки рядом, отвлечься легко.</div><div class="c" data-l="Обычный ежедневник">Ничто не отвлекает.</div><div class="k" data-l="Коммит">Нет уведомлений, страница конечна. День закончился, его закоммитили.</div></div>
-      <div class="r rv"><div class="q">Схемы и рисунки</div><div class="c" data-l="Notion и приложения">Отдельный редактор, нужно переключаться из кода.</div><div class="c" data-l="Обычный ежедневник">Пустая страница, разметку делаешь сам.</div><div class="k" data-l="Коммит">Готовые холсты под набор: sequence, архитектура, раскадровка, пайплайн, топология, дорожная карта. Рисуешь пером.</div></div>
-      <div class="r rv"><div class="q">Рабочие решения</div><div class="c" data-l="Notion и приложения">Шаблоны есть, но их нужно собрать и поддерживать.</div><div class="c" data-l="Обычный ежедневник">Обычно только пустые линии.</div><div class="k" data-l="Коммит">Ключевые шаблоны набора на отрывных листах: баг, постмортем, тест-план, встреча один на один и другие.</div></div>
-      <div class="r rv"><div class="q">Доверие к своим оценкам</div><div class="c" data-l="Notion и приложения">Можно вести, но нужно настроить самому.</div><div class="c" data-l="Обычный ежедневник">Не предусмотрено.</div><div class="k" data-l="Коммит">Страница прогнозов: записал предсказание и уверенность, потом отметил, сбылось ли.</div></div>
-      <div class="r rv"><div class="q">Показать коллеге</div><div class="c" data-l="Notion и приложения">Открыть ссылку и дать доступ.</div><div class="c" data-l="Обычный ежедневник">Показать страницу.</div><div class="k" data-l="Коммит">Вырвал лист по перфорации и отдал. Лист двусторонний, на обороте тот же шаблон.</div></div>
-      <div class="r scr rv"><div class="q">Поиск по истории<small>где экран сильнее</small></div><div class="c" data-l="Notion и приложения">Находит за секунду.</div><div class="c" data-l="Обычный ежедневник">Листаешь.</div><div class="k" data-l="Коммит">Листаешь. Метки M01–M12 на срезе помогают найти нужный месяц.</div></div>
-      <div class="r scr rv"><div class="q">Копия и доступ с телефона<small>где экран сильнее</small></div><div class="c" data-l="Notion и приложения">Синхронизация на всех устройствах.</div><div class="c" data-l="Обычный ежедневник">Одна копия.</div><div class="k" data-l="Коммит">Одна копия. Бумагу не потеряешь при сбое, но и с собой всегда нужно носить.</div></div>
-      <div class="r scr rv"><div class="q">Напоминания<small>где экран сильнее</small></div><div class="c" data-l="Notion и приложения">Напомнит сам.</div><div class="c" data-l="Обычный ежедневник">Не напомнит.</div><div class="k" data-l="Коммит">Не напомнит. Зато и не отвлечёт.</div></div>
-    </div>
-  </div>
-  <div class="hs " data-hs id="hs-paper"><div class="hs-track" role="group" aria-roledescription="карусель" aria-label="Только на бумаге" tabindex="0"><figure class="hs-i tx"><span class="mk" aria-hidden="true">//</span><h3>Холсты для схем</h3><p>Готовая разметка под схему, свои у каждого набора. Рисуешь пером, не выходя из кода.</p></figure><figure class="hs-i tx"><span class="mk" aria-hidden="true">%</span><h3>Прогнозы</h3><p>Записал предсказание и уверенность в процентах. Через время отметил, сбылось ли. Внизу считается калибровка.</p></figure><figure class="hs-i tx"><span class="mk" aria-hidden="true">R8</span><h3>Радар технологий</h3><p>Восемь осей, четыре свободны. От «пока нет» в центре до «владею» на краю. Видно, куда растёшь.</p></figure><figure class="hs-i tx"><span class="mk" aria-hidden="true">v1</span><h3>Журнал роста</h3><p>Страница для самооценки: что получилось, чему научился. Подводишь итоги сам, без отчётов.</p></figure><figure class="hs-i tx"><span class="mk" aria-hidden="true">✂</span><h3>Отрывные листы</h3><p>14 страниц инструментов отрываются по перфорации. Отдал коллеге лист или повесил у монитора.</p></figure><figure class="hs-i tx"><span class="mk" aria-hidden="true">QR</span><h3>Вкладыши и бонусы</h3><p>QR-коды на колофоне ведут к вкладышам и бонусам: скачал, распечатал, положил в ежедневник.</p></figure></div></div>
-</section>
-
 <section id="nabory" class="alt" aria-labelledby="nb-h">
   <div class="wrap">
     <p class="eyebrow rv">// наборы</p>
     <h2 class="rv" id="nb-h">Выберите свой набор.</h2>
-    <p class="lead rv d1">У каждого свой справочник, инструменты и цвета. Пролистайте кадры вбок.</p>
+    <p class="lead rv d1">Справочник, холсты и шаблоны под твою работу, а не один универсальный на всех. Пролистайте кадры вбок.</p>
   </div>
   <div class="setsticky"><div class="wrap">
     <div class="tabs" role="tablist" aria-label="Наборы" id="tabs"></div>
@@ -598,31 +599,13 @@ html.noscroll,html.noscroll body{overflow:hidden}
   <div class="wrap">
     <div class="setmore" id="setmore"></div>
     <p class="vnote rv">Основной: тёмная обложка и цветной корешок. Конверсия: обложка и корешок меняются цветами. Резинка и петля всегда в цвет корешка.</p>
+    <div class="insline rv">
+      <h3>Вкладыши: год, квартал, месяц, статус</h3>
+      <p>Скачай бесплатно, распечатай и положи в ежедневник, ничего открывать не нужно. Если хочешь готовые, допечатаем на плотной бумаге и вложим за отдельную плату.</p>
+      <div class="szs"><span>A5</span><span>A4</span><span>A3</span><span>горизонт и вертикаль</span><span>оборот со сгибами</span></div>
+      <p class="soon">Файлы для скачивания появятся до старта продаж</p>
+    </div>
   </div>
-</section>
-
-<section id="vkladyshi" class="ins" aria-labelledby="vk-h">
-  <div class="wrap">
-    <p class="eyebrow rv">// вкладыши</p>
-    <h2 class="rv" id="vk-h">Вкладыши: год, квартал, месяц, статус.</h2>
-    <p class="lead rv d1">Планирование по годам и месяцам живёт отдельно от ежедневника. Скачай вкладыши бесплатно и распечатай сами. Если хочешь готовые, допечатаем на плотной бумаге и вложим за отдельную плату.</p>
-  </div>
-  <div class="hs " data-hs id="hs-ins"><div class="hs-track" role="group" aria-roledescription="карусель" aria-label="Вкладыши" tabindex="0"><figure class="hs-i tx"><span class="mk" aria-hidden="true">Y</span><h3>Год</h3><p>Лист на весь год: большая картина, которая не должна занимать страницы дней.</p></figure><figure class="hs-i tx"><span class="mk" aria-hidden="true">Q</span><h3>Квартал</h3><p>Квартальный план отдельным листом. Положил в ежедневник и не потерял.</p></figure><figure class="hs-i tx"><span class="mk" aria-hidden="true">M</span><h3>Месяц</h3><p>Месяц на одном листе: что важно и когда. Размер выбираешь сам.</p></figure><figure class="hs-i tx"><span class="mk" aria-hidden="true">//</span><h3>Карточки статуса</h3><p>Короткие карточки, чтобы поставить на стол или у монитора.</p></figure></div></div>
-  <div class="wrap">
-    <div class="szs rv" aria-label="Форматы"><span>A5</span><span>A4</span><span>A3</span><span>горизонт и вертикаль</span><span>оборот со сгибами</span></div>
-    <p class="soon rv">Файлы для скачивания появятся до старта продаж</p>
-  </div>
-</section>
-
-<section class="film" id="vruki" aria-labelledby="film-h">
-  <div class="wrap">
-    <p class="eyebrow rv">// вблизи</p>
-    <h2 class="rv" id="film-h">Как он живёт на столе.</h2>
-  </div>
-  <div class="film-track" id="film" style="--n:5">
-    <div class="film-stage"><figure class="film-f on"><img src="img2/mobile/main/02-standing.webp" srcset="img2/mobile/main/02-standing-sm.webp 900w, img2/mobile/main/02-standing.webp 2200w" sizes="100vw" width="2200" height="1238" alt="Ежедневник «Коммит» стоит на столе" decoding="async" draggable="false"><figcaption><h3>Твёрдая обложка</h3><p>Переплёт 7БЦ с мягкой обивкой soft-touch. Матовая, чуть бархатная на ощупь.</p></figcaption></figure><figure class="film-f" aria-hidden="true"><img src="img2/data/main/09-flip.webp" srcset="img2/data/main/09-flip-sm.webp 900w, img2/data/main/09-flip.webp 2200w" sizes="100vw" width="2200" height="1238" alt="Страницы ежедневника листаются" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Без дат на страницах</h3><p>Начни в любой день. Пропущенного дня не бывает, ни одна страница не пропадёт.</p></figcaption></figure><figure class="film-f" aria-hidden="true"><img src="img2/lead/main/10-stack.webp" srcset="img2/lead/main/10-stack-sm.webp 900w, img2/lead/main/10-stack.webp 2200w" sizes="100vw" width="2200" height="1238" alt="Стопка ежедневников «Коммит»" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Закончился, берёшь следующий</h3><p>Недатированный ежедневник не привязан к году. Начал в марте, закончил, когда дописал последнюю страницу.</p></figcaption></figure><figure class="film-f" aria-hidden="true"><img src="img2/infra/main/04-spread-4-5.webp" srcset="img2/infra/main/04-spread-4-5-sm.webp 900w, img2/infra/main/04-spread-4-5.webp 2200w" sizes="100vw" width="2200" height="1238" alt="Разворот ежедневника с кобальтовыми акцентами и ляссе" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Цвет и на страницах</h3><p>Выделения и метки внутри тоже в тон комплекта. Здесь кобальтовый набор для инфраструктуры.</p></figcaption></figure><figure class="film-f" aria-hidden="true"><img src="img2/web/conv/02-standing.webp" srcset="img2/web/conv/02-standing-sm.webp 900w, img2/web/conv/02-standing.webp 2200w" sizes="100vw" width="2200" height="1238" alt="Ежедневник «Коммит» в варианте «Конверсия»" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Конверсия: те же страницы, другие цвета</h3><p>Обложка и корешок меняются цветами. Страницы и шаблоны те же, выбираешь по вкусу.</p></figcaption></figure><ol class="film-dots" aria-hidden="true"><li class="on"></li><li></li><li></li><li></li><li></li></ol></div>
-  </div>
-  <div class="film-m"><div class="hs " data-hs id="hs-film"><div class="hs-track" role="group" aria-roledescription="карусель" aria-label="Вблизи" tabindex="0"><figure class="hs-i film-s"><img src="img2/mobile/main/02-standing.webp" srcset="img2/mobile/main/02-standing-sm.webp 900w, img2/mobile/main/02-standing.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Ежедневник «Коммит» стоит на столе" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Твёрдая обложка</h3><p>Переплёт 7БЦ с мягкой обивкой soft-touch. Матовая, чуть бархатная на ощупь.</p></figcaption></figure><figure class="hs-i film-s"><img src="img2/data/main/09-flip.webp" srcset="img2/data/main/09-flip-sm.webp 900w, img2/data/main/09-flip.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Страницы ежедневника листаются" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Без дат на страницах</h3><p>Начни в любой день. Пропущенного дня не бывает, ни одна страница не пропадёт.</p></figcaption></figure><figure class="hs-i film-s"><img src="img2/lead/main/10-stack.webp" srcset="img2/lead/main/10-stack-sm.webp 900w, img2/lead/main/10-stack.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Стопка ежедневников «Коммит»" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Закончился, берёшь следующий</h3><p>Недатированный ежедневник не привязан к году. Начал в марте, закончил, когда дописал последнюю страницу.</p></figcaption></figure><figure class="hs-i film-s"><img src="img2/infra/main/04-spread-4-5.webp" srcset="img2/infra/main/04-spread-4-5-sm.webp 900w, img2/infra/main/04-spread-4-5.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Разворот ежедневника с кобальтовыми акцентами и ляссе" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Цвет и на страницах</h3><p>Выделения и метки внутри тоже в тон комплекта. Здесь кобальтовый набор для инфраструктуры.</p></figcaption></figure><figure class="hs-i film-s"><img src="img2/web/conv/02-standing.webp" srcset="img2/web/conv/02-standing-sm.webp 900w, img2/web/conv/02-standing.webp 2200w" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Ежедневник «Коммит» в варианте «Конверсия»" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Конверсия: те же страницы, другие цвета</h3><p>Обложка и корешок меняются цветами. Страницы и шаблоны те же, выбираешь по вкусу.</p></figcaption></figure></div></div></div>
 </section>
 
 <section id="detali" class="alt" aria-labelledby="det-h">
@@ -642,7 +625,7 @@ html.noscroll,html.noscroll body{overflow:hidden}
       <article class="tile txt rv"><span class="mk" aria-hidden="true">v1</span><h3>Журнал роста</h3><p>Страница для самооценки: что получилось и чему научился.</p></article>
       <article class="tile txt rv"><span class="mk" aria-hidden="true">//</span><h3>Пасхалки</h3><p>Внутри спрятаны шутки для своих. Находите сами.</p></article>
     </div>
-    <dl class="specs rv">
+    <details class="specsd rv"><summary>Характеристики</summary><dl class="specs">
       <div><dt>Страниц</dt><dd>272<small>17 тетрадей по 16</small></dd></div>
       <div><dt>Дни</dt><dd>250 страниц-дней, по два на разворот</dd></div>
       <div><dt>Инструменты</dt><dd>14 отрывных страниц с перфорацией</dd></div>
@@ -654,7 +637,7 @@ html.noscroll,html.noscroll body{overflow:hidden}
       <div><dt>Закрывается</dt><dd>резинкой с задней обложки, цвет в тон комплекта</dd></div>
       <div><dt>Для ручки</dt><dd>петля внутри задней обложки, справа посередине</dd></div>
       <div><dt>Даты внутри</dt><dd>нет, месяц и день недели отмечаешь сам</dd></div>
-    </dl>
+    </dl></details>
   </div>
 </section>
 
@@ -686,11 +669,11 @@ html.noscroll,html.noscroll body{overflow:hidden}
     <p class="eyebrow rv">// вопросы</p>
     <h2 class="rv">Коротко о главном.</h2>
     <div class="faq rv">
+      <details><summary>Зачем это, если есть Notion?</summary><p>Коммит не заменяет Notion. Поиск по истории, синхронизацию и напоминания экран делает лучше. Ежедневник нужен там, где экран мешает: записать решение без вкладок, нарисовать схему пером, вырвать лист и отдать.</p></details>
       <details><summary>Когда начнутся продажи?</summary><p>Дату пока не назначил. Сначала смотрю, сколько людей ждёт ежедневник, потом решаю с печатью.</p></details>
       <details><summary>Сколько будет стоить ежедневник?</summary><p>Цену назову до оплаты. Сейчас считаю печать в типографиях, поэтому цифру не обещаю.</p></details>
       <details><summary>Бронь меня к чему-то обязывает?</summary><p>Нет. Платить сейчас ничего не нужно, а купить потом можно или не купить.</p></details>
       <details><summary>Чем отличаются наборы и «Конверсия»?</summary><p>Ядро у всех одно. Набор меняет справочник, холсты и несколько шаблонов. «Конверсия» меняет цвета: обложка и корешок меняются местами.</p></details>
-      <details><summary>Как получить ежедневник?</summary><p>Способ доставки определю к старту продаж и напишу вам.</p></details>
       <details><summary>Как удалить мой контакт?</summary><p>Напишите на почту, я удалю.</p></details>
     </div>
   </div>
@@ -854,9 +837,9 @@ html.noscroll,html.noscroll body{overflow:hidden}
   window.addEventListener('scroll',function(){if(ticking)return;ticking=true;requestAnimationFrame(function(){ticking=false;onScroll()})},{passive:true});
 
   /* лента на весь экран (компьютер) */
-  var track=document.getElementById('film'),ffs=[].slice.call(track.querySelectorAll('.film-f')),dots=[].slice.call(track.querySelectorAll('.film-dots li')),curF=0;
+  var track=document.getElementById('film')||document.createElement('div'),ffs=[].slice.call(track.querySelectorAll('.film-f')),dots=[].slice.call(track.querySelectorAll('.film-dots li')),curF=0;
   function film(){
-    if(mq('(max-width:820px)'))return;
+    if(!ffs.length||mq('(max-width:820px)'))return;
     var i=curF,stacked=mq('(prefers-reduced-motion:reduce)');
     if(!stacked){
       var r=track.getBoundingClientRect(),total=track.offsetHeight-window.innerHeight;
