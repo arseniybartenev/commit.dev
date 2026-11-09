@@ -846,7 +846,7 @@ camera.position.set(14,30,34);
 
 
 /* ---------- вкладыши: лист выезжает из кармашка на заднем форзаце и раскладывается по сгибам ---------- */
-const INS_SZ={1:{c:2,r:1,w:21,h:14.8},2:{c:3,r:2,w:29.7,h:21},3:{c:4,r:3,w:42,h:29.7},0:{c:1,r:1,w:21,h:29.7}};   // 0: карточки статуса, без сгибов
+const INS_SZ={1:{c:2,r:2,w:21,h:14.8},2:{c:3,r:3,w:29.7,h:21},3:{c:4,r:4,w:42,h:29.7},0:{c:2,r:4,w:21,h:29.7}};   // сложенный блок помещается в кармашек (до 12×9,5 см); 0: карточки статуса
 const INS_KINDS=[['year','Год'],['quarter','Квартал'],['month','Месяц'],['status','Статус']];
 const INS_EPS=.035;
 // кармашек на заднем форзаце (правая страница последнего разворота): верхний край z=.7, по ширине x=1.2…13.6, плоскость y=-.69
@@ -917,7 +917,7 @@ function insPose(){
  const bw=pw,bh=ph;
  // выезд из кармашка: блок лежит в кармашке у нижнего края и выдвигается вверх (к z меньше)
  const x0=(POCKET.x0+POCKET.x1)/2,y0=POCKET.y+.12+(insMats.length?0:0);
- const zS=POCKET.zTop+bh/2+.15,zE=POCKET.zTop-bh*.35;   // блок остаётся частично внутри, пока не пойдёт вверх
+ const zS=Math.min(POCKET.zTop+bh/2+.15,POCKET.zBot-bh/2),zE=POCKET.zTop-bh*.35;   // блок остаётся частично внутри, пока не пойдёт вверх
  const sx=x0,sy=y0,sz=zS+(zE-zS)*slide;
  insRoot.position.set(sx+(insShowPos.x-sx)*fly,sy+(insShowPos.y-sy)*fly,sz+(insShowPos.z-sz)*fly);
  insRoot.quaternion.identity().slerp(insShowQ,fly);
