@@ -383,14 +383,14 @@ html.veil body{background:#fff}
   .hs-det .pg .hs-i h3{font-size:15px}.hs-det .pg .hs-i p{font-size:13px;line-height:1.4}
   .hs-det .pg .hs-i.tx{padding:16px}
   /* главный экран: ровно полэкрана, текст слева, фото справа во всю высоту блока */
-  .hero{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:0;align-items:stretch;height:75svh;min-height:420px;padding:0 clamp(24px,5vw,120px);text-align:left;overflow:hidden}
-  .hero .wrap{max-width:none;margin:0;display:flex;flex-direction:column;justify-content:center;padding:57px 3vw 0 0}
+  .hero{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:0;align-items:stretch;height:75svh;min-height:420px;padding:0;margin:73px clamp(24px,5vw,120px) 16px;border-radius:28px;text-align:left;overflow:hidden}
+  .hero .wrap{max-width:none;margin:0;display:flex;flex-direction:column;justify-content:center;padding:0 3vw 0 clamp(28px,4vw,72px)}
   .hero .eyebrow{margin:0 0 1.6svh;font-size:clamp(9px,min(.95vw,1.5svh),13px);white-space:nowrap}
   .hero h1{font-size:clamp(38px,min(6.4vw,10svh),84px);line-height:1}
   .hero .code{font-size:clamp(12px,min(1.3vw,2.4svh),16px);margin:3svh 0 0;max-width:none}
   .hero p.lead{font-size:clamp(13px,min(1.4vw,2.5svh),17px);line-height:1.5;margin:2.4svh 0 0;max-width:56ch}
   .hero .cta{margin-top:4svh;gap:8px 24px;justify-content:flex-start}.hero .btn.lg{min-height:clamp(38px,5.8svh,52px);padding:0 26px;font-size:clamp(14px,2.1svh,17px)}
-  .hero .shot{margin:0;border-radius:0;background:#fff;height:100%;padding-top:57px;box-sizing:border-box}
+  .hero .shot{margin:0;border-radius:0;background:#fff;height:100%}
   .hero .shot img{width:100%;height:100%;max-height:none;aspect-ratio:auto;object-fit:cover;object-position:50% 51%}
   .hero .shot{container-type:size}
   @container (min-aspect-ratio:2/1){.hero .shot img{object-fit:contain;object-position:50% 100%}}
