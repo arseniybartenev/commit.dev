@@ -34,7 +34,7 @@ body{background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--sans);-webkit
 img,video{display:block;max-width:100%}
 a{color:inherit}
 :focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:8px}
-:root{--g:clamp(16px,2.2vw,32px);--edge:max(var(--g),calc((100% - 1600px)/2))}
+:root{--g:clamp(18px,4.5vw,72px);--edge:max(var(--g),calc((100% - 1600px)/2))}
 .wrap{width:min(1600px,100% - 2*var(--g));margin-inline:auto}
 .mono{font-family:var(--mono)}
 .eyebrow{font:500 13px/1 var(--mono);letter-spacing:.04em;color:var(--accent-ink);text-transform:none;margin-bottom:20px}
@@ -366,9 +366,17 @@ html.veil body{background:#fff}
   #otlichiya .core.diff .mk{grid-row:1/span 2;margin:3px 0 0}
   #otlichiya .core.diff h3{margin:0;font-size:17px}#otlichiya .core.diff p{font-size:14px;margin:0}
   /* детали: заголовок сверху, на слайде три крупные плашки с фото */
-  #detali .hs-det{margin-top:28px}
-  #detali .hs-i:not(.tx){flex-basis:calc(var(--fh,380px)*1.7778)}
-  #detali .hs-i.tx{flex-basis:340px;display:flex;flex-direction:column;justify-content:center}
+  #detali{--ev:max(var(--g),calc((100vw - 1600px)/2));display:grid;grid-template-columns:calc(var(--ev) + 300px) minmax(0,1fr);align-items:center}
+  #detali>.wrap:first-child{grid-column:1;width:auto;margin:0;padding:0 32px 0 var(--ev)}
+  #detali>.hs-det{grid-column:2;grid-row:1;margin-top:0;min-width:0}
+  #detali>.hs-det .hs-track{padding-inline:0 var(--ev);scroll-padding-inline:0}
+  #detali>.hs-det>.wrap{width:auto;margin:0;padding-right:var(--ev)}
+  #detali>.wrap:last-child{grid-column:1/-1}
+  #detali .hs-i,#detali .hs-i.tx{flex-basis:clamp(260px,24vw,360px)}
+  #detali .hs-i.tx{display:flex;flex-direction:column;justify-content:center}
+  #detali .hs-i img{border-radius:18px}
+  #detali .hs-i h3{font-size:17px}#detali .hs-i p{font-size:14px}
+  #detali .hs-ui{margin-top:10px}
   #detali .specsd{margin-top:20px}
   #detali .specs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 40px;border-top:0}
   #detali .specs div{grid-template-columns:1fr;gap:2px;padding:14px 0}
