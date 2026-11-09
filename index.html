@@ -325,11 +325,13 @@ html.veil body{background:#fff}
 /* единая логика высоты: на компьютере один блок = не меньше экрана, ленты и ролики подогнаны под экран */
 @media(min-width:821px){
   /* блок = 1 экран: медиа подгоняется скриптом (--fh), у текстовых блоков высота кратна половине экрана */
-  #nabory .hs-i,#hs-ins .hs-i,.hs-det .hs-i{flex-basis:calc(var(--fh,380px)*1.7778)}
+  #hs-ins .hs-i{flex-basis:calc(var(--fh,380px)*1.7778)}
+  #nabory .hs-i{flex:0 0 100%}
+  .setL .wrap{padding:0;max-width:none}
   #kak .panel .frames{aspect-ratio:auto;height:var(--fh,420px)}
   .vid{max-width:calc(var(--fh,460px)*1.7778);margin-inline:auto}
   #viewer3d{height:var(--fh,640px);min-height:0}
-  .setgrid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start;padding-inline:max(20px,calc((100% - 1200px)/2))}
+  .setgrid{display:grid;grid-template-columns:calc(var(--fh,380px)*1.7778) minmax(0,1fr);gap:24px;align-items:start;padding-inline:max(20px,calc((100% - 1200px)/2))}
   .setgrid .hs-track{padding-inline:0;scroll-padding-inline:0}
   .setgrid .hs{margin-top:0}
   .setR .setinfo{padding:20px}
@@ -338,7 +340,6 @@ html.veil body{background:#fff}
   .setR .si-note{display:none}.setR .setinfo h3{font-size:18px}
   .setR .setinfo .seg b{display:none}
   .setR .si-hint{margin-top:10px}
-  .hero .shot img{max-height:max(160px,calc(100svh - 720px))}
   .setR .vnote{margin-top:12px;font-size:13px}
   section[data-fit] h2,section[data-snap] h2{font-size:clamp(30px,3.4vw,46px);line-height:1.08}
   section[data-fit] .lead,section[data-snap] .lead{font-size:clamp(16px,1.5vw,19px);margin-top:12px;max-width:62ch}
@@ -346,6 +347,49 @@ html.veil body{background:#fff}
   .setsticky{padding:6px 0}
   .core.diff{margin-top:28px}.core.diff>div{padding:20px 22px}.core.diff .mk{margin-bottom:12px}.core.diff h3{margin-bottom:6px}
   .cmpd{margin-top:20px}
+  .setR .setmore{display:grid;gap:12px;margin-top:0}
+  .setR .setinfo{padding:16px 18px;border-radius:22px}
+  .setR .setinfo h3{font-size:16px;margin-bottom:10px}
+  .setR .setinfo h3 b{font:500 12px/1 var(--mono);opacity:.6;margin-left:8px}
+  .setR .chips2{margin-top:0}
+  section[data-snap]{padding-block:clamp(20px,3vw,40px)}
+  #nabory .lead{display:none}
+  #detali .hs-ui{margin-top:10px}#detali .hs-dots{min-height:36px}
+  @media(max-height:960px){
+    #otlichiya .cols p+p{display:none}
+    #detali .lead{display:none}
+    section[data-snap]{padding-block:14px}
+    .hs-det .pg .hs-i img{aspect-ratio:2/1}
+    #otlichiya h2,#detali h2{font-size:clamp(28px,3vw,38px)}
+  }
+  /* зачем: пол-экрана, текст слева, карточки справа */
+  #otlichiya>.wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);column-gap:48px;align-items:center}
+  #otlichiya .eyebrow,#otlichiya h2,#otlichiya .cols,#otlichiya .cmpd{grid-column:1}
+  #otlichiya .core.diff{grid-column:2;grid-row:1/span 4;margin-top:0;display:grid;grid-template-columns:1fr;gap:10px}
+  #otlichiya .cols{display:block;margin-top:12px}#otlichiya .cols p{font-size:15px;margin-top:8px}
+  #otlichiya .core.diff>div{padding:14px 18px;display:grid;grid-template-columns:auto 1fr;gap:2px 14px;align-items:start}
+  #otlichiya .core.diff .mk{grid-row:1/span 2;margin:3px 0 0}
+  #otlichiya .core.diff h3{margin:0;font-size:17px}#otlichiya .core.diff p{font-size:14px;margin:0}
+  /* детали: заголовок слева, на слайде сразу три плашки */
+  #detali>.wrap{display:grid;grid-template-columns:280px minmax(0,1fr);column-gap:40px;align-content:center}
+  #detali .eyebrow,#detali h2,#detali .lead,#detali .specsd{grid-column:1}
+  #detali .hs-det{grid-column:2;grid-row:1/span 4;margin-top:0;min-width:0}
+  #detali .hs-det .hs-ui{padding:0}#detali .hs-det .wrap{padding:0}
+  #detali .hs-det .hs-track{padding-inline:0;scroll-padding-inline:0;align-items:stretch}
+  .hs-det .pg{flex:0 0 100%;scroll-snap-align:start;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;min-width:0}
+  .hs-det .pg .hs-i{flex:none;min-width:0;display:flex;flex-direction:column}
+  .hs-det .pg .hs-i img{border-radius:16px}
+  .hs-det .pg .hs-i figcaption{padding:10px 4px 0}
+  .hs-det .pg .hs-i h3{font-size:15px}.hs-det .pg .hs-i p{font-size:13px;line-height:1.4}
+  .hs-det .pg .hs-i.tx{padding:16px}
+  /* главный экран: текст слева, ежедневник справа */
+  .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:40px;align-items:center;min-height:100svh;padding:88px max(24px,calc((100vw - 1240px)/2)) 40px;text-align:left}
+  .hero .wrap{padding:0;max-width:none}
+  .hero h1{font-size:clamp(56px,7.2vw,112px)}
+  .hero .code{margin-left:0}.hero p.lead{margin-left:0;max-width:34ch}
+  .hero .cta{justify-content:flex-start}
+  .hero .shot{margin:0;border-radius:24px}
+  .hero .shot img{max-height:none;height:auto;aspect-ratio:16/9}
 }
 @media(max-width:820px){.setR{padding-inline:20px}.setR .vnote{margin-top:12px}}
 .bento{display:none}.hs-det{display:block;margin-top:40px}
@@ -641,7 +685,7 @@ html.noscroll,html.noscroll body{overflow:hidden}
   <div class="wrap"><p class="soon rv">Файлы для скачивания появятся до старта продаж</p></div>
 </section>
 
-<section id="detali" class="alt" aria-labelledby="det-h" data-fit>
+<section id="detali" class="alt" aria-labelledby="det-h" data-snap>
   <div class="wrap">
     <p class="eyebrow rv">// детали</p>
     <h2 class="rv" id="det-h">Из чего он собран.</h2>
@@ -939,7 +983,7 @@ html.noscroll,html.noscroll body{overflow:hidden}
       cnt.textContent=(best+1)+' / '+n;
       pv.disabled=best===0;nx.disabled=best===n-1;
     }
-    var t=false;tr.addEventListener('scroll',function(){if(t)return;t=true;requestAnimationFrame(function(){t=false;upd()})},{passive:true});
+    var t=false,lastSc=0;tr.addEventListener('scroll',function(){lastSc=Date.now();if(t)return;t=true;requestAnimationFrame(function(){t=false;upd()})},{passive:true});
     pv.addEventListener('click',function(){go(cur-1)});nx.addEventListener('click',function(){go(cur+1)});
     tr.addEventListener('keydown',function(e){if(e.key==='ArrowRight'){go(cur+1);e.preventDefault()}if(e.key==='ArrowLeft'){go(cur-1);e.preventDefault()}});
     /* перетаскивание мышью */
@@ -960,7 +1004,8 @@ html.noscroll,html.noscroll body{overflow:hidden}
       setInterval(function(){
         if(!vis||document.hidden||v3.open||!lb.hidden||Date.now()<pause)return;
         if(root.matches(':hover')||tr.contains(document.activeElement))return;
-        go(cur>=n-1?0:cur+1);
+        if(Date.now()-lastSc<500)return;
+        if(cur>=n-1)tr.scrollTo({left:0,behavior:'instant'});else go(cur+1);
       },4500);
     }
     if('ResizeObserver' in window)new ResizeObserver(upd).observe(tr);
@@ -968,10 +1013,13 @@ html.noscroll,html.noscroll body{overflow:hidden}
   }
   (function(){var b=document.querySelector('.bento');if(!b)return;
     var h='<div class="hs-track" role="group" aria-roledescription="карусель" aria-label="Детали ежедневника" tabindex="0">';
-    [].forEach.call(b.children,function(t){
+    var wide=window.matchMedia('(min-width:821px)').matches,k=0,N=b.children.length;
+    [].forEach.call(b.children,function(t,i){
       var im=t.querySelector('img'),tb=t.querySelector('.tb');
-      if(im&&tb){var c=im.cloneNode(true);c.removeAttribute('sizes');c.setAttribute('sizes','88vw');h+='<figure class="hs-i">'+c.outerHTML+'<figcaption>'+tb.innerHTML+'</figcaption></figure>'}
+      if(wide&&i%3===0)h+='<div class="hs-i pg">';
+      if(im&&tb){var c=im.cloneNode(true);c.removeAttribute('sizes');c.setAttribute('sizes',wide?'300px':'88vw');h+='<figure class="hs-i">'+c.outerHTML+'<figcaption>'+tb.innerHTML+'</figcaption></figure>'}
       else{h+='<figure class="hs-i tx">'+t.innerHTML+'</figure>'}
+      if(wide&&(i%3===2||i===N-1))h+='</div>';
     });
     var d=document.createElement('div');d.className='hs hs-det';d.setAttribute('data-hs','');d.innerHTML=h+'</div>';
     b.parentNode.insertBefore(d,b.nextSibling);})();
@@ -1070,6 +1118,10 @@ html.noscroll,html.noscroll body{overflow:hidden}
   function sheetName(k,ix){var s=SETS[curSet];return (k==='t'?s.t:s.r)[ix]}
   function renderInfo(){
     var s=SETS[curSet],list=infoTab===0?s.t:s.r;
+    if(window.matchMedia('(min-width:821px)').matches){
+      var pl=function(k,t,l){return'<div class="setinfo" style="--k:'+s.k+'"><h3>'+t+'<b>'+l.length+'</b></h3><div class="chips2">'+l.map(function(x,ix){var o=isOpen(k,ix);return'<button type="button" class="chip2'+(o?' on':'')+'" data-k="'+k+'" data-ix="'+ix+'"><i></i>'+x+'</button>'}).join('')+'</div></div>'};
+      setmore.innerHTML=pl('t','Инструменты',s.t)+pl('r','Справочник',s.r)+'<p class="si-hint">Нажми на лист, он появится в ленте слева.</p>';
+      return}
     setmore.innerHTML='<div class="setinfo" style="--k:'+s.k+'"><div class="si-top"><div><h3>Что в наборе «'+s.n+'»</h3><p class="si-note">'+(infoTab===0?'Ключевой шаблон набора, холсты для схем, встреча и прогнозы на отрывных листах.':'Справочник на форзацах ежедневника.')+'</p></div><div class="seg" role="group" aria-label="Что показать"><button type="button" data-i="0" aria-pressed="'+(infoTab===0)+'">Инструменты <b>'+s.t.length+'</b></button><button type="button" data-i="1" aria-pressed="'+(infoTab===1)+'">Справочник <b>'+s.r.length+'</b></button></div></div><div class="chips2">'+list.map(function(x,ix){var o=isOpen(infoTab===0?'t':'r',ix);return'<button type="button" class="chip2'+(o?' on':'')+'" data-k="'+(infoTab===0?'t':'r')+'" data-ix="'+ix+'"><i></i>'+x+'</button>'}).join('')+'</div><p class="si-hint">Нажми на лист, он появится в ленте.</p><div hidden>'+'</div></div>';
   }
   setmore.addEventListener('click',function(e){
@@ -1077,6 +1129,7 @@ html.noscroll,html.noscroll body{overflow:hidden}
     if(c){var key=sheetKey(c.dataset.k,+c.dataset.ix);(opened[curSet]=opened[curSet]||[]);if(opened[curSet].indexOf(key)<0)opened[curSet].push(key);renderSet(key);return}
     var b=e.target.closest('.seg button');if(!b)return;infoTab=+b.dataset.i;renderInfo()});
   function renderSet(focusKey){
+    var y0=window.pageYOffset,sec0=document.getElementById('nabory');sec0.style.minHeight=sec0.offsetHeight+'px';setTimeout(function(){sec0.style.minHeight=''},700);
     var s=SETS[curSet],vn=curVar==='main'?'Основной':'Конверсия';
     var html='<div class="hs" data-hs><div class="hs-track" role="group" aria-roledescription="карусель" aria-label="Кадры набора «'+s.n+'»" tabindex="0">'+FR.map(function(f,j){
       var b='img2/'+s.slug+'/'+curVar+'/'+f[0];
@@ -1091,6 +1144,7 @@ html.noscroll,html.noscroll body{overflow:hidden}
         var r=setgal.getBoundingClientRect();if(r.top<70||r.bottom>window.innerHeight)setgal.scrollIntoView({block:'center',behavior:'smooth'})}}
     kitline.textContent='Комплект: '+s.kit+(curVar==='conv'?', вариант «Конверсия»':'');
     renderInfo();
+    if(!focusKey&&Math.abs(window.pageYOffset-y0)>1)window.scrollTo({top:y0,left:0,behavior:'instant'});
   }
   function pickSet(i,focus){
     curSet=i;
