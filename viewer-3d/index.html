@@ -845,26 +845,37 @@ new ResizeObserver(()=>{if(mode==='book'||mode==='shelf')resize()}).observe(docu
 camera.position.set(14,30,34);
 
 
-/* ---------- вкладыши: лист выезжает из ежедневника и раскладывается по сгибам ---------- */
+/* ---------- вкладыши: лист выезжает из кармашка на заднем форзаце и раскладывается по сгибам ---------- */
 const INS_SZ={1:{c:2,r:1,w:21,h:14.8},2:{c:3,r:2,w:29.7,h:21},3:{c:4,r:3,w:42,h:29.7},0:{c:1,r:1,w:21,h:29.7}};   // 0: карточки статуса, без сгибов
 const INS_KINDS=[['year','Год'],['quarter','Квартал'],['month','Месяц'],['status','Статус']];
 const INS_EPS=.035;
-let insKind='year',insSize=1,insFace=1,insTarget=0,insP=0,insFlip=0,insFlipT=0,insPend=null,insAcc='';
+// кармашек на заднем форзаце (правая страница последнего разворота): верхний край z=.7, по ширине x=1.2…13.6, плоскость y=-.69
+const POCKET={x0:1.2,x1:13.6,zTop:.7,zBot:10.2,y:-.69};
+const insClip=new THREE.Plane(new THREE.Vector3(0,0,-1),POCKET.zTop);   // оставляет то, что выше края кармашка (z<=zTop)
+renderer.localClippingEnabled=true;
+let insKind='year',insSize=1,insFace=1,insTarget=0,insP=0,insFlip=0,insFlipT=0,insAcc='';
+let insWant=null,insShowing=false,insFitSheet=false,insClipOn=false;   // insWant: ждём разворот на последнюю страницу и загрузку картинок
 const insRoot=new THREE.Group(),insFlipG=new THREE.Group(),insSheet=new THREE.Group();
 insRoot.add(insFlipG);insFlipG.add(insSheet);scene.add(insRoot);insRoot.visible=false;
-let insCols=[],insTexCache=new Map(),insShowQ=new THREE.Quaternion(),insShowPos=new THREE.Vector3(0,7,0);
+let insCols=[],insMats=[],insTexCache=new Map(),insShowQ=new THREE.Quaternion(),insShowPos=new THREE.Vector3(0,7,0);
 const insSS=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)};
 const insCl=t=>Math.max(0,Math.min(1,t));
 function insDims(){return INS_SZ[insKind==='status'?0:insSize]}
-function insTexUrl(face){const d=insDims();const k=insKind==='status'?'status_2':insKind+'_'+insSize;return `${TEX}/ins/${accKey()}/${k}_${face}.webp${TV}`}
-function insTex(url){
+function insTexUrl(face){const k=insKind==='status'?'status_2':insKind+'_'+insSize;return `${TEX}/ins/${accKey()}/${k}_${face}.webp${TV}`}
+function insTex(url){   // {tex, ready}: рисуем лист только когда картинка загружена, иначе он чёрный
  let t=insTexCache.get(url);
- if(!t){t=new THREE.TextureLoader().load(url,()=>{dirty=true});t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());insTexCache.set(url,t)}
+ if(!t){
+  t={ready:false,tex:null};
+  t.tex=new THREE.TextureLoader().load(url,()=>{t.ready=true;dirty=true},undefined,()=>{t.ready=true;dirty=true});
+  t.tex.colorSpace=THREE.SRGBColorSpace;t.tex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+  insTexCache.set(url,t);
+ }
  return t;
 }
+const insTexReady=()=>insTex(insTexUrl(1)).ready&&insTex(insTexUrl(0)).ready;
 function insClear(){
  while(insSheet.children.length){const o=insSheet.children[0];insSheet.remove(o);o.traverse(m=>{if(m.geometry)m.geometry.dispose();if(m.material)m.material.dispose()})}
- insCols=[];
+ insCols=[];insMats=[];
 }
 function insPanelGeo(d,c,r,back){
  const pw=d.w/d.c,ph=d.h/d.r,g=new THREE.PlaneGeometry(pw,ph).rotateX(-Math.PI/2).translate(pw/2,0,ph/2);
@@ -877,35 +888,41 @@ function insPanelGeo(d,c,r,back){
 }
 function insBuild(){
  insClear();
- const d=insDims(),pw=d.w/d.c,ph=d.h/d.r;insAcc=accKey();
- const tf=insTex(insTexUrl(1)),tb=insTex(insTexUrl(0));
- const mF=()=>new THREE.MeshLambertMaterial({map:tf,side:THREE.FrontSide,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});
- const mB=()=>new THREE.MeshLambertMaterial({map:tb,side:THREE.BackSide,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});
+ const d=insDims();insAcc=accKey();
+ const tf=insTex(insTexUrl(1)).tex,tb=insTex(insTexUrl(0)).tex;
+ const mk=(map,side)=>{const m=new THREE.MeshLambertMaterial({map,side,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});insMats.push(m);return m};
  let parent=insSheet;
  for(let c=0;c<d.c;c++){
-  const cg=new THREE.Group();cg.position.x=c?pw:0;parent.add(cg);parent=cg;
+  const cg=new THREE.Group();cg.position.x=c?d.w/d.c:0;parent.add(cg);parent=cg;
   const col={g:cg,rows:[]};
   let rp=cg;
   for(let r=0;r<d.r;r++){
-   const rg=new THREE.Group();rg.position.z=r?ph:0;rp.add(rg);rp=rg;
+   const rg=new THREE.Group();rg.position.z=r?d.h/d.r:0;rp.add(rg);rp=rg;
    const m=new THREE.Group();rg.add(m);
-   const a=new THREE.Mesh(insPanelGeo(d,c,r,false),mF()),b=new THREE.Mesh(insPanelGeo(d,c,r,true),mB());
-   m.add(a,b);col.rows.push({g:rg,m,L:c*d.r+r});
+   m.add(new THREE.Mesh(insPanelGeo(d,c,r,false),mk(tf,THREE.FrontSide)),new THREE.Mesh(insPanelGeo(d,c,r,true),mk(tb,THREE.BackSide)));
+   col.rows.push({g:rg,m,L:c*d.r+r});
   }
   insCols.push(col);
  }
+ insClipOn=false;
+}
+function insSetClip(on){
+ if(on===insClipOn)return;insClipOn=on;
+ for(const m of insMats){m.clippingPlanes=on?[insClip]:null;m.needsUpdate=true}
 }
 function insPose(){
  const d=insDims(),P=insP,pw=d.w/d.c,ph=d.h/d.r;
- const slide=insSS(0,.28,P),fly=insSS(.26,.6,P),Ur=insCl((P-.42)/.3),Uc=insCl((P-.62)/.38);
+ const slide=insSS(0,.3,P),fly=insSS(.3,.62,P),Ur=insCl((P-.46)/.28),Uc=insCl((P-.64)/.36);
  const flat=d.c===1&&d.r===1?1:Math.min(Ur,Uc);
  const bw=pw,bh=ph;
- // положение
- const xs=W/2-bw/2-.4,xo=W/2+bw/2+1.2;
- const px=xs+(xo-xs)*slide,py=0;
- insRoot.position.set(px+(insShowPos.x-px)*fly,py+(insShowPos.y-py)*fly+0,insShowPos.z*fly);
+ // выезд из кармашка: блок лежит в кармашке у нижнего края и выдвигается вверх (к z меньше)
+ const x0=(POCKET.x0+POCKET.x1)/2,y0=POCKET.y+.12+(insMats.length?0:0);
+ const zS=POCKET.zTop+bh/2+.15,zE=POCKET.zTop-bh*.35;   // блок остаётся частично внутри, пока не пойдёт вверх
+ const sx=x0,sy=y0,sz=zS+(zE-zS)*slide;
+ insRoot.position.set(sx+(insShowPos.x-sx)*fly,sy+(insShowPos.y-sy)*fly,sz+(insShowPos.z-sz)*fly);
  insRoot.quaternion.identity().slerp(insShowQ,fly);
  insFlipG.rotation.z=Math.PI*insFlip;
+ insSetClip(fly<.05&&P<.34);
  // лист: центр сложенного блока -> центр разложенного
  const u=(Ur+Uc)/2;const e=insSS(0,1,u);
  insSheet.position.set(-bw/2+(-d.w/2+bw/2)*e,0,-bh/2+(-d.h/2+bh/2)*e);
@@ -919,6 +936,15 @@ function insPose(){
   });
  });
 }
+function insStart(){   // всё готово: книга открыта на заднем форзаце, картинки загружены
+ insFlip=insFlipT=insFace?0:1;
+ insBuild();insRoot.visible=true;insShowing=true;insFitSheet=false;
+ const dir=camera.position.clone().sub(controls.target).normalize();
+ insShowQ.setFromUnitVectors(new THREE.Vector3(0,1,0),dir);
+ {let mx=0;for(const sx of [-1,1])for(const sy of [-1,1])for(const sz of [-1,1])mx=Math.max(mx,new THREE.Vector3(sx*W/2,sy*T/2,sz*(H/2+2)).dot(dir));insShowPos.copy(dir).multiplyScalar(mx+1.5)}
+ insTarget=1;if(reduce)insP=1;
+ insPose();refit();dirty=true;
+}
 function insOpen(o){   // o: {kind,size,face,open}
  if(mode!=='book')return;
  let changed=false;
@@ -926,37 +952,44 @@ function insOpen(o){   // o: {kind,size,face,open}
  if(o.size&&o.size!==insSize){insSize=o.size;changed=true}
  if(o.face!==undefined&&o.face!==insFace){insFace=o.face;insFlipT=o.face?0:1}
  const want=o.open===undefined?1:(o.open?1:0);
- if(want&&!insTarget&&insP===0){
-  insFlip=insFlipT=insFace?0:1;
-  insBuild();insRoot.visible=true;
-  const dir=camera.position.clone().sub(controls.target).normalize();
-  insShowQ.setFromUnitVectors(new THREE.Vector3(0,1,0),dir);
-  {const d=insDims();let mx=0;for(const sx of [-1,1])for(const sy of [-1,1])for(const sz of [-1,1])mx=Math.max(mx,new THREE.Vector3(sx*W/2,sy*T/2,sz*(H/2+2)).dot(dir));insShowPos.copy(dir).multiplyScalar(mx+1.5)}
-  insTarget=1;if(reduce)insP=1;
- }else if(want&&changed&&(insTarget||insP>0)){insPend={};insTarget=0}   // сложить, подменить лист, выдвинуть снова
- else if(!want){insTarget=0}
- else if(want)insTarget=1;
- insUI();refit();dirty=true;
+ if(!want){insClose(false);return}
+ insWant=true;
+ if(insShowing&&changed){insTarget=0}   // сложить обратно в кармашек, дальше stepIns соберёт новый лист
+ insTex(insTexUrl(1));insTex(insTexUrl(0));   // начинаем грузить сразу
+ // сначала открываем задний форзац
+ if(Math.round(target)!==NSP){goTo(NSP)}
+ insUI();dirty=true;
 }
 function insClose(now){
- insPend=null;insTarget=0;
- if(now){insP=0;insRoot.visible=false}
+ insWant=null;insTarget=0;
+ if(now){insP=0;insRoot.visible=false;insShowing=false;insFitSheet=false}
  insUI();refit();dirty=true;
 }
 function stepIns(dt){
  let mv=false;
  if(insFlip!==insFlipT){const st=dt/(reduce?.05:.9);insFlip=insFlip<insFlipT?Math.min(insFlipT,insFlip+st):Math.max(insFlipT,insFlip-st);mv=true}
- const tg=insTarget;
- if(insP!==tg){const st=dt/(reduce?.05:(tg?2.6:1.6));insP=insP<tg?Math.min(tg,insP+st):Math.max(tg,insP-st);mv=true}
- if(insP===0&&!insTarget&&insRoot.visible){insRoot.visible=false;refit();if(insPend){insPend=null;insTarget=1;insBuild();insRoot.visible=true;insFlip=insFlipT=insFace?0:1;refit()}mv=true}
- if(insRoot.visible&&insAcc!==accKey()){insBuild();mv=true}
- if(insRoot.visible&&(mv||insP>0)){insPose()}
+ if(insP!==insTarget){const st=dt/(reduce?.05:(insTarget?3:1.8));insP=insP<insTarget?Math.min(insTarget,insP+st):Math.max(insTarget,insP-st);mv=true}
+ // камера: пока лист в кармашке смотрим на книгу, когда вылетел — вписываем лист
+ if(insShowing){
+  const fs=insTarget===1&&insP>.28||insP>.4&&insTarget===1;
+  if(fs!==insFitSheet){insFitSheet=fs;refit()}
+  if(insTarget===0&&insFitSheet&&insP<.45){insFitSheet=false;refit()}
+ }
+ // лист сложился обратно в кармашек
+ if(insShowing&&insP===0&&insTarget===0){insRoot.visible=false;insShowing=false;insFitSheet=false;refit();mv=true}
+ // ждём: книга на заднем форзаце, лист в кармашке (если был), картинки загружены
+ if(insWant&&!insShowing){
+  const arrived=f===NSP&&Math.round(target)===NSP&&bandT>=0&&Math.abs(f-NSP)<1e-3;
+  if(arrived&&insTexReady()){insWant=null;insStart();mv=true}
+ }
+ if(insShowing&&insAcc!==accKey()&&insTexReady()){insBuild();mv=true}
+ if(insShowing&&(mv||insP>0))insPose();
  return mv;
 }
-const insActive=()=>insTarget===1||insP>0||insRoot.visible;
+const insActive=()=>insShowing&&insFitSheet;
 const insBar=document.getElementById('insBar'),insRow=document.getElementById('insRow'),insB=document.getElementById('insB');
 function insUI(){
- const on=insTarget===1||insPend!==null;
+ const on=insWant!==null||insTarget===1;
  insRow.hidden=!on;insB.setAttribute('aria-pressed',String(on));wrapEl.classList.toggle('ins',on);
  insB.querySelector('.long').textContent=on?'Убрать вкладыш':'Вкладыши';
  insB.querySelector('.short').textContent=on?'Убрать':'Вкладыши';
@@ -969,7 +1002,7 @@ INS_KINDS.forEach(([k,n])=>{const b=document.createElement('button');b.type='but
 [[1,'A5'],[2,'A4'],[3,'A3']].forEach(([s,n])=>{const b=document.createElement('button');b.type='button';b.dataset.s=s;b.textContent=n;b.onclick=()=>insOpen({size:s});insBar.appendChild(b)});
 {const sp=document.createElement('span');sp.className='sep';insBar.appendChild(sp)}
 {const b=document.createElement('button');b.type='button';b.dataset.f='1';b.onclick=()=>{insFace=insFace?0:1;insFlipT=insFace?0:1;insUI();dirty=true};insBar.appendChild(b)}
-insB.onclick=()=>{if(insTarget||insPend)insClose(false);else insOpen({})};
+insB.onclick=()=>{if(insWant!==null||insTarget)insClose(false);else insOpen({})};
 
 /* ---------- цикл ---------- */
 let last=performance.now();
@@ -1041,6 +1074,7 @@ function updateUI(){
  updateTools();
 }
 function goTo(n){
+ if(n!==NSP&&(insShowing||insWant!==null))insClose(false);
  if(n>0&&Math.round(target)===0&&bandTarget===0){bandTarget=1;pendingOpen=n;updateTools();dirty=true;return}   // сначала снимаем резинку
  pendingOpen=null;
  const old=Math.round(target)>=1;
@@ -1128,7 +1162,7 @@ function placeMarksPanel(){const z=$('zoom');marksEl.style.top=(z.offsetTop+z.of
   if(mode!=='book'){ptrs.delete(e.pointerId);return}
   const was=ptrs.size;ptrs.delete(e.pointerId);
   if(multi||was>1||Math.hypot(e.clientX-sx,e.clientY-sy)>6||performance.now()-st>500||backFlip>.01)return;
-  if(insActive())return;
+  if(insShowing||insWant!==null)return;
   const k=pickRibbon(e.clientX,e.clientY);
   if(k===10){togglePen();return}
   if(k===11){toggleBand();return}
