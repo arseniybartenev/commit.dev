@@ -34,7 +34,8 @@ body{background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--sans);-webkit
 img,video{display:block;max-width:100%}
 a{color:inherit}
 :focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:8px}
-.wrap{width:min(1200px,100% - 40px);margin-inline:auto}
+:root{--g:clamp(16px,3vw,40px);--edge:max(var(--g),calc((100% - 1200px)/2))}
+.wrap{width:min(1200px,100% - 2*var(--g));margin-inline:auto}
 .mono{font-family:var(--mono)}
 .eyebrow{font:500 13px/1 var(--mono);letter-spacing:.04em;color:var(--accent-ink);text-transform:none;margin-bottom:20px}
 h1,h2,h3{font-weight:700;letter-spacing:-.03em;line-height:1.05}
@@ -134,7 +135,7 @@ header.nav .wrap{display:flex;align-items:center;justify-content:space-between;h
 .film-f img{width:100%;height:100%;object-fit:cover;object-position:50% 55%;transform:scale(1.06);transition:transform 1.6s var(--ease)}
 .film-f.on img{transform:none}
 .film-f::after{content:"";position:absolute;inset:auto 0 0 0;height:55%;background:linear-gradient(transparent,rgba(0,0,0,.7));pointer-events:none}
-.film-f figcaption{position:absolute;z-index:1;left:max(20px,(100% - 1200px)/2);right:64px;bottom:clamp(28px,6vw,72px);color:#f5f5f7;max-width:560px;text-shadow:0 1px 16px rgba(0,0,0,.6)}
+.film-f figcaption{position:absolute;z-index:1;left:var(--edge);right:64px;bottom:clamp(28px,6vw,72px);color:#f5f5f7;max-width:560px;text-shadow:0 1px 16px rgba(0,0,0,.6)}
 .film-f figcaption h3{font-size:clamp(28px,4.4vw,48px);letter-spacing:-.03em;margin-bottom:12px}
 .film-f figcaption p{font-size:clamp(16px,1.8vw,20px);color:#e4e4e8;line-height:1.45}
 .film-dots{position:absolute;z-index:2;right:max(16px,2vw);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;list-style:none}
@@ -306,7 +307,7 @@ html.veil body{background:#fff}
 /* горизонтальная лента со свайпом */
 .hs{position:relative;margin-top:44px}
 .hs-track{display:flex;align-items:flex-start;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;cursor:grab;
-  padding:4px max(20px,calc((100% - 1200px)/2)) 8px;scroll-padding-inline:max(20px,calc((100% - 1200px)/2));touch-action:pan-x pan-y}
+  padding:4px var(--edge) 8px;scroll-padding-inline:var(--edge);touch-action:pan-x pan-y}
 .hs-track::-webkit-scrollbar{display:none}
 .hs-track.drag{cursor:grabbing;scroll-snap-type:none;scroll-behavior:auto}
 .hs-i{flex:0 0 min(78vw,880px);scroll-snap-align:start;margin:0;min-width:0}
@@ -327,11 +328,11 @@ html.veil body{background:#fff}
   /* блок = 1 экран: медиа подгоняется скриптом (--fh), у текстовых блоков высота кратна половине экрана */
   #hs-ins .hs-i{flex-basis:calc(var(--fh,380px)*1.7778)}
   #nabory .hs-i{flex:0 0 100%}
-  .setL .wrap{padding:0;max-width:none}
+  .setL .wrap{padding:0;width:100%}
   #kak .panel .frames{aspect-ratio:auto;height:var(--fh,420px)}
   .vid{max-width:calc(var(--fh,460px)*1.7778);margin-inline:auto}
   #viewer3d{height:var(--fh,640px);min-height:0}
-  .setgrid{display:grid;grid-template-columns:calc(var(--fh,380px)*1.7778) minmax(0,1fr);gap:24px;align-items:start;padding-inline:max(20px,calc((100% - 1200px)/2))}
+  .setgrid{display:grid;grid-template-columns:minmax(0,min(calc(var(--fh,380px)*1.7778),60%)) minmax(0,1fr);gap:24px;align-items:start;padding-inline:var(--edge)}
   .setgrid .hs-track{padding-inline:0;scroll-padding-inline:0}
   .setgrid .hs{margin-top:0}
   .setR .setinfo{padding:20px}
@@ -374,7 +375,7 @@ html.veil body{background:#fff}
   #detali>.wrap{display:grid;grid-template-columns:280px minmax(0,1fr);column-gap:40px;align-content:center}
   #detali .eyebrow,#detali h2,#detali .lead,#detali .specsd{grid-column:1}
   #detali .hs-det{grid-column:2;grid-row:1/span 4;margin-top:0;min-width:0}
-  #detali .hs-det .hs-ui{padding:0}#detali .hs-det .wrap{padding:0}
+  #detali .hs-det .hs-ui{padding:0}#detali .hs-det .wrap{padding:0;width:100%}
   #detali .hs-det .hs-track{padding-inline:0;scroll-padding-inline:0;align-items:stretch}
   .hs-det .pg{flex:0 0 100%;scroll-snap-align:start;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;min-width:0}
   .hs-det .pg .hs-i{flex:none;min-width:0;display:flex;flex-direction:column}
@@ -383,8 +384,8 @@ html.veil body{background:#fff}
   .hs-det .pg .hs-i h3{font-size:15px}.hs-det .pg .hs-i p{font-size:13px;line-height:1.4}
   .hs-det .pg .hs-i.tx{padding:16px}
   /* главный экран: ровно полэкрана, текст слева, фото справа во всю высоту блока */
-  .hero{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:0;align-items:stretch;height:75svh;min-height:420px;padding:0;margin:73px clamp(24px,5vw,120px) 16px;border-radius:28px;text-align:left;overflow:hidden}
-  .hero .wrap{max-width:none;margin:0;display:flex;flex-direction:column;justify-content:center;padding:0 3vw 0 clamp(28px,4vw,72px)}
+  .hero{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:0;align-items:stretch;height:75svh;min-height:420px;padding:0;margin:73px var(--edge) 16px;border-radius:28px;text-align:left;overflow:hidden}
+  .hero .wrap{width:auto;max-width:none;margin:0;display:flex;flex-direction:column;justify-content:center;padding:0 3vw 0 clamp(28px,4vw,72px)}
   .hero .eyebrow{margin:0 0 1.6svh;font-size:clamp(9px,min(.95vw,1.5svh),13px);white-space:nowrap}
   .hero h1{font-size:clamp(38px,min(6.4vw,10svh),84px);line-height:1}
   .hero .code{font-size:clamp(12px,min(1.3vw,2.4svh),16px);margin:3svh 0 0;max-width:none}
