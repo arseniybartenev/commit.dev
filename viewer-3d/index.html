@@ -66,6 +66,47 @@ button:disabled{opacity:.35;cursor:default}
 .mk .x{width:28px;min-height:34px;padding:0;color:var(--mut);font-size:16px}
 @keyframes mkin{from{opacity:0;transform:translateX(26px)}}
 @media (max-width:520px){#marks{right:6px}.mk .go{font-size:11px;padding:4px 4px 4px 6px;min-height:30px}.mk .x{min-height:30px;width:24px}}
+/* панели: на телефоне меню над нижней строкой, на компьютере боковые колонки */
+#left,#right{position:absolute;left:10px;right:10px;bottom:var(--uih,70px);display:none;flex-direction:column;align-items:center;gap:6px;z-index:5;pointer-events:none}
+#left>*,#right>*{pointer-events:auto}
+#wrap.pm-view #left,#wrap.pm-color #left,#wrap.pm-more #right,#wrap.pm-ins #right{display:flex}
+#wrap.pm-view #kits,#wrap.pm-color #sets,#wrap.pm-more #insRow,#wrap.pm-ins #tools{display:none}
+#mbtns{display:flex;gap:2px;padding:4px}
+#mbtns button{font-size:13px;padding:4px 12px;min-height:34px}
+#mbtns button[aria-pressed=true]{background:var(--fg);color:var(--bg)}
+#insB{display:none}
+#left .sets,#insBar{flex-wrap:wrap;justify-content:center;overflow:visible}
+#insRow{max-width:100%}
+#insBar .sep{display:none}
+#insBar .cl{margin-left:6px;color:var(--mut)}
+#wrap.shelf #left,#wrap.shelf #right{display:none}
+@media (min-width:861px) and (min-height:640px){
+ #mbtns{display:none}
+ #insB{display:block}
+ #insBar .cl{display:none}
+ #left{display:flex;left:12px;right:auto;top:58px;bottom:auto;align-items:flex-start}
+ #left .sets{flex-direction:column;overflow:visible;width:196px}
+ #left .sets button{text-align:left;width:100%}
+ #left .kits{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;width:196px;padding:6px;overflow:visible}
+ #left .kits button{padding:0;justify-content:center;width:100%;height:32px;min-height:32px}
+ #left .kits button span{display:none}
+ #left .kits button i{width:20px;height:20px}
+ #left .kits .seg{grid-column:1/-1;flex-direction:column;margin:4px 0 0;padding:4px 0 0;border-left:0;border-top:1px solid var(--line)}
+ #left .kits .seg button{justify-content:flex-start;padding:0 10px;height:30px;min-height:30px}
+ #left .kits .seg button span{display:inline}
+ #right{display:flex;flex-direction:row;left:auto;right:12px;top:var(--rtop,260px);bottom:auto;align-items:flex-start}
+ #wrap.pm-ins #tools,#wrap.pm-more #insRow{display:flex}
+ #tools{flex-direction:column;width:170px}
+ #tools .tool{text-align:left;width:100%}
+ #tools .tool .long{display:inline}#tools .tool .short{display:none}
+ #insRow{position:absolute;right:calc(100% + 8px);top:0}
+ #insRow[hidden]{display:none}
+ #insBar{flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;width:150px}
+ #insBar .sep{display:block}
+ #left .sets{flex-wrap:nowrap;justify-content:flex-start}
+ #insBar button{text-align:left;width:100%}
+ #insBar .sep{width:auto;height:1px;margin:4px 6px}
+}
 #toast{position:absolute;left:50%;top:14px;transform:translate(-50%,-8px);max-width:min(86%,420px);background:#111413;color:#fff;padding:8px 14px;border-radius:12px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;text-align:center;z-index:5}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 @media (max-width:520px){#zoom{right:6px;top:8px}#zoom .zs{height:100px}#zoom input{width:90px}}
@@ -99,6 +140,16 @@ button:disabled{opacity:.35;cursor:default}
     <button id="zout" aria-label="Отдалить">−</button>
     <button id="zfit" aria-label="Вписать в экран" title="Вписать в экран">⤢</button>
   </div>
+  <div id="left">
+    <div class="bar sets" id="sets" role="group" aria-label="Набор"></div>
+    <div class="bar kits" id="kits" role="group" aria-label="Цвет комплекта"></div>
+  </div>
+  <div id="right">
+    <div class="row" id="insRow" hidden>
+      <div class="bar sets" id="insBar" role="group" aria-label="Вкладыши"></div>
+    </div>
+    <div class="bar" id="tools"><button class="tool" id="back" aria-pressed="false"><span class="long">Обратная сторона</span><span class="short">Сзади</span></button><button class="tool" id="bandB"><span class="long">Снять резинку</span><span class="short">Резинка</span></button><button class="tool" id="insB" aria-pressed="false"><span class="long">Вкладыши</span><span class="short">Вкладыши</span></button><button class="tool" id="penB"><span class="long">Вынуть ручку</span><span class="short">Ручка</span></button></div>
+  </div>
   <div id="ui">
     <div class="row">
       <div class="bar nav">
@@ -106,15 +157,8 @@ button:disabled{opacity:.35;cursor:default}
         <button class="lbl" id="lbl" aria-haspopup="listbox" aria-expanded="false" aria-label="Разделы ежедневника"></button><div id="secmenu" role="listbox" aria-label="Разделы"></div>
         <button id="next" aria-label="Вперёд">›</button>
       </div>
-      <div class="bar" id="tools"><button class="tool" id="back" aria-pressed="false"><span class="long">Обратная сторона</span><span class="short">Сзади</span></button><button class="tool" id="bandB"><span class="long">Снять резинку</span><span class="short">Резинка</span></button><button class="tool" id="insB" aria-pressed="false"><span class="long">Вкладыши</span><span class="short">Вкладыши</span></button><button class="tool" id="penB"><span class="long">Вынуть ручку</span><span class="short">Ручка</span></button></div>
     </div>
-    <div class="row" id="insRow" hidden>
-      <div class="bar sets" id="insBar" role="group" aria-label="Вкладыши"></div>
-    </div>
-    <div class="row">
-      <div class="bar kits" id="kits" role="group" aria-label="Цвет комплекта"></div>
-    </div>
-    <div class="bar sets" id="sets" role="group" aria-label="Набор"></div>
+    <div class="bar" id="mbtns" role="group" aria-label="Панели"><button type="button" data-pm="view">Вид</button><button type="button" data-pm="color">Цвет</button><button type="button" data-pm="ins">Вкладыши</button><button type="button" data-pm="more">Детали</button></div>
   </div>
 </div>
 <script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
@@ -803,6 +847,7 @@ function applyState(){
 const camTarget=new THREE.Vector3(0,0,0);
 let camGoal=60,fitD=60,zoom=1;
 const ZMIN=.55,ZMAX=3.2;
+const deskMQ=matchMedia('(min-width:861px) and (min-height:640px)');
 function uiH(){return document.getElementById('ui').offsetHeight}
 // расстояние, при котором вся книга (с хвостами ляссе) помещается в свободную область экрана при текущем ракурсе
 const _tc=new THREE.PerspectiveCamera(28,1,1,600),_v=new THREE.Vector3();
@@ -819,7 +864,8 @@ function fitDistance(){
  if(mode==='shelf')return fitFor(BOOK_DIR,_z0.set(0,0,0),'book')*(canvas.parentElement.clientWidth>canvas.parentElement.clientHeight*1.1?1.55:1.28);  // полка чуть мельче книги, чтобы поместились декор и фон
  const el=canvas.parentElement,w=Math.max(1,el.clientWidth),fh=Math.max(1,el.clientHeight);
  const avail=Math.max(120,fh-uiH()-6),pad=Math.min(24,w*.04);
- const limX=Math.max(.3,1-2*pad/w),limY=Math.max(.3,(avail-2*pad)/fh);
+ const side=deskMQ.matches?Math.min(190,w*.17):pad;
+ const limX=Math.max(.3,1-2*Math.max(pad,side)/w),limY=Math.max(.3,(avail-2*pad)/fh);
  const pts=fitPts();
  _tc.fov=camera.fov;_tc.aspect=w/fh;_tc.updateProjectionMatrix();_tc.up.copy(camera.up);
  const dir=camera.position.clone().sub(camTarget).normalize();
@@ -837,6 +883,7 @@ function resize(){
  renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
  renderer.setSize(w,h,false);camera.aspect=w/h;
  camera.setViewOffset(w,h,0,Math.round((uiH()+6)/2),w,h);camera.updateProjectionMatrix();
+ wrapEl.style.setProperty('--uih',(uiH()+6)+'px');
  refit();
  if(typeof placeMarksPanel==='function')placeMarksPanel();
 }
@@ -1145,7 +1192,24 @@ function renderMarks(){
  }
  placeMarksPanel();
 }
-function placeMarksPanel(){const z=$('zoom');marksEl.style.top=(z.offsetTop+z.offsetHeight+8)+'px'}
+function placeMarksPanel(){const z=$('zoom'),r=$('right'),b=z.offsetTop+z.offsetHeight+8;
+ if(deskMQ.matches){wrapEl.style.setProperty('--rtop',b+'px');marksEl.style.top=(b+r.offsetHeight+8)+'px'}
+ else marksEl.style.top=b+'px'}
+// мобильные панели «Вид / Цвет / Вкладыши / Детали»
+const mbtns=[...document.querySelectorAll('#mbtns [data-pm]')];
+function setPm(v){
+ for(const c of [...wrapEl.classList])if(c.startsWith('pm-'))wrapEl.classList.remove(c);
+ if(v)wrapEl.classList.add('pm-'+v);
+ mbtns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.pm===v)));
+}
+mbtns.forEach(b=>b.onclick=()=>{
+ const v=b.dataset.pm,cur=wrapEl.classList.contains('pm-'+v);
+ if(v==='ins'&&!cur&&insRow.hidden)insB.click();
+ setPm(cur?null:v);
+});
+canvas.addEventListener('pointerdown',()=>setPm(null));
+deskMQ.addEventListener('change',()=>{setPm(null);resize()});
+{const cl=document.createElement('button');cl.type='button';cl.className='cl';cl.textContent='Убрать вкладыш';cl.onclick=()=>{insB.click();setPm(null)};insBar.appendChild(cl)}
 // тап по странице: правая половина вперёд, левая назад; по ляссе: заложить, снять или перейти
 {
  let sx=0,sy=0,st=0,multi=false;const ptrs=new Map();
