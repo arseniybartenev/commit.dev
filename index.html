@@ -34,8 +34,8 @@ body{background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--sans);-webkit
 img,video{display:block;max-width:100%}
 a{color:inherit}
 :focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:8px}
-:root{--g:clamp(16px,3vw,40px);--edge:max(var(--g),calc((100% - 1200px)/2))}
-.wrap{width:min(1200px,100% - 2*var(--g));margin-inline:auto}
+:root{--g:clamp(16px,2.2vw,32px);--edge:max(var(--g),calc((100% - 1600px)/2))}
+.wrap{width:min(1600px,100% - 2*var(--g));margin-inline:auto}
 .mono{font-family:var(--mono)}
 .eyebrow{font:500 13px/1 var(--mono);letter-spacing:.04em;color:var(--accent-ink);text-transform:none;margin-bottom:20px}
 h1,h2,h3{font-weight:700;letter-spacing:-.03em;line-height:1.05}
@@ -353,38 +353,33 @@ html.veil body{background:#fff}
   .setR .setinfo h3{font-size:16px;margin-bottom:10px}
   .setR .setinfo h3 b{font:500 12px/1 var(--mono);opacity:.6;margin-left:8px}
   .setR .chips2{margin-top:0}
-  section[data-snap]{padding-block:clamp(20px,3vw,40px)}
+  section{padding-block:clamp(36px,4vw,56px)}
   #nabory .lead{display:none}
   #detali .hs-ui{margin-top:10px}#detali .hs-dots{min-height:36px}
-  @media(max-height:960px){
-    #otlichiya .cols p+p{display:none}
-    #detali .lead{display:none}
-    section[data-snap]{padding-block:14px}
-    .hs-det .pg .hs-i img{aspect-ratio:2/1}
-    #otlichiya h2,#detali h2{font-size:clamp(28px,3vw,38px)}
-  }
   /* зачем: пол-экрана, текст слева, карточки справа */
-  #otlichiya>.wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);column-gap:48px;align-items:center}
-  #otlichiya .eyebrow,#otlichiya h2,#otlichiya .cols,#otlichiya .cmpd{grid-column:1}
-  #otlichiya .core.diff{grid-column:2;grid-row:1/span 4;margin-top:0;display:grid;grid-template-columns:1fr;gap:10px}
+  #otlichiya>.wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);column-gap:48px;align-items:start}
+  #otlichiya .eyebrow,#otlichiya h2,#otlichiya .cols{grid-column:1}
+  #otlichiya .cmpd{grid-column:1/-1}
+  #otlichiya .core.diff{grid-column:2;grid-row:1/span 3;align-self:start;margin-top:0;display:grid;grid-template-columns:1fr;gap:10px}
   #otlichiya .cols{display:block;margin-top:12px}#otlichiya .cols p{font-size:15px;margin-top:8px}
   #otlichiya .core.diff>div{padding:14px 18px;display:grid;grid-template-columns:auto 1fr;gap:2px 14px;align-items:start}
   #otlichiya .core.diff .mk{grid-row:1/span 2;margin:3px 0 0}
   #otlichiya .core.diff h3{margin:0;font-size:17px}#otlichiya .core.diff p{font-size:14px;margin:0}
-  /* детали: заголовок слева, на слайде сразу три плашки */
-  #detali>.wrap{display:grid;grid-template-columns:280px minmax(0,1fr);column-gap:40px;align-content:center}
-  #detali .eyebrow,#detali h2,#detali .lead,#detali .specsd{grid-column:1}
-  #detali .hs-det{grid-column:2;grid-row:1/span 4;margin-top:0;min-width:0}
-  #detali .hs-det .hs-ui{padding:0}#detali .hs-det .wrap{padding:0;width:100%}
+  /* детали: заголовок сверху, на слайде три крупные плашки с фото */
+  #detali .hs-det{margin-top:28px}
+  #detali .hs-det .wrap{padding:0;width:100%}
   #detali .hs-det .hs-track{padding-inline:0;scroll-padding-inline:0;align-items:stretch}
-  .hs-det .pg{flex:0 0 100%;scroll-snap-align:start;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;min-width:0}
+  .hs-det .pg{flex:0 0 100%;scroll-snap-align:start;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;min-width:0}
   .hs-det .pg .hs-i{flex:none;min-width:0;display:flex;flex-direction:column}
-  .hs-det .pg .hs-i img{border-radius:16px}
-  .hs-det .pg .hs-i figcaption{padding:10px 4px 0}
-  .hs-det .pg .hs-i h3{font-size:15px}.hs-det .pg .hs-i p{font-size:13px;line-height:1.4}
-  .hs-det .pg .hs-i.tx{padding:16px}
+  .hs-det .pg .hs-i img{border-radius:20px;aspect-ratio:16/9;object-fit:cover}
+  .hs-det .pg .hs-i figcaption{padding:14px 4px 0}
+  .hs-det .pg .hs-i h3{font-size:19px}.hs-det .pg .hs-i p{font-size:15px;line-height:1.45}
+  .hs-det .pg .hs-i.tx{padding:28px 24px;justify-content:center}
+  #detali .specsd{margin-top:20px}
+  #detali .specs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 40px;border-top:0}
+  #detali .specs div{grid-template-columns:1fr;gap:2px;padding:14px 0}
   /* главный экран: ровно полэкрана, текст слева, фото справа во всю высоту блока */
-  .hero{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:0;align-items:stretch;height:75svh;min-height:420px;padding:0;margin:73px var(--edge) 16px;border-radius:28px;text-align:left;overflow:hidden}
+  .hero{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:0;align-items:stretch;height:75svh;min-height:420px;padding:0;margin:57px var(--edge) 0;border-radius:0 0 28px 28px;text-align:left;overflow:hidden}
   .hero .wrap{width:auto;max-width:none;margin:0;display:flex;flex-direction:column;justify-content:center;padding:0 3vw 0 clamp(28px,4vw,72px)}
   .hero .eyebrow{margin:0 0 1.6svh;font-size:clamp(9px,min(.95vw,1.5svh),13px);white-space:nowrap}
   .hero h1{font-size:clamp(38px,min(6.4vw,10svh),84px);line-height:1}
@@ -1020,10 +1015,12 @@ html.noscroll,html.noscroll body{overflow:hidden}
   (function(){var b=document.querySelector('.bento');if(!b)return;
     var h='<div class="hs-track" role="group" aria-roledescription="карусель" aria-label="Детали ежедневника" tabindex="0">';
     var wide=window.matchMedia('(min-width:821px)').matches,k=0,N=b.children.length;
+    if(wide)N=N-N%3;
     [].forEach.call(b.children,function(t,i){
+      if(i>=N)return;
       var im=t.querySelector('img'),tb=t.querySelector('.tb');
       if(wide&&i%3===0)h+='<div class="hs-i pg">';
-      if(im&&tb){var c=im.cloneNode(true);c.removeAttribute('sizes');c.setAttribute('sizes',wide?'300px':'88vw');h+='<figure class="hs-i">'+c.outerHTML+'<figcaption>'+tb.innerHTML+'</figcaption></figure>'}
+      if(im&&tb){var c=im.cloneNode(true);c.removeAttribute('sizes');c.setAttribute('sizes',wide?'520px':'88vw');h+='<figure class="hs-i">'+c.outerHTML+'<figcaption>'+tb.innerHTML+'</figcaption></figure>'}
       else{h+='<figure class="hs-i tx">'+t.innerHTML+'</figure>'}
       if(wide&&(i%3===2||i===N-1))h+='</div>';
     });
@@ -1047,23 +1044,17 @@ html.noscroll,html.noscroll body{overflow:hidden}
       var secs=document.querySelectorAll('section[data-fit],section[data-snap]');
       [].forEach.call(secs,function(sc){sc.style.removeProperty('--fh');sc.style.paddingTop='';sc.style.paddingBottom=''});
       if(!big.matches)return;
-      var vh=window.innerHeight;
+      var vh=Math.round(window.innerHeight*0.9);
       [].forEach.call(document.querySelectorAll('section[data-fit]'),function(sc){
         var fh=380;
         for(var k=0;k<4;k++){sc.style.setProperty('--fh',fh+'px');var H=sc.getBoundingClientRect().height;var nf=Math.max(160,Math.min(780,fh+(vh-H)));if(Math.abs(nf-fh)<2)break;fh=nf}
         sc.style.setProperty('--fh',fh+'px');
-        var H2=sc.getBoundingClientRect().height;
-        if(H2<vh-2){var e=(vh-H2)/2;sc.style.paddingTop='calc('+getComputedStyle(sc).paddingTop+' + '+e+'px)';sc.style.paddingBottom='calc('+getComputedStyle(sc).paddingBottom+' + '+e+'px)'}
-      });
-      [].forEach.call(document.querySelectorAll('section[data-snap]'),function(sc){
-        var c=sc.getBoundingClientRect().height,half=vh/2,t=Math.max(half,Math.ceil((c-1)/half)*half);
-        if(t-c>1){var e=(t-c)/2;sc.style.paddingTop='calc('+getComputedStyle(sc).paddingTop+' + '+e+'px)';sc.style.paddingBottom='calc('+getComputedStyle(sc).paddingBottom+' + '+e+'px)'}
       });
     }
     var tm;function later(){clearTimeout(tm);tm=setTimeout(fit,120)}
     window.addEventListener('resize',later);
     window.addEventListener('load',function(){fit();setTimeout(fit,600)});
-    document.addEventListener('click',function(e){if(e.target.closest('summary,.chip2,#tabs,.seg'))later()});
+    document.addEventListener('click',function(e){if(e.target.closest('.chip2,#tabs,.seg'))later()});
     fit();
   })();
 
