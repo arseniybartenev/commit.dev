@@ -36,6 +36,10 @@ button:disabled{opacity:.35;cursor:default}
 .sets{display:flex;gap:2px;max-width:100%;overflow-x:auto;scrollbar-width:none}
 .sets::-webkit-scrollbar{display:none}
 .sets button{white-space:nowrap;font-size:13px}
+#insRow[hidden]{display:none}
+#wrap.ins #marks{display:none}
+#insBar .sep{width:1px;background:var(--line);margin:4px 6px;flex:none}
+#insBar button:disabled{opacity:.35}
 .sets button[aria-pressed=true]{background:var(--fg);color:var(--bg)}
 .kits{display:flex;gap:2px;align-items:center;padding:6px 8px;max-width:100%;overflow-x:auto;scrollbar-width:none}
 .kits::-webkit-scrollbar{display:none}
@@ -76,6 +80,8 @@ button:disabled{opacity:.35;cursor:default}
 #ui{transition:opacity .6s,visibility .6s}
 #wrap.shelf #ui{opacity:0;visibility:hidden;pointer-events:none}
 #wrap.shelf #zoom,#wrap.shelf #marks{display:none}
+@media (max-height:600px){#marks{top:10px!important;right:64px;flex-direction:row;align-items:flex-start}#zoom .zs{height:70px}.sets button{padding:6px 10px}.kits{padding:3px 6px}}
+@media (max-height:600px) and (min-width:521px){.kits .seg{margin-left:4px;padding-left:4px}.kits button{padding:0 4px}.kits button span{display:none}.kits .seg button span{display:inline}}
 </style>
 </head>
 <body>
@@ -100,7 +106,10 @@ button:disabled{opacity:.35;cursor:default}
         <button class="lbl" id="lbl" aria-haspopup="listbox" aria-expanded="false" aria-label="Разделы ежедневника"></button><div id="secmenu" role="listbox" aria-label="Разделы"></div>
         <button id="next" aria-label="Вперёд">›</button>
       </div>
-      <div class="bar" id="tools"><button class="tool" id="back" aria-pressed="false"><span class="long">Обратная сторона</span><span class="short">Сзади</span></button><button class="tool" id="bandB"><span class="long">Снять резинку</span><span class="short">Резинка</span></button><button class="tool" id="penB"><span class="long">Вынуть ручку</span><span class="short">Ручка</span></button></div>
+      <div class="bar" id="tools"><button class="tool" id="back" aria-pressed="false"><span class="long">Обратная сторона</span><span class="short">Сзади</span></button><button class="tool" id="bandB"><span class="long">Снять резинку</span><span class="short">Резинка</span></button><button class="tool" id="insB" aria-pressed="false"><span class="long">Вкладыши</span><span class="short">Вкладыши</span></button><button class="tool" id="penB"><span class="long">Вынуть ручку</span><span class="short">Ручка</span></button></div>
+    </div>
+    <div class="row" id="insRow" hidden>
+      <div class="bar sets" id="insBar" role="group" aria-label="Вкладыши"></div>
     </div>
     <div class="row">
       <div class="bar kits" id="kits" role="group" aria-label="Цвет комплекта"></div>
@@ -132,17 +141,17 @@ const KITS={
  ei:{n:'Петроль',bg:'#FF9A4D',sp:'#0B2D33',tx:'#EAF6F7',ac:'#EAF6F7',acc:'amber'},
  fi:{n:'Чернильная',bg:'#7FB0FF',sp:'#0F1E3D',tx:'#EAF0FF',ac:'#EAF0FF',acc:'sky'},
  hi:{n:'Фиолетовая',bg:'#A57CFF',sp:'#1F1147',tx:'#F3EEFF',ac:'#F3EEFF',acc:'violet'}};
-const NSP=33;            // разворотов в просмотре
+const NSP=27;            // разворотов в просмотре (макет v5, 272 стр.)
 const NL=NSP-1;          // листов
 const q=new URLSearchParams(location.search);
 const TEX=q.get('tex')||'./tex';
 const SITE=q.get('look')==='site';   // ?look=site: холодный серый декор полки для сайта
 const BGQ=(q.get('bg')||'').replace('#','');
 if(/^[0-9a-fA-F]{6}$/.test(BGQ))document.documentElement.style.setProperty('--bg','#'+BGQ);
-const TV='?v=37';   // версия текстур: при замене картинок поднять, чтобы браузер не отдавал старые из кэша
+const TV='?v=40';   // версия текстур: при замене картинок поднять, чтобы браузер не отдавал старые из кэша
 
 /* ---------- размеры, см ---------- */
-const W=14.8,H=21.0,CB=0.22,TB=1.0,T=TB+2*CB,PWD=14.5,PHT=20.5,R_CORNER=0.45;
+const W=14.8,H=21.0,CB=0.22,TB=1.4,T=TB+2*CB,PWD=14.5,PHT=20.5,R_CORNER=0.45;
 const Y0=-T/2+CB;
 
 /* ---------- состояние ---------- */
@@ -445,13 +454,13 @@ book.add(blockR,blockL);
 /* ---------- метки на торце стопки (нарисованные на страницах боковые ступеньки) ---------- */
 const ACC_HEX={green:'#1F9D55',blue:'#2F5BEA',orange:'#E8590C',violet:'#7B3FE4',mono:'#111413',amber:'#D9650F',sky:'#2A6FD4',ochre:'#A06C00'};
 let tabsData=null;
-const FCW=512,FROW=8,NREAL=98;     // 98 реальных листов = 196 страниц
+const FCW=512,FROW=8,NREAL=137;    // 137 листов: форзацный лист + 135 листов блока + форзацный лист (272 стр.)
 // какие страницы на каком развороте просмотра: по ним берём метки реальных листов
-const SPREADS=[['F',1],[2,3],[4,5],[6,7],[8,9],[10,11],[12,13],[14,15],[116,117],[150,151],[152,153],[154,155],[156,157],[158,159],[160,161],[162,163],[164,165],[166,167],[168,169],[170,171],[172,173],[174,175],[176,177],[178,179],[180,181],[182,183],[184,185],[186,187],[188,189],[190,191],[192,193],[194,195],[196,'B']];
+const SPREADS=[['FL','FR'],[1,2],[3,4],[5,6],[7,8],[9,10],[11,12],[13,14],[15,16],[67,68],[69,70],[129,130],[131,132],[191,192],[193,194],[251,252],[253,254],[255,256],[257,258],[259,260],[261,262],[263,264],[265,266],[267,268],[269,270],[271,272],['BL','BR']];
 function realLeaves(){   // сколько реальных листов лежит слева и справа на текущем развороте
  const nl=Math.max(0,Math.min(NSP,Math.floor(f+1e-6))),nr=Math.max(0,Math.min(NSP,Math.ceil(f-1e-6)));
  const L=nl===0?0:SPREADS[nl-1][0],R=nr===0?1:SPREADS[nr-1][1];
- return [L==='F'?0:L/2,R==='B'?0:NREAL-(R-1)/2];
+ return [L==='FL'?0:L==='BL'?NREAL:(L+1)/2,R==='FR'?NREAL:R==='BR'?0:NREAL-R/2];
 }
 function makeForeTex(reverse,left){
  const c=document.createElement('canvas');c.width=FCW;c.height=NREAL*FROW;const x=c.getContext('2d');
@@ -463,8 +472,8 @@ function makeForeTex(reverse,left){
   x.fillStyle=`rgb(${g},${g},${g-2})`;x.fillRect(0,y,FCW,FROW);
   if(tabs){
    // метки лицевой (2j+1) и оборотной (2j+2) сторон листа: на торце видны как полоски цветом краски, ровно там же, где на странице
-   for(const n of [2*j+1,2*j+2]){
-    const t=tabs[n-1];if(!t)continue;
+   for(const n of [2*j,2*j+1]){
+    const t=n>=1&&n<=272?tabs[n-1]:null;if(!t)continue;
     const top=t[0],hh=t[1],x0=left?FCW*(top/210):FCW*(1-(top+hh)/210),w=FCW*hh/210;
     x.fillStyle=t[2]?'#15191a':col;x.fillRect(x0,y,w,FROW);
     x.fillStyle=`rgba(255,255,255,${.06+rnd()*.12})`;x.fillRect(x0,y,w,2);        // блик на верхней кромке листа
@@ -800,6 +809,7 @@ const _tc=new THREE.PerspectiveCamera(28,1,1,600),_v=new THREE.Vector3();
 function fitPts(){
  const pts=[];
  if(mode==='shelf'){const hx=3*(T+GAP)+.5;for(const x of [-hx,hx])for(const y of [SHELF_Y-1.8,SHELF_Y+H+.5])for(const z of [SHELF_Z-W/2,SHELF_Z+W/2+1])pts.push(new THREE.Vector3(x,y,z));return pts}
+ if(insActive()){const d=insDims();for(const sx of [-1,1])for(const sz of [-1,1])pts.push(new THREE.Vector3(sx*d.w/2,0,sz*d.h/2).applyQuaternion(insShowQ).add(insShowPos));return pts}
  const openG=Math.round(target)>=1;
  const x0=openG?-W:-W/2,x1=openG?W:W/2;
  for(const x of [x0,x1])for(const y of [-T/2,T/2])for(const z of [-H/2-1.4,H/2+2.2])pts.push(new THREE.Vector3(x,y,z));
@@ -834,6 +844,133 @@ new ResizeObserver(resize).observe(canvas.parentElement);
 new ResizeObserver(()=>{if(mode==='book'||mode==='shelf')resize()}).observe(document.getElementById('ui'));
 camera.position.set(14,30,34);
 
+
+/* ---------- вкладыши: лист выезжает из ежедневника и раскладывается по сгибам ---------- */
+const INS_SZ={1:{c:2,r:1,w:21,h:14.8},2:{c:3,r:2,w:29.7,h:21},3:{c:4,r:3,w:42,h:29.7},0:{c:1,r:1,w:21,h:29.7}};   // 0: карточки статуса, без сгибов
+const INS_KINDS=[['year','Год'],['quarter','Квартал'],['month','Месяц'],['status','Статус']];
+const INS_EPS=.035;
+let insKind='year',insSize=1,insFace=1,insTarget=0,insP=0,insFlip=0,insFlipT=0,insPend=null,insAcc='';
+const insRoot=new THREE.Group(),insFlipG=new THREE.Group(),insSheet=new THREE.Group();
+insRoot.add(insFlipG);insFlipG.add(insSheet);scene.add(insRoot);insRoot.visible=false;
+let insCols=[],insTexCache=new Map(),insShowQ=new THREE.Quaternion(),insShowPos=new THREE.Vector3(0,7,0);
+const insSS=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)};
+const insCl=t=>Math.max(0,Math.min(1,t));
+function insDims(){return INS_SZ[insKind==='status'?0:insSize]}
+function insTexUrl(face){const d=insDims();const k=insKind==='status'?'status_2':insKind+'_'+insSize;return `${TEX}/ins/${accKey()}/${k}_${face}.webp${TV}`}
+function insTex(url){
+ let t=insTexCache.get(url);
+ if(!t){t=new THREE.TextureLoader().load(url,()=>{dirty=true});t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());insTexCache.set(url,t)}
+ return t;
+}
+function insClear(){
+ while(insSheet.children.length){const o=insSheet.children[0];insSheet.remove(o);o.traverse(m=>{if(m.geometry)m.geometry.dispose();if(m.material)m.material.dispose()})}
+ insCols=[];
+}
+function insPanelGeo(d,c,r,back){
+ const pw=d.w/d.c,ph=d.h/d.r,g=new THREE.PlaneGeometry(pw,ph).rotateX(-Math.PI/2).translate(pw/2,0,ph/2);
+ const pos=g.attributes.position,uv=g.attributes.uv;
+ for(let i=0;i<pos.count;i++){
+  const x=pos.getX(i)/pw,z=pos.getZ(i)/ph;
+  uv.setXY(i,back?1-(c+x)/d.c:(c+x)/d.c,1-(r+z)/d.r);
+ }
+ uv.needsUpdate=true;return g;
+}
+function insBuild(){
+ insClear();
+ const d=insDims(),pw=d.w/d.c,ph=d.h/d.r;insAcc=accKey();
+ const tf=insTex(insTexUrl(1)),tb=insTex(insTexUrl(0));
+ const mF=()=>new THREE.MeshLambertMaterial({map:tf,side:THREE.FrontSide,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});
+ const mB=()=>new THREE.MeshLambertMaterial({map:tb,side:THREE.BackSide,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});
+ let parent=insSheet;
+ for(let c=0;c<d.c;c++){
+  const cg=new THREE.Group();cg.position.x=c?pw:0;parent.add(cg);parent=cg;
+  const col={g:cg,rows:[]};
+  let rp=cg;
+  for(let r=0;r<d.r;r++){
+   const rg=new THREE.Group();rg.position.z=r?ph:0;rp.add(rg);rp=rg;
+   const m=new THREE.Group();rg.add(m);
+   const a=new THREE.Mesh(insPanelGeo(d,c,r,false),mF()),b=new THREE.Mesh(insPanelGeo(d,c,r,true),mB());
+   m.add(a,b);col.rows.push({g:rg,m,L:c*d.r+r});
+  }
+  insCols.push(col);
+ }
+}
+function insPose(){
+ const d=insDims(),P=insP,pw=d.w/d.c,ph=d.h/d.r;
+ const slide=insSS(0,.28,P),fly=insSS(.26,.6,P),Ur=insCl((P-.42)/.3),Uc=insCl((P-.62)/.38);
+ const flat=d.c===1&&d.r===1?1:Math.min(Ur,Uc);
+ const bw=pw,bh=ph;
+ // положение
+ const xs=W/2-bw/2-.4,xo=W/2+bw/2+1.2;
+ const px=xs+(xo-xs)*slide,py=0;
+ insRoot.position.set(px+(insShowPos.x-px)*fly,py+(insShowPos.y-py)*fly+0,insShowPos.z*fly);
+ insRoot.quaternion.identity().slerp(insShowQ,fly);
+ insFlipG.rotation.z=Math.PI*insFlip;
+ // лист: центр сложенного блока -> центр разложенного
+ const u=(Ur+Uc)/2;const e=insSS(0,1,u);
+ insSheet.position.set(-bw/2+(-d.w/2+bw/2)*e,0,-bh/2+(-d.h/2+bh/2)*e);
+ // сгибы
+ const stag=(U,i,n)=>insCl((U-i*.5/n)/(1-.5*(n-1)/n));
+ insCols.forEach((col,c)=>{
+  if(c){const p=stag(Uc,c-1,Math.max(1,d.c-1)),s=(c%2)?1:-1;col.g.rotation.z=s*Math.PI*(1-insSS(0,1,p))}
+  col.rows.forEach((row,r)=>{
+   if(r){const p=stag(Ur,r-1,Math.max(1,d.r-1)),s=(r%2)?1:-1;row.g.rotation.x=-s*Math.PI*(1-insSS(0,1,p))}
+   row.m.position.y=((c+r)%2?-1:1)*row.L*INS_EPS*(1-flat);
+  });
+ });
+}
+function insOpen(o){   // o: {kind,size,face,open}
+ if(mode!=='book')return;
+ let changed=false;
+ if(o.kind&&o.kind!==insKind){insKind=o.kind;changed=true}
+ if(o.size&&o.size!==insSize){insSize=o.size;changed=true}
+ if(o.face!==undefined&&o.face!==insFace){insFace=o.face;insFlipT=o.face?0:1}
+ const want=o.open===undefined?1:(o.open?1:0);
+ if(want&&!insTarget&&insP===0){
+  insFlip=insFlipT=insFace?0:1;
+  insBuild();insRoot.visible=true;
+  const dir=camera.position.clone().sub(controls.target).normalize();
+  insShowQ.setFromUnitVectors(new THREE.Vector3(0,1,0),dir);
+  {const d=insDims();let mx=0;for(const sx of [-1,1])for(const sy of [-1,1])for(const sz of [-1,1])mx=Math.max(mx,new THREE.Vector3(sx*W/2,sy*T/2,sz*(H/2+2)).dot(dir));insShowPos.copy(dir).multiplyScalar(mx+1.5)}
+  insTarget=1;if(reduce)insP=1;
+ }else if(want&&changed&&(insTarget||insP>0)){insPend={};insTarget=0}   // сложить, подменить лист, выдвинуть снова
+ else if(!want){insTarget=0}
+ else if(want)insTarget=1;
+ insUI();refit();dirty=true;
+}
+function insClose(now){
+ insPend=null;insTarget=0;
+ if(now){insP=0;insRoot.visible=false}
+ insUI();refit();dirty=true;
+}
+function stepIns(dt){
+ let mv=false;
+ if(insFlip!==insFlipT){const st=dt/(reduce?.05:.9);insFlip=insFlip<insFlipT?Math.min(insFlipT,insFlip+st):Math.max(insFlipT,insFlip-st);mv=true}
+ const tg=insTarget;
+ if(insP!==tg){const st=dt/(reduce?.05:(tg?2.6:1.6));insP=insP<tg?Math.min(tg,insP+st):Math.max(tg,insP-st);mv=true}
+ if(insP===0&&!insTarget&&insRoot.visible){insRoot.visible=false;refit();if(insPend){insPend=null;insTarget=1;insBuild();insRoot.visible=true;insFlip=insFlipT=insFace?0:1;refit()}mv=true}
+ if(insRoot.visible&&insAcc!==accKey()){insBuild();mv=true}
+ if(insRoot.visible&&(mv||insP>0)){insPose()}
+ return mv;
+}
+const insActive=()=>insTarget===1||insP>0||insRoot.visible;
+const insBar=document.getElementById('insBar'),insRow=document.getElementById('insRow'),insB=document.getElementById('insB');
+function insUI(){
+ const on=insTarget===1||insPend!==null;
+ insRow.hidden=!on;insB.setAttribute('aria-pressed',String(on));wrapEl.classList.toggle('ins',on);
+ insB.querySelector('.long').textContent=on?'Убрать вкладыш':'Вкладыши';
+ insB.querySelector('.short').textContent=on?'Убрать':'Вкладыши';
+ [...insBar.querySelectorAll('[data-k]')].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.k===insKind)));
+ [...insBar.querySelectorAll('[data-s]')].forEach(b=>{b.setAttribute('aria-pressed',String(+b.dataset.s===insSize&&insKind!=='status'));b.disabled=insKind==='status'});
+ const fb=insBar.querySelector('[data-f]');if(fb)fb.textContent=insFace?'Оборот (сгибы)':'Лицо';
+}
+INS_KINDS.forEach(([k,n])=>{const b=document.createElement('button');b.type='button';b.dataset.k=k;b.textContent=n;b.onclick=()=>insOpen({kind:k});insBar.appendChild(b)});
+{const sp=document.createElement('span');sp.className='sep';insBar.appendChild(sp)}
+[[1,'A5'],[2,'A4'],[3,'A3']].forEach(([s,n])=>{const b=document.createElement('button');b.type='button';b.dataset.s=s;b.textContent=n;b.onclick=()=>insOpen({size:s});insBar.appendChild(b)});
+{const sp=document.createElement('span');sp.className='sep';insBar.appendChild(sp)}
+{const b=document.createElement('button');b.type='button';b.dataset.f='1';b.onclick=()=>{insFace=insFace?0:1;insFlipT=insFace?0:1;insUI();dirty=true};insBar.appendChild(b)}
+insB.onclick=()=>{if(insTarget||insPend)insClose(false);else insOpen({})};
+
 /* ---------- цикл ---------- */
 let last=performance.now();
 function tick(now){
@@ -866,6 +1003,7 @@ function tick(now){
   if(sv[k]>=1&&marks[k]===null&&slotMark[k]!==null)slotMark[k]=null;
  }
  if(stepShelf(dt))moving=true;
+ if(stepIns(dt))moving=true;
  simDt=Math.min(.033,Math.max(.008,dt));
  if(moving||ribEnergy>.004)dirty=true;
  if(controls.update())dirty=true;
@@ -878,8 +1016,8 @@ function tick(now){
 /* ---------- интерфейс ---------- */
 const $=id=>document.getElementById(id);
 const lbl=$('lbl'),prevB=$('prev'),nextB=$('next'),backB=$('back');
-// разделы ежедневника: номер первого разворота из 33 в просмотре
-const BLOCKS=[['Обложка',0],['Начало',1],['Год',4],['Квартал',5],['Месяц и недели',6],['Итоги',9],['Инструменты',13],['Справочник',22],['Заметки',27],['Конец',32]];
+// разделы ежедневника: номер первого разворота из 27 в просмотре
+const BLOCKS=[['Обложка',0],['Форзац',1],['Начало',2],['Дни',4],['Инструменты',18],['Заметки',25],['Колофон',26],['Справочник',27]];
 const blockOf=t=>{let b=BLOCKS[1];for(const x of BLOCKS)if(x[1]<=t&&x[1]>0)b=x;return b};
 const secMenu=$('secmenu');
 BLOCKS.forEach(([n,st])=>{
@@ -990,6 +1128,7 @@ function placeMarksPanel(){const z=$('zoom');marksEl.style.top=(z.offsetTop+z.of
   if(mode!=='book'){ptrs.delete(e.pointerId);return}
   const was=ptrs.size;ptrs.delete(e.pointerId);
   if(multi||was>1||Math.hypot(e.clientX-sx,e.clientY-sy)>6||performance.now()-st>500||backFlip>.01)return;
+  if(insActive())return;
   const k=pickRibbon(e.clientX,e.clientY);
   if(k===10){togglePen();return}
   if(k===11){toggleBand();return}
@@ -1029,7 +1168,7 @@ function wheelOverBook(e){
  const r=canvas.getBoundingClientRect();
  wheelV.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);
  wheelRay.setFromCamera(wheelV,camera);
- return wheelRay.intersectObject(lift,true).some(h=>h.object!==shadow&&!h.object.userData.hit);
+ return wheelRay.intersectObjects([lift,insRoot],true).some(h=>h.object!==shadow&&!h.object.userData.hit);
 }
 const onWheel=e=>{
  if(mode==='book'&&wheelOverBook(e)){e.preventDefault();setZoom(zoom*Math.exp(-e.deltaY*(e.deltaMode===1?.04:.0013)));return}
@@ -1060,6 +1199,7 @@ const varBtns=[['Основной',false],['Конверсия',true]].map(([t,c
 kitsEl.appendChild(varEl);
 function syncChips(){
  [...setsEl.children].forEach((b,i)=>b.setAttribute('aria-pressed',String(i===set)));
+ {const a=setsEl.children[set];if(a)setsEl.scrollLeft=a.offsetLeft-(setsEl.clientWidth-a.offsetWidth)/2}
  const cv=isConv(kit);
  MAIN_KEYS.forEach(k=>{const K=KITS[k+(cv?'i':'')],b=kitBtns[k];b.firstChild.style.background=`linear-gradient(135deg,${K.bg} 50%,${K.sp} 50%)`;b.setAttribute('aria-pressed',String(k===baseOf(kit)))});
  varBtns.forEach(([b,v])=>b.setAttribute('aria-pressed',String(v===cv)));
@@ -1311,7 +1451,7 @@ function choose(i){
 }
 const _z0=new THREE.Vector3();
 function startReturn(){
- zoom=1;zr.value=z2v(1);
+ insClose(true);zoom=1;zr.value=z2v(1);
  pkSet=set;camR1=camera.position.distanceTo(controls.target);camR0=fitFor(SHELF_DIR,SHELF_T,'shelf');mode='return';pk=1;pkDir=-1;
  wrapEl.classList.add('shelf');wrapEl.classList.remove('book');
  dirBook.copy(camera.position).sub(controls.target).normalize();
@@ -1320,6 +1460,7 @@ function startReturn(){
 }
 function toShelf(){
  if(mode!=='book')return;
+ insClose(true);
  if(reduce){goTo(0);backTarget=0;penTarget=0;bandTarget=0;f=target=0;backFlip=0;penT=0;bandT=0;enterShelfState();return}
  goTo(0);backTarget=0;backB.setAttribute('aria-pressed','false');penTarget=0;bandTarget=0;pendingOpen=null;shelfPending=true;updateTools();dirty=true;
 }
@@ -1376,7 +1517,7 @@ wrapEl.classList.add('book');
 if(START_SHELF)enterShelfState();else shelfG.visible=false;
 requestAnimationFrame(tick);
 // публичный API для лендинга: window.kommit3d
-window.kommit3d={pick:pickRibbon,shelfHit,hit:(x,y)=>wheelOverBook({target:canvas,clientX:x,clientY:y}),dbg:()=>({camR1,fit:fitDistance(),goal:camGoal,ui:uiH(),d:camera.position.distanceTo(controls.target),mode,zoom}),go:n=>{enterBookInstant();go(n)},setSet:(i,u)=>{enterBookInstant();setSet(i,u)},setKit,open:n=>{enterBookInstant();goTo(n)},zoom:z=>{enterBookInstant();setZoom(z)},shelf:toShelf,choose,get mode(){return mode}};
+window.kommit3d={ins:o=>{enterBookInstant();insOpen(o||{})},insClose:()=>insClose(false),insState:()=>({kind:insKind,size:insSize,face:insFace,p:insP}),insSetP:v=>{insTarget=v;insP=v;insPose();dirty=true},pick:pickRibbon,shelfHit,hit:(x,y)=>wheelOverBook({target:canvas,clientX:x,clientY:y}),dbg:()=>({camR1,fit:fitDistance(),goal:camGoal,ui:uiH(),d:camera.position.distanceTo(controls.target),mode,zoom}),go:n=>{enterBookInstant();go(n)},setSet:(i,u)=>{enterBookInstant();setSet(i,u)},setKit,open:n=>{enterBookInstant();goTo(n)},zoom:z=>{enterBookInstant();setZoom(z)},shelf:toShelf,choose,get mode(){return mode}};
 </script>
 </body>
 </html>
