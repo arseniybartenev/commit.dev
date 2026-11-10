@@ -1120,7 +1120,7 @@ html.noscroll,html.noscroll body{overflow:hidden}
     }).join('')+'</div></div>';
     setgal.innerHTML=html;initHS(setgal.firstChild);
     if(focusKey){var f=setgal.querySelector('[data-sheet="'+focusKey+'"]'),t=setgal.querySelector('.hs-track');
-      if(f&&t){t.scrollTo({left:f.offsetLeft-t.firstElementChild.offsetLeft,behavior:'smooth'});
+      if(f&&t){t.scrollTo({left:f.offsetLeft-t.firstElementChild.offsetLeft,behavior:'instant'});
         var r=setgal.getBoundingClientRect();if(r.top<70||r.bottom>window.innerHeight)setgal.scrollIntoView({block:'center',behavior:'smooth'})}}
     kitline.textContent='Комплект: '+s.kit+(curVar==='conv'?', вариант «Конверсия»':'');
     renderInfo();
