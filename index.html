@@ -1116,7 +1116,7 @@ html.noscroll,html.noscroll body{overflow:hidden}
       return'<figure class="hs-i sp egg"><img src="'+b+'" sizes="(max-width:820px) 90vw, 880px" width="2200" height="1238" alt="Пасхалка на странице '+e[1]+', набор «'+s.n+'»" loading="lazy" decoding="async" draggable="false"><figcaption><h3>Пасхалка, стр. '+e[1]+(e[2]?' (общая для всех видов)':'')+'</h3></figcaption></figure>';
     }).join(''):'')+(opened[curSet]||[]).map(function(key){
       var k=key.charAt(0),ix=+key.slice(1),nm=sheetName(k,ix),b='img2/'+s.slug+'/'+curVar+'/sheets/'+key;
-      return'<figure class="hs-i sp sheet" data-sheet="'+key+'"><img src="'+b+'.webp" width="2200" height="1238" alt="Лист «'+nm+'», набор «'+s.n+'»" loading="lazy" decoding="async" draggable="false" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="sheetph" style="display:none"><span>Скоро будет</span></div><figcaption><h3>'+(k==='t'?'Лист: ':'Справочник: ')+nm+'</h3></figcaption></figure>';
+      return'<figure class="hs-i sp sheet" data-sheet="'+key+'"><img src="'+b+'.webp?v=5" width="2200" height="1238" alt="Лист «'+nm+'», набор «'+s.n+'»" loading="lazy" decoding="async" draggable="false" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="sheetph" style="display:none"><span>Скоро будет</span></div><figcaption><h3>'+(k==='t'?'Лист: ':'Справочник: ')+nm+'</h3></figcaption></figure>';
     }).join('')+'</div></div>';
     setgal.innerHTML=html;initHS(setgal.firstChild);
     if(focusKey){var f=setgal.querySelector('[data-sheet="'+focusKey+'"]'),t=setgal.querySelector('.hs-track');
